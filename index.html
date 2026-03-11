@@ -1,0 +1,1188 @@
+<!DOCTYPE html>    <html lang="bn">    
+<head>    
+    <meta charset="UTF-8">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    
+    <meta name="theme-color" content="#005A34">    
+    <title>সুপার অ্যাডভান্সড নোটিশ ও মেসেজ সিস্টেম</title>    <!-- Tailwind CSS for UI -->    
+<script src="https://cdn.tailwindcss.com"></script>    
+
+<!-- Google Fonts -->    
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;600;700;800&family=Noto+Serif+Bengali:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Tiro+Bangla:ital@0;1&family=Baloo+Da+2:wght@400;500;600;700&display=swap" rel="stylesheet">    
+
+<!-- Lucide Icons -->    
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>    
+    /* =========================================================    
+       1. MOBILE APP UI STYLES    
+       ========================================================= */    
+    :root {    
+        --app-bg: #f3f4f6;    
+        --primary: #005A34;   
+        --gold: #C29B0C;    
+        --wa-color: #25D366;   
+    }  
+  
+    body {  
+        font-family: 'Anek Bangla', sans-serif;  
+        background-color: var(--app-bg);  
+        margin: 0; padding: 0;  
+        -webkit-tap-highlight-color: transparent;  
+        overflow: hidden;  
+    }  
+  
+    /* App Shell */    
+    #app-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; width: 100%; }    
+  
+    /* Top Header */    
+    .app-header {    
+        background: var(--primary); color: white; padding: 15px 20px;    
+        display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10;    
+    }    
+    .app-logo { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); font-size: 11px; text-align: center; line-height: 1; border: 2px solid var(--gold);}    
+    .app-title h1 { font-size: 18px; font-weight: 800; margin: 0; line-height: 1.2; }    
+    .app-title p { font-size: 11px; color: var(--gold); font-weight: bold; margin: 0; letter-spacing: 0.5px;}    
+  
+    /* View Container */    
+    .view-container { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; display: none; animation: fadeIn 0.3s ease; }    
+    .view-container.active { display: block; }    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }    
+  
+    /* Bottom Navigation */    
+    .bottom-nav {    
+        position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb;    
+        display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: calc(10px + env(safe-area-inset-bottom));    
+        z-index: 50; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);    
+    }    
+    .nav-btn { display: flex; flex-direction: column; align-items: center; color: #9ca3af; font-size: 11px; font-weight: bold; gap: 4px; width: 50%; cursor: pointer; }    
+    .nav-btn svg { width: 24px; height: 24px; }    
+    .nav-btn.active { color: var(--primary); }    
+  
+    /* General UI Elements */    
+    .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border: 1px solid #e5e7eb; }    
+    .input-field { width: 100%; border: 1px solid #d1d5db; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; color: #111; outline: none; transition: 0.2s; background: white;}    
+    .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,90,52,0.1);}    
+        
+    .btn-primary { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,90,52,0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}    
+    .btn-primary:active { transform: scale(0.98); }    
+    .btn-primary:disabled { background: #9ca3af; box-shadow: none; cursor: not-allowed; }    
+  
+    /* Toolbar */    
+    .toolbar { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; background: #f9fafb; padding: 6px; border-radius: 8px; border: 1px solid #e5e7eb;}    
+    .toolbar-row { display: flex; width: 100%; justify-content: space-between; align-items: center; overflow-x: auto; scrollbar-width: none;}    
+    .toolbar-row::-webkit-scrollbar { display: none; }    
+        
+    .tool-group { display: flex; gap: 2px; border-right: 1px solid #d1d5db; padding-right: 4px; margin-right: 4px; align-items: center; flex-shrink: 0;}    
+    .tool-group:last-child { border-right: none; padding-right: 0; margin-right: 0;}    
+        
+    .tool-btn { background: transparent; color: #374151; width: 28px; height: 28px; border-radius: 6px; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; transition: 0.2s; flex-shrink: 0;}    
+    .tool-btn:hover, .tool-btn:active { background: #e5e7eb; color: var(--primary);}    
+    .tool-btn.format-b { font-weight: 900; font-family: serif; font-size: 15px;}    
+    .tool-btn.format-i { font-style: italic; font-family: serif; font-size: 15px; font-weight: bold;}    
+    .tool-btn.format-s { text-decoration: line-through; font-family: serif; font-size: 15px; font-weight: bold;}    
+        
+    .tool-select-wrapper { position: relative; display: inline-block; flex-shrink: 0; }    
+    .tool-select-wrapper select { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }    
+  
+    /* Editor */    
+    #msg-template { min-height: 200px; resize: vertical; line-height: 1.6; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;}    
+    #msg-preview-container { display: none; border: 1px solid #1e40af; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}    
+    .preview-nav { display: flex; justify-content: space-between; align-items: center; background: #eff6ff; padding: 6px 10px; border-bottom: 1px solid #bfdbfe;}    
+    .nav-arrow { background: #1e40af; color: white; width: 24px; height: 24px; border-radius: 5px; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; font-weight: bold;}    
+    .nav-arrow:disabled { background: #9ca3af; cursor: not-allowed;}    
+    .preview-index-input { width: 45px; text-align: center; border: 1px solid #93c5fd; border-radius: 4px; font-weight: bold; font-size: 13px; padding: 2px; color: #1e40af;}    
+    #msg-preview-box { padding: 15px; font-size: 14px; line-height: 1.6; color: #111; min-height: 160px; outline: none; word-wrap: break-word;}    
+  
+    /* NEW TAG HIGHLIGHT: contenteditable=false safe block */  
+    .tag-hl { background: #dbeafe; color: #1e40af; padding: 0 4px; margin: 0 2px; border-radius: 3px; font-weight: bold; display: inline-block; border: 1px solid #bfdbfe;}    
+  
+    /* Toast & Loader */    
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: bold; z-index: 9999; opacity: 0; pointer-events: none; transition: 0.3s; }    
+    .toast.show { opacity: 1; }    
+    .loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9998; flex-direction: column; justify-content: center; align-items: center; }    
+    .spinner { width: 50px; height: 50px; border: 5px solid #e5e7eb; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }    
+    @keyframes spin { to { transform: rotate(360deg); } }    
+  
+    .student-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #e5e7eb; transition: background 0.2s;}    
+    .student-list-item:last-child { border-bottom: none; }    
+    .btn-wa { background: var(--wa-color); color: white; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(37,211,102,0.3); text-decoration: none; transition: 0.3s;}    
+    .btn-wa.sent { background: #9ca3af; box-shadow: none; }    
+  
+    /* PRINT ENGINE */    
+    #print-engine { display: none; }    
+    @media print {    
+        html, body { background: white !important; margin: 0; padding: 0; height: auto; overflow: visible; font-family: 'Anek Bangla', sans-serif;}    
+        #app-shell, .toast, .loader { display: none !important; }    
+        #print-engine { display: block !important; position: static; width: 100%; margin: 0; padding: 0; }    
+        @page { size: A4 portrait; margin: 0; }    
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box;}    
+        .notice-page-container { width: 210mm; padding: 0; margin: 0; background: white; display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: max-content; gap: 0; }    
+        .notice-wrapper { padding: 5mm; box-sizing: border-box; border-right: 1px dashed #888; border-bottom: 1px dashed #888; page-break-inside: avoid; display: flex; flex-direction: column; }    
+        .notice-wrapper:nth-child(even) { border-right: none; }    
+        .notice-card { height: 100%; border: 1.5px solid #111; padding: 12px; box-sizing: border-box; background: white; color: #000; font-size: 14px; line-height: 1.6; display: flex; flex-direction: column; }    
+        .notice-header { text-align: center; border-bottom: 1.5px solid #111; padding-bottom: 5px; margin-bottom: 10px; font-family: 'Anek Bangla', sans-serif !important;}    
+        .notice-header h2 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1;}    
+        .notice-header p { font-size: 11px; margin: 2px 0 0 0; font-weight: bold;}    
+        .notice-body { flex-grow: 1; white-space: pre-wrap;}    
+        .notice-body strong { font-weight: 800;}    
+        .notice-body i { font-style: italic; }    
+        .notice-body del { text-decoration: line-through; color: #555;}    
+        .notice-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 12px; font-weight: 800; font-family: 'Anek Bangla', sans-serif !important; }    
+        .sign-box { text-align: center; border-top: 1px solid #000; padding-top: 3px; width: 80px;}    
+    }    
+        
+    #filter-rules-container::-webkit-scrollbar { width: 6px; }    
+    #filter-rules-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }    
+</style>  </head>    
+<body>    <div id="toast" class="toast">মেসেজ</div>    <div id="loader" class="loader">    
+    <div class="spinner"></div>    
+    <h2 class="mt-4 font-bold text-[#005A34] text-lg" id="loader-msg">সিস্টেম প্রসেস করছে...</h2>    
+    <p class="text-sm text-gray-500">দয়া করে অপেক্ষা করুন</p>    
+</div>    <div id="filter-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex justify-center items-center hidden">    
+    <div class="bg-white w-11/12 max-w-lg rounded-xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">    
+        <div class="bg-[#005A34] text-white p-3 flex justify-between items-center">    
+            <h3 class="font-bold flex items-center gap-2 text-sm"><i data-lucide="filter" class="w-4 h-4"></i> মেইল মার্জ ফিল্টারিং রুলস</h3>    
+            <button onclick="closeFilterModal()" class="text-white hover:text-gray-200 transition-colors">    
+                <i data-lucide="x" class="w-5 h-5"></i>    
+            </button>    
+        </div>    
+        <div id="filter-rules-container" class="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-3"></div>    
+        <div class="px-4 py-2 bg-gray-50 border-t flex justify-between items-center">    
+            <button onclick="addFilterRule()" class="text-[#005A34] font-bold text-sm flex items-center gap-1 hover:text-[#1e40af] transition-colors">    
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> নতুন রুল যোগ করুন    
+            </button>    
+            <span class="text-[11px] font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded">প্রাপক: <span id="filter-modal-count" class="text-[#005A34]">0</span></span>    
+        </div>    
+        <div class="p-3 border-t bg-white flex gap-2">    
+            <button onclick="resetFilter()" class="w-1/3 bg-gray-200 text-gray-800 font-bold py-2 rounded-lg text-sm">রিসেট</button>    
+            <button onclick="applyAdvancedFilter()" class="w-2/3 bg-[#1e40af] text-white font-bold py-2 rounded-lg flex justify-center items-center gap-2 text-sm">    
+                <i data-lucide="check-check" class="w-4 h-4"></i> ফিল্টার এপ্লাই করুন    
+            </button>    
+        </div>    
+    </div>    
+</div>    <div id="spacing-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex justify-center items-center hidden">    
+    <div class="bg-white w-11/12 max-w-sm rounded-xl overflow-hidden shadow-2xl">    
+        <div class="bg-[#005A34] text-white p-3 flex justify-between items-center">    
+            <h3 class="font-bold flex items-center gap-2 text-sm"><i data-lucide="expand" class="w-4 h-4"></i> স্পেসিং এবং মার্জিন (pt)</h3>    
+            <button onclick="closeSpacingModal()" class="text-white hover:text-gray-200 transition-colors">    
+                <i data-lucide="x" class="w-5 h-5"></i>    
+            </button>    
+        </div>    
+        <div class="p-4 grid grid-cols-2 gap-4">    
+            <div><label class="block text-[11px] font-bold text-gray-500 mb-1">উপরে (Top)</label><input type="number" id="space-top" value="0" class="input-field py-2 text-center"></div>    
+            <div><label class="block text-[11px] font-bold text-gray-500 mb-1">নিচে (Bottom)</label><input type="number" id="space-bottom" value="0" class="input-field py-2 text-center"></div>    
+            <div><label class="block text-[11px] font-bold text-gray-500 mb-1">বামে (Left)</label><input type="number" id="space-left" value="0" class="input-field py-2 text-center"></div>    
+            <div><label class="block text-[11px] font-bold text-gray-500 mb-1">ডানে (Right)</label><input type="number" id="space-right" value="0" class="input-field py-2 text-center"></div>    
+        </div>    
+        <div class="p-3 border-t bg-gray-50 flex justify-end">    
+            <button onclick="applySpacing()" class="bg-[#1e40af] text-white font-bold py-2 px-6 rounded-lg text-sm w-full">এপ্লাই করুন</button>    
+        </div>    
+    </div>    
+</div>    <div id="app-shell">    
+    <header class="app-header">    
+        <div class="app-logo">ARDM</div>    
+        <div class="app-title">    
+            <h1>আবদুর রাজ্জাক দাখিল মাদ্রাসা</h1>    
+            <p>ULTRA ADVANCED SMS SYSTEM</p>    
+        </div>    
+    </header>    <main id="view-home" class="view-container active">    
+    <div class="card" style="border-color: #bfdbfe; background: #eff6ff;">    
+        <h3 class="font-bold text-sm text-[#1e40af] mb-3 border-b border-blue-200 pb-2 flex items-center gap-2">    
+            <i data-lucide="database" class="w-4 h-4"></i> শিক্ষার্থী নির্বাচন (API)    
+        </h3>    
+        <div class="grid grid-cols-2 gap-3 mb-3">    
+            <div>    
+                <label class="block text-xs font-bold text-blue-800 mb-1">শ্রেণি নির্বাচন</label>    
+                <select id="api-class" class="input-field" style="border-color: #93c5fd; padding: 10px;">    
+                    <option value="All">সব ক্লাস (All)</option>    
+                    <option value="প্লে">প্লে</option>    
+                    <option value="নার্সারি">নার্সারি</option>    
+                    <option value="কেজি">কেজি</option>    
+                    <option value="১ম">১ম</option>    
+                    <option value="২য়">২য়</option>    
+                    <option value="৩য়">৩য়</option>    
+                    <option value="৪র্থ">৪র্থ</option>    
+                    <option value="৫ম">৫ম</option>    
+                    <option value="৬ষ্ঠ">৬ষ্ঠ</option>    
+                    <option value="৭ম">৭ম</option>    
+                    <option value="৮ম">৮ম</option>    
+                    <option value="৯ম">৯ম</option>    
+                    <option value="১০ম">১০ম</option>    
+                </select>    
+            </div>    
+            <div>    
+                <label class="block text-xs font-bold text-blue-800 mb-1">শিক্ষাবর্ষ</label>    
+                <select id="api-year" class="input-field" style="font-family: sans-serif; border-color: #93c5fd; padding: 10px;">    
+                    <option value="2025">2025</option>    
+                    <option value="2026" selected>2026</option>    
+                    <option value="2027">2027</option>    
+                </select>    
+            </div>    
+        </div>    
+        <button id="btn-fetch" class="btn-primary w-full" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 10px rgba(37,99,235,0.3); padding: 12px;" onclick="fetchOnlineStudents()">    
+            <i data-lucide="cloud-download" class="w-5 h-5"></i> ডাটা লোড করুন    
+        </button>    
+    </div>    
+
+    <div class="card" style="padding: 10px;">    
+        <h3 class="font-bold text-sm text-gray-800 mb-2 border-b pb-2 flex justify-between items-center px-2">    
+            <span>মেসেজ তৈরি করুন</span>    
+            <span class="text-[10px] text-green-600 font-bold bg-green-100 px-2 py-1 rounded">✅ Auto Saved</span>    
+        </h3>    
+        <div class="toolbar">    
+            <div class="toolbar-row">    
+                <div class="tool-group">    
+                    <button class="tool-btn" onclick="undoMsg()" title="Undo"><i data-lucide="undo-2" class="w-4 h-4"></i></button>    
+                    <button class="tool-btn" onclick="redoMsg()" title="Redo"><i data-lucide="redo-2" class="w-4 h-4"></i></button>    
+                </div>    
+                <div class="tool-group">    
+                    <button class="tool-btn format-b" onclick="applyFormat('*', 'bold')" title="Bold">B</button>    
+                    <button class="tool-btn format-i" onclick="applyFormat('_', 'italic')" title="Italic">I</button>    
+                    <button class="tool-btn format-s" onclick="applyFormat('~', 'strikeThrough')" title="Strikethrough">S</button>    
+                </div>    
+                <div class="tool-group">    
+                    <button class="tool-btn" onclick="applyAlignment('left', 'justifyLeft')" title="Align Left"><i data-lucide="align-left" class="w-4 h-4"></i></button>    
+                    <button class="tool-btn" onclick="applyAlignment('center', 'justifyCenter')" title="Align Center"><i data-lucide="align-center" class="w-4 h-4"></i></button>    
+                    <button class="tool-btn" onclick="applyAlignment('right', 'justifyRight')" title="Align Right"><i data-lucide="align-right" class="w-4 h-4"></i></button>    
+                    <button class="tool-btn" onclick="applyAlignment('justify', 'justifyFull')" title="Justify"><i data-lucide="align-justify" class="w-4 h-4"></i></button>    
+                </div>    
+                <div class="tool-group">    
+                    <div class="tool-select-wrapper" title="Font Style">    
+                        <button class="tool-btn"><i data-lucide="type" class="w-4 h-4"></i></button>    
+                        <select id="font-select" onchange="applyFont()">    
+                            <option value="'Anek Bangla', sans-serif">Anek Bangla (আধুনিক)</option>    
+                            <option value="'Noto Serif Bengali', serif">Noto Serif (অফিসিয়াল)</option>    
+                            <option value="'Hind Siliguri', sans-serif">Hind Siliguri (ক্লিন)</option>    
+                            <option value="'Tiro Bangla', serif">Tiro Bangla (ট্র্যাডিশনাল)</option>    
+                            <option value="'Baloo Da 2', cursive">Baloo Da 2 (রাউন্ডেড)</option>    
+                        </select>    
+                    </div>    
+                    <div class="tool-select-wrapper" title="Font Size">    
+                        <button class="tool-btn"><i data-lucide="heading" class="w-4 h-4"></i></button>    
+                        <select id="fontSize-select" onchange="applyFontSize()">    
+                            <option value="" disabled selected>ফন্ট সাইজ (pt)</option>    
+                            <option value="10">10 pt</option><option value="11">11 pt</option><option value="12">12 pt</option>    
+                            <option value="14">14 pt</option><option value="16">16 pt</option><option value="18">18 pt</option>    
+                            <option value="20">20 pt</option><option value="24">24 pt</option><option value="28">28 pt</option>    
+                            <option value="32">32 pt</option><option value="36">36 pt</option>    
+                        </select>    
+                    </div>    
+                    <button class="tool-btn" onclick="openSpacingModal()" title="Paragraph Spacing"><i data-lucide="expand" class="w-4 h-4"></i></button>    
+                </div>    
+            </div>    
+            <div class="toolbar-row border-t border-gray-200 pt-1">    
+                <div class="flex gap-2">    
+                    <div class="tool-select-wrapper" title="Insert Data">    
+                        <button class="tool-btn bg-blue-50 text-blue-800"><i data-lucide="braces" class="w-4 h-4"></i></button>    
+                        <select id="var-select" onchange="insertTagFromSelect()">    
+                            <option value="" disabled selected>ডাটা ইনসার্ট...</option>    
+                            <optgroup label="সাধারণ তথ্য (বাংলা)">    
+                                <option value="[StudentNameBn]">শিক্ষার্থীর নাম (বাংলা)</option>    
+                                <option value="[RollBn]">রোল নম্বর (বাংলা)</option>    
+                                <option value="[ClassBn]">শ্রেণি (বাংলা)</option>    
+                                <option value="[IDBn]">আইডি (বাংলা)</option>    
+                                <option value="[GenderBn]">লিঙ্গ (ছাত্র/ছাত্রী)</option>    
+                                <option value="[AgeBn]">বয়স (বাংলা)</option>    
+                            </optgroup>    
+                            <optgroup label="General Info (English)">    
+                                <option value="[StudentNameEn]">Student Name (Eng)</option>    
+                                <option value="[RollEn]">Roll (Eng)</option>    
+                                <option value="[ClassEn]">Class (Eng)</option>    
+                                <option value="[IDEn]">ID (Eng)</option>    
+                                <option value="[GenderEn]">Gender (Eng)</option>    
+                                <option value="[AgeEn]">Age (Eng)</option>    
+                            </optgroup>    
+                            <optgroup label="পারিবারিক তথ্য">    
+                                <option value="[FatherNameBn]">পিতার নাম (বাংলা)</option>    
+                                <option value="[FatherNameEn]">Father Name (Eng)</option>    
+                                <option value="[MotherNameBn]">মাতার নাম (বাংলা)</option>    
+                                <option value="[MotherNameEn]">Mother Name (Eng)</option>    
+                                <option value="[WhatsApp]">হোয়াটসঅ্যাপ নম্বর</option>    
+                                <option value="[EmergencyNo]">জরুরি নম্বর</option>    
+                            </optgroup>    
+                            <optgroup label="অন্যান্য ও ঠিকানা">    
+                                <option value="[DOB]">জন্ম তারিখ</option>    
+                                <option value="[BloodGroup]">রক্তের গ্রুপ</option>    
+                                <option value="[BRN]">জন্ম নিবন্ধন (BRN)</option>    
+                                <option value="[VillageBn]">গ্রাম (বাংলা)</option>    
+                                <option value="[VillageEn]">Village (Eng)</option>    
+                                <option value="[FullAddressBn]">সম্পূর্ণ ঠিকানা (বাংলা)</option>    
+                                <option value="[FullAddressEn]">Full Address (Eng)</option>    
+                            </optgroup>    
+                        </select>    
+                    </div>    
+                    <div class="tool-select-wrapper" title="Templates">    
+                        <button class="tool-btn bg-blue-50 text-blue-800"><i data-lucide="folder-open" class="w-4 h-4"></i></button>    
+                        <select id="template-select" onchange="loadTemplate()">    
+                            <option value="" disabled selected>টেমপ্লেট...</option>    
+                            <option value="absent">❌ অনুপস্থিতির নোটিশ</option>    
+                            <option value="leave">🗓️ ছুটির নোটিশ</option>    
+                            <option value="exam">📝 পরীক্ষার নোটিশ</option>    
+                            <option value="fees">💰 বেতনের নোটিশ</option>    
+                            <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>    
+                        </select>    
+                    </div>    
+                    <div class="tool-select-wrapper" title="Date & Time">    
+                        <button class="tool-btn bg-blue-50 text-blue-800"><i data-lucide="calendar-clock" class="w-4 h-4"></i></button>    
+                        <select id="datetime-select" onchange="insertDateTime()">    
+                            <option value="" disabled selected>সময়/তারিখ...</option>    
+                            <option value="date_bn">আজকের তারিখ (বাংলা)</option>    
+                            <option value="date_en">Today's Date (Eng)</option>    
+                            <option value="time_bn">বর্তমান সময় (বাংলা)</option>    
+                            <option value="time_en">Current Time (Eng)</option>    
+                        </select>    
+                    </div>    
+                </div>    
+                <div class="flex gap-2">    
+                    <button class="tool-btn bg-gray-600 text-white hover:bg-gray-700" onclick="openFilterModal()" title="ফিল্টার (Filter)"><i data-lucide="filter" class="w-4 h-4"></i></button>    
+                    <button id="btn-toggle-preview" class="tool-btn bg-[#005A34] text-white hover:bg-[#004225]" onclick="togglePreview()" title="কোড / এডিট (Code / Visual)"><i data-lucide="code" class="w-4 h-4"></i></button>    
+                </div>    
+            </div>    
+        </div>    
+
+        <div class="relative">    
+            <!-- Code Mode (Textarea) -->    
+            <textarea id="msg-template" class="input-field hidden" style="border-radius: 4px;" placeholder="এখানে মেসেজ লিখুন..." oninput="syncCodeToVisual()"></textarea>    
+            <!-- Edit/Visual Mode (Content Editable) -->    
+            <div id="msg-preview-container">    
+                <div class="preview-nav">    
+                    <button class="nav-arrow" id="prev-btn" onclick="changePreview(-1)">◀</button>    
+                    <div class="text-sm font-bold text-gray-700">    
+                        <input type="number" id="preview-index" class="preview-index-input" value="1" min="1" onchange="jumpPreview()"> / <span id="preview-total">0</span>    
+                    </div>    
+                    <button class="nav-arrow" id="next-btn" onclick="changePreview(1)">▶</button>    
+                </div>    
+                <div id="msg-preview-box" contenteditable="true" oninput="syncVisualToCode()"></div>    
+            </div>    
+        </div>    
+    </div>    
+
+    <button id="btn-generate" class="btn-primary w-full mt-2" disabled>    
+        <i data-lucide="cog" class="w-5 h-5"></i> মেসেজ প্রসেস    
+    </button>    
+</main>    
+
+<main id="view-print" class="view-container">    
+    <div class="text-center mt-6">    
+        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3">    
+            <i data-lucide="check-circle-2" class="w-8 h-8"></i>    
+        </div>    
+        <h2 class="text-xl font-bold text-gray-800 mb-1">প্রসেসিং সম্পন্ন!</h2>    
+        <p class="text-gray-600 font-bold mb-6 text-sm">মোট <span id="success-count" class="text-[#005A34] text-lg">0</span> জনের নোটিশ প্রস্তুত।</p>    
+        <div class="space-y-4">    
+            <!-- NEW TOGGLES ADDED HERE -->
+            <div class="flex justify-around items-center bg-gray-50 p-3 rounded-lg border">
+                <label class="flex items-center gap-2 text-sm font-bold text-gray-700 cursor-pointer">
+                    <input type="checkbox" id="print-header-toggle" checked class="w-4 h-4 accent-[#005A34] cursor-pointer">
+                    হেডার (নাম)
+                </label>
+                <label class="flex items-center gap-2 text-sm font-bold text-gray-700 cursor-pointer">
+                    <input type="checkbox" id="print-footer-toggle" checked class="w-4 h-4 accent-[#005A34] cursor-pointer">
+                    ফুটার (স্বাক্ষর)
+                </label>
+            </div>
+            
+            <button class="btn-primary flex items-center justify-center gap-2 w-full" onclick="printNotices()">    
+                <i data-lucide="printer" class="w-5 h-5"></i> কাগজে প্রিন্ট করুন (Cut Layout)    
+            </button>    
+        </div>    
+    </div>    
+
+    <div class="mt-8">    
+        <h3 class="font-bold text-gray-800 border-b pb-2 mb-3 flex justify-between items-end">    
+            <span>হোয়াটসঅ্যাপে পাঠান</span><span class="text-xs font-normal text-gray-500">লিস্ট থেকে ক্লিক করুন</span>    
+        </h3>    
+        <div id="whatsapp-list" class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"></div>    
+    </div><br>    
+</main>    
+
+<nav class="bottom-nav">    
+    <div class="nav-btn active" id="tab-home" onclick="switchTab('home')"><i data-lucide="pen-square" class="w-6 h-6"></i> লিখুন (Write)</div>    
+    <div class="nav-btn" id="tab-print" onclick="switchTab('print')" style="pointer-events: none; opacity: 0.5;"><i data-lucide="send" class="w-6 h-6"></i> পাঠান (Send)</div>    
+</nav>
+
+</div>    <div id="print-engine"></div>    <script>    
+    lucide.createIcons();    
+  
+    const toBn = (n) => {    
+        if (n === undefined || n === null || n === '') return '-';    
+        return String(n).replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);    
+    };    
+    const toEn = (n) => {    
+        if (n === undefined || n === null || n === '') return '-';    
+        const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};    
+        return String(n).replace(/[০-৯]/g, d => bnToEn[d] || d);    
+    };    
+  
+    const API_URL = "https://script.google.com/macros/s/AKfycbzlG01v-naEr4WZR__n4ZX9fPkQR9pE01A0n8W9fOMUfw5x3RIDNPD_ZyaDwsVz9fphFw/exec";    
+        
+    let originalParsedStudents = [];     
+    let parsedStudents = [];             
+    let globalPrintHTML = '';    
+    let isPreviewMode = false;    
+    let currentPreviewIndex = 0;    
+  
+    let historyStack = [];    
+    let historyIndex = -1;    
+  
+    const TEMPLATES = {    
+        absent: "সম্মানিত অভিভাবক,\nআপনার সন্তান *[StudentNameBn]* (রোল: [RollBn], শ্রেণি: [ClassBn]) আজকে মাদ্রাসায় অনুপস্থিত। দয়া করে এর কারণ জানাবেন।\n\nধন্যবাদান্তে,\nমাদ্রাসা কর্তৃপক্ষ",    
+        leave: "সম্মানিত অভিভাবক,\nআপনার সন্তান *[StudentNameBn]* (রোল: [RollBn]) এর আবেদনকৃত ছুটি মঞ্জুর করা হয়েছে। আগামী [তারিখ] থেকে সে পুনরায় ক্লাসে যোগদান করবে।\n\nধন্যবাদ।",    
+        exam: "সম্মানিত অভিভাবক,\nআগামী [তারিখ] থেকে *[StudentNameBn]* এর ক্লাস টেস্ট পরীক্ষা শুরু হবে। রুটিন ডায়রিতে দেওয়া হয়েছে। পরীক্ষার ফি বকেয়া থাকলে পরিশোধের অনুরোধ রইল।\n\nমাদ্রাসা কর্তৃপক্ষ",    
+        fees: "সম্মানিত অভিভাবক,\n*[StudentNameBn]* এর চলতি মাসের বেতন ও অন্যান্য ফি বকেয়া রয়েছে। দয়া করে আগামী [তারিখ]-এর মধ্যে তা পরিশোধ করার অনুরোধ করা হলো।\n\nধন্যবাদান্তে,\nমাদ্রাসা কর্তৃপক্ষ"    
+    };    
+  
+    window.onload = () => {    
+        const savedMsg = localStorage.getItem('ardm_notice_msg');    
+        if (savedMsg) {    
+            document.getElementById('msg-template').value = savedMsg;    
+            saveHistoryState(savedMsg);    
+        } else saveHistoryState("");    
+  
+        const savedFont = localStorage.getItem('ardm_notice_font');    
+        if (savedFont) {    
+            document.getElementById('font-select').value = savedFont;    
+            applyFont();    
+        }    
+            
+        syncCodeToVisual();    
+        if(!isPreviewMode) togglePreview();    
+        document.getElementById('msg-preview-container').style.display = 'block';    
+    };    
+  
+    function applyFont() {    
+        const font = document.getElementById('font-select').value;    
+        document.getElementById('msg-template').style.fontFamily = font;    
+        document.getElementById('msg-preview-box').style.fontFamily = font;    
+        localStorage.setItem('ardm_notice_font', font);    
+    }    
+  
+    function saveMessageLocally() {    
+        const msg = document.getElementById('msg-template').value;    
+        localStorage.setItem('ardm_notice_msg', msg);    
+        saveHistoryState(msg);    
+    }    
+  
+    function saveHistoryState(val) {    
+        if (historyIndex >= 0 && historyStack[historyIndex] === val) return;    
+        if (historyIndex < historyStack.length - 1) historyStack = historyStack.slice(0, historyIndex + 1);    
+        historyStack.push(val);    
+        historyIndex++;    
+        if(historyStack.length > 20) { historyStack.shift(); historyIndex--; }    
+    }    
+  
+    function undoMsg() {    
+        if(isPreviewMode) { document.execCommand('undo'); syncVisualToCode(); return; }    
+        if (historyIndex > 0) {    
+            historyIndex--;    
+            document.getElementById('msg-template').value = historyStack[historyIndex];    
+            localStorage.setItem('ardm_notice_msg', historyStack[historyIndex]);    
+            syncCodeToVisual();    
+        }    
+    }    
+  
+    function redoMsg() {    
+        if(isPreviewMode) { document.execCommand('redo'); syncVisualToCode(); return; }    
+        if (historyIndex < historyStack.length - 1) {    
+            historyIndex++;    
+            document.getElementById('msg-template').value = historyStack[historyIndex];    
+            localStorage.setItem('ardm_notice_msg', historyStack[historyIndex]);    
+            syncCodeToVisual();    
+        }    
+    }    
+  
+    function showToast(msg) {    
+        const toast = document.getElementById('toast');    
+        toast.innerText = msg;    
+        toast.classList.add('show');    
+        setTimeout(() => toast.classList.remove('show'), 3000);    
+    }    
+  
+    function switchTab(tabId) {    
+        document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));    
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));    
+        document.getElementById(`view-${tabId}`).classList.add('active');    
+        document.getElementById(`tab-${tabId}`).classList.add('active');    
+    }    
+  
+    // ==========================================    
+    // WYSIWYG SYNC & TAG PROCESSOR    
+    // ==========================================    
+    function convertToHTML(rawText) {    
+        if(!rawText) return "";    
+        
+        // Clean overlapping new lines before structural tags
+        let cleanText = rawText.replace(/\n?\[space=([^\]]+)\]\n?/g, '[space=$1]')
+                               .replace(/\n?\[\/space\]\n?/g, '[/space]')
+                               .replace(/\n?\[align=([^\]]+)\]\n?/g, '[align=$1]')
+                               .replace(/\n?\[\/align\]\n?/g, '[/align]');
+
+        let html = cleanText.replace(/\n/g, '<br>');    
+        html = html.replace(/\*([\s\S]*?)\*/g, '<b>$1</b>');     
+        html = html.replace(/_([\s\S]*?)_/g, '<i>$1</i>');     
+        html = html.replace(/~([\s\S]*?)~/g, '<strike>$1</strike>');     
+        html = html.replace(/\[size=(\d+)\]/g, '<span style="font-size: $1pt;">');
+        html = html.replace(/\[\/size\]/g, '</span>');
+        html = html.replace(/\[space=(\d+),(\d+),(\d+),(\d+)\]/g, '<div data-margin="$1,$2,$3,$4" style="margin: $1pt $2pt $3pt $4pt; display: block;">');
+        html = html.replace(/\[\/space\]/g, '</div>');
+        html = html.replace(/\[align=(left|center|right|justify)\]/g, '<div style="text-align: $1; display: block;">');
+        html = html.replace(/\[\/align\]/g, '</div>');
+        return html;    
+    }    
+  
+    function convertToRaw(htmlContent) {    
+        let raw = htmlContent;    
+          
+        // Restore tags    
+        raw = raw.replace(/<span[^>]*data-tag="([^"]+)"[^>]*>([\s\S]*?)<\/span>/gi, '$1');  
+  
+        // Inline tags    
+        raw = raw.replace(/<b>([\s\S]*?)<\/b>/gi, '*$1*');    
+        raw = raw.replace(/<strong>([\s\S]*?)<\/strong>/gi, '*$1*');    
+        raw = raw.replace(/<i>([\s\S]*?)<\/i>/gi, '_$1_');    
+        raw = raw.replace(/<em>([\s\S]*?)<\/em>/gi, '_$1_');    
+        raw = raw.replace(/<strike>([\s\S]*?)<\/strike>/gi, '~$1~');    
+        raw = raw.replace(/<del>([\s\S]*?)<\/del>/gi, '~$1~');    
+        
+        // Block & Nested tags: Using Do-While Loop for resolving deep nesting
+        let prevRaw;
+        do {
+            prevRaw = raw;
+            raw = raw.replace(/<div[^>]*style="[^"]*text-align:\s*(left|center|right|justify);?[^"]*"[^>]*>((?:(?!<div[^>]*style="[^"]*text-align)[\s\S])*?)<\/div>/gi, '[align=$1]$2[/align]');    
+            raw = raw.replace(/<span[^>]*style="[^"]*font-size:\s*(\d+)pt;?[^"]*"[^>]*>((?:(?!<span[^>]*style="[^"]*font-size)[\s\S])*?)<\/span>/gi, '[size=$1]$2[/size]');    
+            raw = raw.replace(/<div[^>]*data-margin="(\d+),(\d+),(\d+),(\d+)"[^>]*>((?:(?!<div[^>]*data-margin)[\s\S])*?)<\/div>/gi, '[space=$1,$2,$3,$4]$5[/space]');    
+        } while (raw !== prevRaw);
+  
+        // Strip leftovers    
+        raw = raw.replace(/<div><br><\/div>/gi, '\n');    
+        raw = raw.replace(/<br\s*[\/]?>/gi, '\n');    
+        raw = raw.replace(/<\/div>/gi, '\n');    
+        raw = raw.replace(/<\/p>/gi, '\n');    
+            
+        let tempDiv = document.createElement('div');    
+        tempDiv.innerHTML = raw;    
+        raw = tempDiv.textContent || tempDiv.innerText || "";    
+        return raw;    
+    }    
+  
+    function syncCodeToVisual() {    
+        saveMessageLocally();    
+        if(!isPreviewMode) return;   
+  
+        const raw = document.getElementById('msg-template').value;  
+        if(parsedStudents.length === 0) {    
+            document.getElementById('msg-preview-box').innerHTML = convertToHTML(wrapTagsWithoutData(raw));    
+        } else {  
+            renderPreview();  
+        }  
+    }    
+  
+    function syncVisualToCode() {  
+        const visualHtml = document.getElementById('msg-preview-box').innerHTML;  
+        const rawText = convertToRaw(visualHtml);  
+        document.getElementById('msg-template').value = rawText;  
+        saveMessageLocally();  
+    }  
+      
+    // Tag Wrappers for Visual Mode  
+    function replaceTagsWithData(template, st, forPreview = false) {    
+        let msg = template;    
+        const wrap = (tag, val) => forPreview ? `<span class="tag-hl" data-tag="${tag}" contenteditable="false">${val || '-'}</span>` : (val || '-');    
+  
+        const map = {    
+            '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), '[ClassBn]': wrap('[ClassBn]', st.ClassBn),    
+            '[IDBn]': wrap('[IDBn]', toBn(st.ID)), '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),    
+            '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn), '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), '[ClassEn]': wrap('[ClassEn]', st.ClassEn),    
+            '[IDEn]': wrap('[IDEn]', st.ID), '[GenderEn]': wrap('[GenderEn]', st.Gender), '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),    
+            '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn),    
+            '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn),    
+            '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),    
+            '[DOB]': wrap('[DOB]', st.DOB), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),    
+            '[VillageBn]': wrap('[VillageBn]', st.VillageBn), '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),    
+            '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)    
+        };    
+  
+        for (const [key, val] of Object.entries(map)) {    
+            msg = msg.split(key).join(val);    
+        }    
+        return msg;    
+    }  
+  
+    function wrapTagsWithoutData(text) {  
+        const tags = ['[StudentNameBn]', '[RollBn]', '[ClassBn]', '[IDBn]', '[GenderBn]', '[AgeBn]', '[StudentNameEn]', '[RollEn]', '[ClassEn]', '[IDEn]', '[GenderEn]', '[AgeEn]', '[FatherNameBn]', '[FatherNameEn]', '[MotherNameBn]', '[MotherNameEn]', '[WhatsApp]', '[EmergencyNo]', '[DOB]', '[BloodGroup]', '[BRN]', '[VillageBn]', '[FullAddressBn]', '[VillageEn]', '[FullAddressEn]'];  
+        let msg = text;  
+        tags.forEach(tag => {  
+            msg = msg.split(tag).join(`<span class="tag-hl" data-tag="${tag}" contenteditable="false">${tag}</span>`);  
+        });  
+        return msg;  
+    }  
+  
+    // ==========================================    
+    // EDITOR BUTTONS    
+    // ==========================================    
+    function loadTemplate() {    
+        const select = document.getElementById('template-select');    
+        const val = select.value;    
+        const textarea = document.getElementById('msg-template');    
+            
+        if (val === 'clear') {    
+            if(confirm("আপনি কি নিশ্চিত পুরো লেখা মুছে ফেলতে চান?")) textarea.value = "";    
+        } else if (TEMPLATES[val]) {    
+            if(textarea.value.trim() !== "") {    
+                if(!confirm("নতুন টেমপ্লেট লোড করলে আগের লেখা মুছে যাবে। নিশ্চিত?")) { select.selectedIndex = 0; return; }    
+            }    
+            textarea.value = TEMPLATES[val];    
+        }    
+            
+        syncCodeToVisual();    
+        select.selectedIndex = 0;    
+    }    
+  
+   function insertIntoTextarea(textToInsert) {  
+       if(isPreviewMode){  
+           const box = document.getElementById('msg-preview-box');  
+           box.focus();  
+             
+           if(textToInsert.startsWith('[')){  
+               let insertHtml = textToInsert;  
+               if(parsedStudents.length > 0){  
+                   const student = parsedStudents[currentPreviewIndex];  
+                   insertHtml = replaceTagsWithData(textToInsert, student, true);  
+               }else{  
+                   insertHtml = `<span class="tag-hl" data-tag="${textToInsert}" contenteditable="false">${textToInsert}</span>`;  
+               }  
+               document.execCommand("insertHTML", false, insertHtml);  
+           }else{  
+               document.execCommand("insertText", false, textToInsert);  
+           }  
+           syncVisualToCode();  
+           return;  
+       }  
+         
+       const textarea = document.getElementById('msg-template');  
+       textarea.focus();  
+       const start = textarea.selectionStart;  
+       const end = textarea.selectionEnd;  
+       const text = textarea.value;  
+         
+       textarea.value = text.substring(0, start) + textToInsert + text.substring(end);  
+       textarea.selectionStart = start + textToInsert.length;  
+       textarea.selectionEnd = start + textToInsert.length;  
+         
+       syncCodeToVisual();  
+   }  
+     
+    function insertTagFromSelect() {    
+        const select = document.getElementById('var-select');    
+        if(select.value) insertIntoTextarea(select.value);    
+        select.selectedIndex = 0;    
+    }    
+  
+    function insertDateTime() {    
+        const select = document.getElementById('datetime-select');    
+        const val = select.value;    
+        if(!val) return;    
+  
+        const now = new Date();    
+        let insertStr = "";    
+  
+        if(val === 'date_en') { insertStr = now.toLocaleDateString('en-GB'); }     
+        else if(val === 'date_bn') {    
+            const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];    
+            insertStr = `${toBn(now.getDate())} ${months[now.getMonth()]} ${toBn(now.getFullYear())}`;    
+        } else if(val === 'time_en') { insertStr = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}); }     
+        else if(val === 'time_bn') {    
+            let timeStr = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});    
+            timeStr = timeStr.replace('AM', 'এএম').replace('PM', 'পিএম');    
+            insertStr = toBn(timeStr);    
+        }    
+        insertIntoTextarea(insertStr);    
+        select.selectedIndex = 0;    
+    }    
+  
+    function applyFormat(wrapper, cmd) {    
+        if(isPreviewMode) { document.execCommand(cmd, false, null); syncVisualToCode(); return; }    
+        const textarea = document.getElementById('msg-template');    
+        textarea.focus();    
+        const start = textarea.selectionStart;    
+        const end = textarea.selectionEnd;    
+        if (start === end) { showToast("প্রথমে কোনো লেখা সিলেক্ট করুন!"); return; }    
+        const selectedText = textarea.value.substring(start, end);    
+        const newText = wrapper + selectedText + wrapper;    
+        textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);    
+        textarea.selectionStart = start; textarea.selectionEnd = end + (wrapper.length * 2);    
+        syncCodeToVisual();    
+    }    
+  
+    function applyAlignment(align, cmd) {    
+        if(isPreviewMode) { document.execCommand(cmd, false, null); syncVisualToCode(); return; }    
+        const textarea = document.getElementById('msg-template');    
+        textarea.focus();    
+        const start = textarea.selectionStart;    
+        const end = textarea.selectionEnd;    
+        if (start === end) { showToast("প্রথমে কোনো লেখা সিলেক্ট করুন!"); return; }    
+        const selectedText = textarea.value.substring(start, end);    
+        const newText = `\n[align=${align}]\n${selectedText}\n[/align]\n`;    
+        textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);    
+        syncCodeToVisual();    
+    }    
+  
+    function applyFontSize() {    
+        const select = document.getElementById('fontSize-select');    
+        const size = select.value;    
+        if(!size) return;    
+        if(isPreviewMode) {    
+            document.execCommand("styleWithCSS", false, true);    
+            document.execCommand("fontSize", false, "7");     
+            const fonts = document.getElementById('msg-preview-box').querySelectorAll('span[style*="font-size: -webkit-xxx-large"], font[size="7"]');    
+            fonts.forEach(f => {    
+                const span = document.createElement('span');    
+                span.style.fontSize = size + "pt";    
+                span.innerHTML = f.innerHTML;    
+                f.parentNode.replaceChild(span, f);    
+            });    
+            syncVisualToCode();    
+            select.selectedIndex = 0; return;     
+        }    
+        const textarea = document.getElementById('msg-template');    
+        const start = textarea.selectionStart; const end = textarea.selectionEnd;    
+        if (start === end) { showToast("প্রথমে কোনো লেখা সিলেক্ট করুন!"); select.selectedIndex = 0; return; }    
+        const selectedText = textarea.value.substring(start, end);    
+        const newText = `[size=${size}]${selectedText}[/size]`;    
+        textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);    
+        syncCodeToVisual();    
+        select.selectedIndex = 0;    
+    }    
+  
+    function openSpacingModal() { document.getElementById('spacing-modal').classList.remove('hidden'); }    
+    function closeSpacingModal() { document.getElementById('spacing-modal').classList.add('hidden'); }    
+  
+    function applySpacing() {    
+        const t = document.getElementById('space-top').value || 0;    
+        const b = document.getElementById('space-bottom').value || 0;    
+        const l = document.getElementById('space-left').value || 0;    
+        const r = document.getElementById('space-right').value || 0;    
+        closeSpacingModal();    
+            
+        if(isPreviewMode) {    
+            const selection = window.getSelection();    
+            if (!selection.rangeCount || selection.isCollapsed) { showToast("প্রথমে লেখা সিলেক্ট করুন!"); return; }    
+            const range = selection.getRangeAt(0);    
+            
+            // Extract and wrap to handle multiple lines or elements safely
+            const content = range.extractContents(); 
+            const div = document.createElement('div');    
+            div.style.margin = `${t}pt ${r}pt ${b}pt ${l}pt`; 
+            div.setAttribute('data-margin', `${t},${r},${b},${l}`); 
+            div.appendChild(content);
+            range.insertNode(div);
+            
+            syncVisualToCode(); 
+            return;    
+        }    
+  
+        const textarea = document.getElementById('msg-template');    
+        const start = textarea.selectionStart; const end = textarea.selectionEnd;    
+        if (start === end) { showToast("প্রথমে কোনো লেখা সিলেক্ট করুন!"); return; }    
+        const selectedText = textarea.value.substring(start, end);    
+        const newText = `\n[space=${t},${r},${b},${l}]\n${selectedText}\n[/space]\n`;    
+        textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);    
+        syncCodeToVisual();    
+    }    
+  
+    // ==========================================    
+    // TOGGLE & PREVIEW    
+    // ==========================================    
+    function togglePreview() {  
+        isPreviewMode = !isPreviewMode;  
+        const btn = document.getElementById('btn-toggle-preview');  
+        const textarea = document.getElementById('msg-template');  
+        const previewContainer = document.getElementById('msg-preview-container');  
+          
+        if(isPreviewMode){  
+            textarea.classList.add('hidden');  
+            textarea.style.display = 'none';  
+            previewContainer.style.display = 'block';  
+              
+            if(parsedStudents.length === 0){  
+                let text = wrapTagsWithoutData(textarea.value);  
+                document.getElementById('msg-preview-box').innerHTML = convertToHTML(text);  
+            }else{  
+                renderPreview();  
+            }  
+            btn.innerHTML = `<i data-lucide="code" class="w-4 h-4"></i>`;  
+        }else{  
+            textarea.classList.remove('hidden');  
+            textarea.style.display = 'block';  
+            previewContainer.style.display = 'none';  
+              
+            btn.innerHTML = `<i data-lucide="eye" class="w-4 h-4"></i>`;  
+        }  
+        lucide.createIcons();  
+    }  
+      
+    function changePreview(step) {    
+        let newIndex = currentPreviewIndex + step;    
+        if (newIndex >= 0 && newIndex < parsedStudents.length) {    
+            currentPreviewIndex = newIndex;    
+            renderPreview();    
+        }    
+    }    
+  
+    function jumpPreview() {    
+        let val = parseInt(document.getElementById('preview-index').value) - 1;    
+        if (isNaN(val) || val < 0) val = 0;    
+        if (val >= parsedStudents.length) val = parsedStudents.length - 1;    
+        currentPreviewIndex = val;    
+        renderPreview();    
+    }    
+  
+    function renderPreview() {    
+        const textarea = document.getElementById('msg-template');    
+            
+        if(parsedStudents.length === 0) {    
+            document.getElementById('msg-preview-box').innerHTML = convertToHTML(wrapTagsWithoutData(textarea.value));    
+            document.getElementById('preview-index').value = 0;    
+            document.getElementById('preview-total').innerText = 0;    
+            document.getElementById('prev-btn').disabled = true;    
+            document.getElementById('next-btn').disabled = true;    
+            return;    
+        }    
+            
+        const student = parsedStudents[currentPreviewIndex];    
+        document.getElementById('preview-index').value = currentPreviewIndex + 1;    
+        document.getElementById('prev-btn').disabled = (currentPreviewIndex === 0);    
+        document.getElementById('next-btn').disabled = (currentPreviewIndex === parsedStudents.length - 1);    
+  
+        let replacedText = replaceTagsWithData(textarea.value, student, true);    
+        document.getElementById('msg-preview-box').innerHTML = convertToHTML(replacedText);  
+    }    
+  
+    // ==========================================    
+    // FILTER MODAL    
+    // ==========================================    
+    function openFilterModal() {    
+        if(originalParsedStudents.length === 0) { showToast("প্রথমে API থেকে ডাটা লোড করুন!"); return; }    
+        document.getElementById('filter-modal-count').innerText = parsedStudents.length;    
+        const container = document.getElementById('filter-rules-container');    
+        if(container.children.length === 0) addFilterRule();    
+        document.getElementById('filter-modal').classList.remove('hidden');    
+    }    
+  
+    function closeFilterModal() { document.getElementById('filter-modal').classList.add('hidden'); }    
+  
+    function addFilterRule() {    
+        const container = document.getElementById('filter-rules-container');    
+        const ruleId = Date.now();    
+        const ruleHTML = `    
+            <div class="filter-rule-item bg-white p-3 border rounded-lg shadow-sm flex flex-col gap-2 relative" id="rule-${ruleId}">    
+                <button onclick="document.getElementById('rule-${ruleId}').remove()" class="absolute top-2 right-2 text-red-500 hover:text-red-700">    
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>    
+                </button>    
+                <div class="pr-6">    
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1">Field (ডাটা)</label>    
+                    <select class="rule-field w-full border rounded p-1.5 text-sm font-bold text-[#005A34] outline-none">    
+                        <option value="Roll">রোল (Roll)</option>    
+                        <option value="ClassBn">শ্রেণি (ClassBn)</option>    
+                        <option value="Age">বয়স (Age)</option>    
+                        <option value="Gender">লিঙ্গ (Gender)</option>    
+                        <option value="StudentNameBn">নাম (Student Name)</option>    
+                        <option value="VillageBn">গ্রাম (Village)</option>    
+                        <option value="BloodGroup">রক্তের গ্রুপ (Blood Grp)</option>    
+                    </select>    
+                </div>    
+                <div class="flex gap-2">    
+                    <div class="w-1/2">    
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">Condition (শর্ত)</label>    
+                        <select class="rule-operator w-full border rounded p-1.5 text-sm outline-none">    
+                            <option value="==">Equal to (=)</option><option value="!=">Not equal to (≠)</option>    
+                            <option value="<">Less than (<)</option><option value=">">Greater than (>)</option>    
+                            <option value="<=">Less than or equal (<=)</option><option value=">=">Greater than or equal (>=)</option>    
+                            <option value="contains">Contains</option><option value="not_contains">Does not contain</option>    
+                            <option value="empty">Is blank</option><option value="not_empty">Is not blank</option>    
+                        </select>    
+                    </div>    
+                    <div class="w-1/2">    
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">Value (মান)</label>    
+                        <input type="text" class="rule-value w-full border rounded p-1.5 text-sm outline-none" placeholder="Value...">    
+                    </div>    
+                </div>    
+            </div>    
+        `;    
+        container.insertAdjacentHTML('beforeend', ruleHTML);    
+        lucide.createIcons();    
+    }    
+  
+    function resetFilter() {    
+        document.getElementById('filter-rules-container').innerHTML = '';    
+        parsedStudents = [...originalParsedStudents];    
+        updateFilterUIAfterApply();    
+        showToast("সব ফিল্টার রিসেট করা হয়েছে!");    
+    }    
+  
+    function applyAdvancedFilter() {    
+        if(originalParsedStudents.length === 0) return;    
+        const ruleItems = document.querySelectorAll('.filter-rule-item');    
+            
+        parsedStudents = originalParsedStudents.filter(st => {    
+            let passedAll = true;    
+            ruleItems.forEach(item => {    
+                const field = item.querySelector('.rule-field').value;    
+                const operator = item.querySelector('.rule-operator').value;    
+                const valueInputRaw = item.querySelector('.rule-value').value.trim();    
+                    
+                let stVal = st[field];    
+                if (stVal === undefined || stVal === null) stVal = "";    
+                    
+                const numStVal = parseFloat(toEn(stVal));    
+                const numValInput = parseFloat(toEn(valueInputRaw));    
+                const isNumericCompare = !isNaN(numStVal) && !isNaN(numValInput);    
+                const strStVal = String(stVal).toLowerCase();    
+                const strValInput = String(valueInputRaw).toLowerCase();    
+  
+                let conditionMet = false;    
+                switch(operator) {    
+                    case '==': conditionMet = isNumericCompare ? (numStVal === numValInput) : (strStVal === strValInput); break;    
+                    case '!=': conditionMet = isNumericCompare ? (numStVal !== numValInput) : (strStVal !== strValInput); break;    
+                    case '<': conditionMet = isNumericCompare ? (numStVal < numValInput) : (strStVal < strValInput); break;    
+                    case '>': conditionMet = isNumericCompare ? (numStVal > numValInput) : (strStVal > strValInput); break;    
+                    case '<=': conditionMet = isNumericCompare ? (numStVal <= numValInput) : (strStVal <= strValInput); break;    
+                    case '>=': conditionMet = isNumericCompare ? (numStVal >= numValInput) : (strStVal >= strValInput); break;    
+                    case 'contains': conditionMet = strStVal.includes(strValInput); break;    
+                    case 'not_contains': conditionMet = !strStVal.includes(strValInput); break;    
+                    case 'empty': conditionMet = strStVal === ""; break;    
+                    case 'not_empty': conditionMet = strStVal !== ""; break;    
+                }    
+                if(!conditionMet) passedAll = false;    
+            });    
+            return passedAll;    
+        });    
+  
+        updateFilterUIAfterApply();    
+        showToast(`ফিল্টার অ্যাপ্লাই হয়েছে (${parsedStudents.length} জন)`);    
+    }    
+  
+    function updateFilterUIAfterApply() {    
+        closeFilterModal();    
+        const btnGen = document.getElementById('btn-generate');    
+        if(parsedStudents.length > 0) {    
+            btnGen.disabled = false;    
+            btnGen.innerHTML = `<i data-lucide="cog" class="w-5 h-5"></i> মেসেজ প্রসেস (${toBn(parsedStudents.length)})`;    
+        } else {    
+            btnGen.disabled = true;    
+            btnGen.innerHTML = `<i data-lucide="cog" class="w-5 h-5"></i> মেসেজ প্রসেস`;    
+        }    
+  
+        if(isPreviewMode) {    
+            if(parsedStudents.length > 0) {    
+                document.getElementById('preview-total').innerText = parsedStudents.length;    
+                currentPreviewIndex = 0;    
+                renderPreview();    
+            } else {    
+                document.getElementById('msg-preview-box').innerHTML = convertToHTML(wrapTagsWithoutData(document.getElementById('msg-template').value));    
+                document.getElementById('preview-index').value = 0;    
+                document.getElementById('preview-total').innerText = 0;    
+            }    
+        }    
+        lucide.createIcons();    
+    }    
+  
+    // ==========================================    
+    // API FETCH    
+    // ==========================================    
+    function calculateAge(dobStr) {    
+        if(!dobStr) return '';    
+        const dob = new Date(dobStr);    
+        if(isNaN(dob)) return '';    
+        return Math.floor((new Date() - dob) / (1000 * 60 * 60 * 24 * 365.25));    
+    }    
+  
+    async function fetchOnlineStudents() {    
+        const cls = document.getElementById('api-class').value;    
+        const yr = document.getElementById('api-year').value;    
+        const btn = document.getElementById('btn-fetch');    
+  
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> লোড হচ্ছে...`;    
+        lucide.createIcons(); btn.disabled = true;    
+        document.getElementById('loader-msg').innerText = "ডাটা আনা হচ্ছে...";    
+        document.getElementById('loader').style.display = 'flex';    
+  
+        try {    
+            const res = await fetch(API_URL + "?action=read");    
+            const json = await res.json();    
+                
+            if(json.status === 'success'){    
+                let fetchedStudents = [];    
+                json.data.forEach(row => {    
+                    if((cls === 'All' || row['ClassBn'] === cls) && row['Session'] == yr && row['StudentNameBn']) {    
+                        let st = {...row};     
+                        st.Age = calculateAge(row['DOB']);    
+                        st.BRN = st.BRN ? String(st.BRN).replace(/'/g, '') : '';    
+                        st.WhatsApp = st.WhatsApp ? String(st.WhatsApp).replace(/'/g, '') : '';    
+                        st.EmergencyNo = st.EmergencyNo ? String(st.EmergencyNo).replace(/'/g, '') : '';    
+                        fetchedStudents.push(st);    
+                    }    
+                });    
+  
+                document.getElementById('loader').style.display = 'none';    
+  
+                if (fetchedStudents.length > 0) {    
+                    const classOrder = { "প্লে": 1, "নার্সারি": 2, "কেজি": 3, "১ম": 4, "২য়": 5, "৩য়": 6, "৪র্থ": 7, "৫ম": 8, "৬ষ্ঠ": 9, "৭ম": 10, "৮ম": 11, "৯ম": 12, "১০ম": 13 };    
+                    fetchedStudents.sort((a, b) => {    
+                        let orderA = classOrder[a.ClassBn] || 99;    
+                        let orderB = classOrder[b.ClassBn] || 99;    
+                        if (orderA !== orderB) return orderA - orderB;    
+                        return Number(a.Roll) - Number(b.Roll);    
+                    });    
+  
+                    originalParsedStudents = [...fetchedStudents];     
+                    parsedStudents = [...fetchedStudents];             
+  
+                    showToast(`সফল! ${parsedStudents.length} জনের ডাটা পাওয়া গেছে।`);    
+                        
+                    const btnGen = document.getElementById('btn-generate');    
+                    btnGen.disabled = false;    
+                    btnGen.innerHTML = `<i data-lucide="cog" class="w-5 h-5"></i> মেসেজ প্রসেস (${toBn(parsedStudents.length)})`;    
+                    lucide.createIcons();    
+                        
+                    if(isPreviewMode) {    
+                        document.getElementById('preview-total').innerText = parsedStudents.length;    
+                        currentPreviewIndex = 0;    
+                        renderPreview();    
+                    }    
+                } else {    
+                    showToast("এই ক্লাস ও বছরের কোনো ডাটা পাওয়া যায়নি!");    
+                    document.getElementById('btn-generate').disabled = true;    
+                }    
+            } else {    
+                document.getElementById('loader').style.display = 'none';    
+                showToast('ডাটা আনতে সমস্যা হয়েছে!');    
+            }    
+        } catch(e) {    
+            document.getElementById('loader').style.display = 'none';    
+            showToast('ইন্টারনেট সংযোগ চেক করুন!');    
+        } finally {    
+            btn.innerHTML = `<i data-lucide="cloud-download" class="w-5 h-5"></i> ডাটা লোড করুন`;    
+            lucide.createIcons(); btn.disabled = false;    
+        }    
+    }    
+  
+    // ==========================================    
+    // PRINT ENGINE    
+    // ==========================================    
+    function formatPrintHTML(text) {    
+        // Clean overlapping new lines before structural tags
+        let cleanText = text.replace(/\n?\[space=([^\]]+)\]\n?/g, '[space=$1]')
+                            .replace(/\n?\[\/space\]\n?/g, '[/space]')
+                            .replace(/\n?\[align=([^\]]+)\]\n?/g, '[align=$1]')
+                            .replace(/\n?\[\/align\]\n?/g, '[/align]');
+
+        let html = cleanText.replace(/\n/g, '<br>');    
+        html = html.replace(/\*([\s\S]*?)\*/g, '<strong>$1</strong>');     
+        html = html.replace(/_([\s\S]*?)_/g, '<i>$1</i>');     
+        html = html.replace(/~([\s\S]*?)~/g, '<del>$1</del>');  
+        html = html.replace(/\[size=(\d+)\]/g, '<span style="font-size: $1pt; line-height: 1.2;">');
+        html = html.replace(/\[\/size\]/g, '</span>');
+        html = html.replace(/\[space=(\d+),(\d+),(\d+),(\d+)\]/g, '<div style="margin: $1pt $2pt $3pt $4pt; display: block;">');
+        html = html.replace(/\[\/space\]/g, '</div>');
+        html = html.replace(/\[align=(left|center|right|justify)\]/g, '<div style="text-align: $1; display: block;">');
+        html = html.replace(/\[\/align\]/g, '</div>');
+        return html;    
+    }    
+  
+    document.getElementById('btn-generate').addEventListener('click', async function() {    
+        if(parsedStudents.length === 0) return;    
+  
+        const rawTemplate = document.getElementById('msg-template').value;    
+        if(!rawTemplate.trim() && !isPreviewMode) { showToast("অনুগ্রহ করে মেসেজ লিখুন!"); return; }    
+  
+        document.getElementById('loader-msg').innerText = "মেসেজ তৈরি হচ্ছে...";    
+        document.getElementById('loader').style.display = 'flex';    
+        await new Promise(resolve => setTimeout(resolve, 50));     
+  
+        const currentFont = document.getElementById('font-select').value || "'Anek Bangla', sans-serif";    
+        globalPrintHTML = `<div class="notice-page-container" style="font-family: ${currentFont} !important;">`;    
+        let waListHTML = '';    
+  
+        parsedStudents.forEach((student, index) => {    
+            let msgRaw = replaceTagsWithData(rawTemplate, student, false);    
+            let msgHtml = formatPrintHTML(msgRaw);    
+                
+            let cleanWaText = msgRaw    
+            .replace(/\[size=\d+\]/g, '').replace(/\[\/size\]/g, '')    
+            .replace(/\[space=\d+,\d+,\d+,\d+\]/g, '').replace(/\[\/space\]/g, '')    
+            .replace(/\[align=(left|center|right|justify)\]/g, '').replace(/\[\/align\]/g, '');
+            
+            globalPrintHTML += `    
+            <div class="notice-wrapper">    
+                <div class="notice-card" style="font-family: ${currentFont} !important;">    
+                    <div class="notice-header">    
+                        <h2>আবদুর রাজ্জাক দাখিল মাদ্রাসা</h2>    
+                        <p>মীরেরখীল, সরফভাটা, রাঙ্গুনিয়া, চট্টগ্রাম।</p>    
+                    </div>    
+                    <div class="notice-body">${msgHtml}</div>    
+                    <div class="notice-footer">    
+                        <div class="sign-box">অভিভাবক</div>    
+                        <div class="sign-box">কর্তৃপক্ষ</div>    
+                    </div>    
+                </div>    
+            </div>`;    
+  
+            let phone = String(student.WhatsApp || student.EmergencyNo).replace(/[^0-9]/g, '');    
+            if (phone.startsWith('0')) phone = '88' + phone;    
+            const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(cleanWaText)}`;    
+                
+            waListHTML += `    
+            <div class="student-list-item" id="item-${index}">    
+                <div>    
+                    <div class="text-sm font-bold text-gray-800">${student.StudentNameBn}</div>    
+                    <div class="text-xs text-gray-500 font-bold mt-1">শ্রেণি: <span class="text-blue-600">${student.ClassBn}</span> | রোল: <span class="text-blue-600">${toBn(student.Roll)}</span></div>    
+                </div>    
+                <a href="${waUrl}" target="_blank" class="btn-wa" id="btn-wa-${index}" onclick="markAsSent(${index})">    
+                    <i data-lucide="send-horizontal" class="w-4 h-4 wa-icon"></i>    
+                    <span class="btn-text">পাঠান</span>    
+                </a>    
+            </div>`;    
+        });    
+  
+        globalPrintHTML += '</div>';    
+        document.getElementById('whatsapp-list').innerHTML = waListHTML;    
+        document.getElementById('loader').style.display = 'none';    
+        document.getElementById('success-count').innerText = parsedStudents.length;    
+            
+        lucide.createIcons();     
+        const printTab = document.getElementById('tab-print');    
+        printTab.style.pointerEvents = 'auto'; printTab.style.opacity = '1';    
+        switchTab('print');    
+        showToast("আলহামদুলিল্লাহ! নোটিশ প্রস্তুত।");    
+    });    
+  
+    function markAsSent(index) {    
+        const btn = document.getElementById(`btn-wa-${index}`);    
+        const item = document.getElementById(`item-${index}`);    
+        btn.classList.add('sent');    
+        btn.querySelector('.btn-text').innerText = "✅ পাঠানো হয়েছে";    
+        btn.querySelector('.wa-icon').style.display = "none";    
+        item.style.backgroundColor = "#f9fafb";    
+    }    
+  
+    function printNotices() {    
+        document.getElementById('print-engine').innerHTML = globalPrintHTML;    
+        
+        // হেডার এবং ফুটার হাইড বা শো করার লজিক
+        const showHeader = document.getElementById('print-header-toggle').checked;
+        const showFooter = document.getElementById('print-footer-toggle').checked;
+
+        if (!showHeader) {
+            const headers = document.getElementById('print-engine').querySelectorAll('.notice-header');
+            headers.forEach(h => h.style.display = 'none');
+        }
+        if (!showFooter) {
+            const footers = document.getElementById('print-engine').querySelectorAll('.notice-footer');
+            footers.forEach(f => f.style.display = 'none');
+        }
+
+        window.print();    
+    }    
+</script>    </body>    
+</html>
