@@ -409,7 +409,18 @@ const toEn = (n) => {
     const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};      
     return String(n).replace(/[০-৯]/g, d => bnToEn[d] || d);      
 };      
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'N/A';
 
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+
+  return d.toLocaleDateString('bn-BD', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+};
 const API_URL = "https://script.google.com/macros/s/AKfycbzlG01v-naEr4WZR__n4ZX9fPkQR9pE01A0n8W9fOMUfw5x3RIDNPD_ZyaDwsVz9fphFw/exec";      
       
 let originalParsedStudents = [];       
@@ -652,7 +663,7 @@ function replaceTagsWithData(template, st, forPreview = false) {
         '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn),      
         '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn),      
         '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),      
-        '[DOB]': wrap('[DOB]', st.DOB), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),      
+        '[DOB]': wrap('[DOB]', formatDate(st.DOB)), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),      
         '[VillageBn]': wrap('[VillageBn]', st.VillageBn), '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),      
         '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)      
     };      
