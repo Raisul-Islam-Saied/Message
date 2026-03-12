@@ -383,6 +383,10 @@
                     <input type="checkbox" id="print-footer-toggle" checked class="w-4 h-4 accent-[#005A34] cursor-pointer">  
                     ফুটার (স্বাক্ষর)  
                 </label>  
+                <label class="flex items-center gap-2 text-sm font-bold text-gray-700 cursor-pointer">
+<input type="checkbox" id="print-two-row-toggle" checked class="w-4 h-4 accent-[#005A34] cursor-pointer">
+২টি রো
+</label>
             </div>  <button class="btn-primary flex items-center justify-center gap-2 w-full" onclick="printNotices()">      
             <i data-lucide="printer" class="w-5 h-5"></i> কাগজে প্রিন্ট করুন (Cut Layout)      
         </button>      
@@ -1465,8 +1469,17 @@ function markAsSent(index) {
 }      
 
 function printNotices() {      
-    document.getElementById('print-engine').innerHTML = globalPrintHTML;      
-      
+    document.getElementById('print-engine').innerHTML = globalPrintHTML;
+
+const twoRow = document.getElementById('print-two-row-toggle').checked;
+
+const container = document.querySelector('.notice-page-container');
+
+if(twoRow){
+    container.style.gridTemplateColumns = "1fr 1fr";
+}else{
+    container.style.gridTemplateColumns = "1fr";
+}
     // হেডার এবং ফুটার হাইড বা শো করার লজিক  
     const showHeader = document.getElementById('print-header-toggle').checked;  
     const showFooter = document.getElementById('print-footer-toggle').checked;  
