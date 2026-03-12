@@ -1469,18 +1469,46 @@ function markAsSent(index) {
 }      
 
 function printNotices() {      
-    document.getElementById('print-engine').innerHTML = globalPrintHTML;
+ document.getElementById('print-engine').innerHTML = globalPrintHTML;
 
 const twoRow = document.getElementById('print-two-row-toggle').checked;
 
 const container = document.querySelector('.notice-page-container');
 
 if(twoRow){
+
+    // ২ Column Cut Layout
     container.style.gridTemplateColumns = "1fr 1fr";
+
+    document.querySelectorAll('.notice-wrapper').forEach(w=>{
+        w.style.borderRight = "1px dashed #888";
+        w.style.borderBottom = "1px dashed #888";
+        w.style.padding = "5mm";
+    });
+
+    document.querySelectorAll('.notice-card').forEach(c=>{
+        c.style.border = "1.5px solid #111";
+    });
+
+    document.getElementById('print-engine').style.padding = "0";
+
 }else{
+
+    // ১ Column Clean Layout
     container.style.gridTemplateColumns = "1fr";
-}
-    // হেডার এবং ফুটার হাইড বা শো করার লজিক  
+
+    document.querySelectorAll('.notice-wrapper').forEach(w=>{
+        w.style.border = "none";
+        w.style.padding = "0";
+    });
+
+    document.querySelectorAll('.notice-card').forEach(c=>{
+        c.style.border = "none";
+    });
+
+    // Half inch margin
+    document.getElementById('print-engine').style.padding = "0.5in";
+}   // হেডার এবং ফুটার হাইড বা শো করার লজিক  
     const showHeader = document.getElementById('print-header-toggle').checked;  
     const showFooter = document.getElementById('print-footer-toggle').checked;  
 
