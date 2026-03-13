@@ -203,6 +203,116 @@
         </div>
     </div>
 </div>
+<div id="logic-manager-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex justify-center items-center hidden">
+    <div class="bg-white w-11/12 max-w-md rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="bg-[#005A34] text-white p-3 flex justify-between items-center">
+            <h3 class="font-bold flex items-center gap-2 text-sm"><i data-lucide="git-merge" class="w-4 h-4"></i> লজিক রুলস ম্যানেজার</h3>
+            <button onclick="closeLogicManager()" class="text-white hover:text-gray-200 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="p-3 bg-blue-50 border-b text-xs font-bold text-blue-800">
+            আপনার সেভ করা লজিক রুলস:
+        </div>
+        <div id="logic-rule-list" class="p-4 overflow-y-auto flex-1 bg-gray-50 min-h-[200px]">
+            </div>
+        <div class="p-3 border-t bg-white flex justify-end">
+            <button onclick="openLogicEditor(true)" class="bg-[#1e40af] text-white font-bold py-2 px-4 rounded-lg text-sm w-full flex justify-center items-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> নতুন লজিক রুল তৈরি করুন
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="logic-editor-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[10001] flex justify-center items-center hidden">
+    <div class="bg-white w-11/12 max-w-md rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
+        <div class="bg-blue-800 text-white p-3 flex justify-between items-center">
+            <h3 class="font-bold flex items-center gap-2 text-sm"><i data-lucide="edit-3" class="w-4 h-4"></i> লজিক এডিটর</h3>
+            <button onclick="closeLogicEditor()" class="text-white hover:text-gray-200 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="p-4 overflow-y-auto space-y-4">
+            <div>
+                <label class="block text-[11px] font-bold text-gray-500 mb-1">রুলের নাম (যেমন: ক্লাস ভিত্তিক বেতন)</label>
+                <input type="text" id="logic-rule-name" class="input-field p-2 text-sm font-bold text-[#005A34]">
+            </div>
+            
+            <div class="border rounded-lg p-2 bg-gray-50">
+                <div class="flex justify-between items-center mb-2 border-b pb-1">
+                    <label class="block text-[11px] font-bold text-gray-700">শর্তসমূহ (Conditions)</label>
+                    <button onclick="addConditionRow()" class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded font-bold hover:bg-green-200">+ যোগ করুন</button>
+                </div>
+                <div id="logic-conditions-container" class="space-y-2">
+                    </div>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-red-500 mb-1">কোনো শর্ত না মিললে ডিফল্ট যা বসবে (ঐচ্ছিক)</label>
+                <input type="text" id="logic-rule-fallback" placeholder="যেমন: অনির্ধারিত" class="input-field p-2 text-sm">
+            </div>
+        </div>
+        <div class="p-3 border-t bg-gray-50 flex gap-2">
+            <button onclick="closeLogicEditor()" class="w-1/3 bg-gray-200 text-gray-800 font-bold py-2 rounded-lg text-sm">বাতিল</button>
+            <button onclick="saveLogicRule()" class="w-2/3 bg-green-600 text-white font-bold py-2 rounded-lg text-sm flex justify-center items-center gap-2">
+                <i data-lucide="save" class="w-4 h-4"></i> সেভ করুন
+            </button>
+        </div>
+    </div>
+</div>
+<div id="number-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex justify-center items-center hidden">
+    <div class="bg-white w-11/12 max-w-sm rounded-xl overflow-hidden shadow-2xl flex flex-col">
+        <div class="bg-[#005A34] text-white p-3 flex justify-between items-center">
+            <h3 class="font-bold flex items-center gap-2 text-sm"><i data-lucide="hash" class="w-4 h-4"></i> সিরিয়াল ও রেন্ডম কোড</h3>
+            <button onclick="closeNumberModal()" class="text-white hover:text-gray-200 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="p-4 space-y-3">
+            <div>
+                <label class="block text-[11px] font-bold text-gray-500 mb-1">কী তৈরি করতে চান?</label>
+                <select id="num-type" class="input-field p-2 text-sm font-bold text-[#005A34]" onchange="toggleNumFields()">
+                    <option value="SERIAL">সিরিয়াল নম্বর (১, ২, ৩...)</option>
+                    <option value="RANDOM">রেন্ডম কোড (A7X9...)</option>
+                    <option value="RANDOM_NUM">শুধু রেন্ডম নম্বর (9876...)</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div id="num-start-container">
+                    <label class="block text-[11px] font-bold text-gray-500 mb-1">শুরু হবে কত থেকে?</label>
+                    <input type="number" id="num-start" value="1" class="input-field p-2 text-sm text-center">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-500 mb-1">কত ডিজিটের হবে?</label>
+                    <input type="number" id="num-length" value="4" class="input-field p-2 text-sm text-center" placeholder="যেমন: 4">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-500 mb-1">আগে কী থাকবে? (Prefix)</label>
+                    <input type="text" id="num-prefix" class="input-field p-2 text-sm" placeholder="যেমন: INV-">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-500 mb-1">পরে কী থাকবে? (Suffix)</label>
+                    <input type="text" id="num-suffix" class="input-field p-2 text-sm" placeholder="যেমন: -26">
+                </div>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-gray-500 mb-1">ভাষা নির্বাচন</label>
+                <select id="num-lang" class="input-field p-2 text-sm">
+                    <option value="bn">বাংলা (০১২৩৪)</option>
+                    <option value="en">English (01234)</option>
+                </select>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-2 italic">* ৪ ডিজিট দিলে ১ নম্বরটি ০০০১ হয়ে বসবে।</p>
+        </div>
+        <div class="p-3 border-t bg-gray-50 flex justify-end">
+            <button onmousedown="event.preventDefault()" onclick="insertNumberTag()" class="bg-[#1e40af] text-white font-bold py-2 px-6 rounded-lg text-sm w-full flex justify-center items-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> ইনসার্ট করুন
+            </button>
+        </div>
+    </div>
+</div>
 
 <div id="app-shell">
     <header class="app-header">
@@ -352,24 +462,38 @@
                                     <option value="promotion">🏆 ফলাফল ও প্রমোশন</option>
                                 </optgroup>
                                 <optgroup label="অন্যান্য">
-                                    <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>
+                                <option value="clear_format">✨ ফরম্যাট পরিষ্কার করুন</option>
+                                <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>
+                                <option value="factory_reset">⚠️ ফ্যাক্টরি রিসেট</option>
                                 </optgroup>
                             </select>
                         </div>
                         <div class="tool-select-wrapper" title="Date & Time">
                             <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="calendar-clock" class="w-4 h-4"></i></button>
-                            <select id="datetime-select" onchange="insertDateTime()">
-                                <option value="" disabled selected>সময়/তারিখ...</option>
-                                <option value="date_bn">আজকের তারিখ (বাংলা)</option>
-                                <option value="date_en">Today's Date (Eng)</option>
-                                <option value="time_bn">বর্তমান সময় (বাংলা)</option>
-                                <option value="time_en">Current Time (Eng)</option>
-                            </select>
+                           <select id="datetime-select" onchange="insertDateTime()">
+                               <option value="" disabled selected>সময়/তারিখ...</option>
+                               <optgroup label="বাংলা তারিখ ও সময়">
+                                   <option value="date_bn_short">ছোট তারিখ (১০/০১/২০২৬)</option>
+                                   <option value="date_bn">সাধারণ তারিখ (১০ জানুয়ারি ২০২৬)</option>
+                                   <option value="date_bn_full">বিস্তারিত (১০ জানুয়ারি ২০২৬ খ্রি., রোজ...)</option>
+                                   <option value="time_bn">বর্তমান সময় (বাংলা)</option>
+                               </optgroup>
+                               <optgroup label="English Date & Time">
+                                   <option value="date_en_short">Short Date (10/01/2026)</option>
+                                   <option value="date_en">Standard Date (10 Jan 2026)</option>
+                                   <option value="date_en_full">Full Date (Saturday, 10 Jan...)</option>
+                                   <option value="time_en">Current Time (Eng)</option>
+                               </optgroup>
+                           </select>
+                           
                         </div>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 ml-3">
                         <button class="tool-btn bg-gray-600 text-white hover:bg-gray-700" onmousedown="event.preventDefault()" onclick="openFilterModal()" title="ফিল্টার (Filter)"><i data-lucide="filter" class="w-4 h-4"></i></button>
                         <button id="btn-toggle-preview" class="tool-btn bg-[#005A34] text-white hover:bg-[#004225]" onmousedown="event.preventDefault()" onclick="togglePreview()" title="কোড / এডিট (Code / Visual)"><i data-lucide="code" class="w-4 h-4"></i></button>
+                        <button class="tool-btn bg-purple-50 text-purple-800" onmousedown="event.preventDefault()" onclick="openLogicManager()" title="লজিক রুলস ম্যানেজার"><i data-lucide="git-merge" class="w-4 h-4"></i></button>
+                        <button class="tool-btn bg-orange-50 text-orange-800" onmousedown="event.preventDefault()" onclick="openNumberModal()" title="সিরিয়াল ও রেন্ডম নম্বর"><i data-lucide="hash" class="w-4 h-4"></i></button>
+                        
                     </div>
                 </div>
             </div>
@@ -419,9 +543,15 @@
                         ২টি রো
                     </label>
                 </div>
+                
                 <button class="btn-primary flex items-center justify-center gap-2 w-full" onclick="printNotices()">
                     <i data-lucide="printer" class="w-5 h-5"></i> কাগজে প্রিন্ট করুন (Cut Layout)
                 </button>
+                
+                <button class="btn-primary flex items-center justify-center gap-2 w-full mt-3" style="background: #10b981; color: white; box-shadow: 0 4px 10px rgba(16,185,129,0.3);" onclick="downloadExcel()">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5"></i> এক্সেল (CSV) ডাউনলোড করুন
+                </button>
+                
             </div>
         </div>
 
@@ -747,64 +877,253 @@ function convertToRaw(htmlContent) {
         document.getElementById('msg-template').value = rawText.trim();
         localStorage.setItem('ardm_notice_msg', rawText.trim());
     }
+function replaceTagsWithData(template, st, forPreview = false) {
+    let msg = template;
 
-    function replaceTagsWithData(template, st, forPreview = false) {
-        let msg = template;
-        const wrap = (tag, val) => forPreview ? `<span class="tag-hl" data-tag="${tag}" contenteditable="false">${val || '-'}</span>` : (val || '-');
-
-        const map = {
-            '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
-            '[IDBn]': wrap('[IDBn]', toBn(st.ID)), '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
-            '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn), '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
-            '[IDEn]': wrap('[IDEn]', st.ID), '[GenderEn]': wrap('[GenderEn]', st.Gender), '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
-            '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn),
-            '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn),
-            '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
-            '[DOB]': wrap('[DOB]', formatDate(st.DOB)), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),
-            '[VillageBn]': wrap('[VillageBn]', st.VillageBn), '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
-            '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
-        };
-
-        for (const [key, val] of Object.entries(map)) {
-            msg = msg.split(key).join(val);
+    // --- NEW NUMBER GENERATOR ENGINE START ---
+    const numRegex = /\[NUM:(SERIAL|RANDOM|RANDOM_NUM):([^\]]+)\]/gi;
+    msg = msg.replace(numRegex, function(match, type, params) {
+        if(forPreview && !st) return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+        
+        let p = params.split('|'); 
+        let output = match;
+        
+        if (st) {
+            let lang = p[0]; 
+            
+            if (type.toUpperCase() === 'SERIAL') {
+                let start = parseInt(p[1]) || 1;
+                let len = parseInt(p[2]) || 1;
+                let pref = p[3] || '';
+                let suff = p[4] || '';
+                
+                let idx = parsedStudents.indexOf(st);
+                if (idx === -1) idx = 0;
+                
+                let currentNum = start + idx;
+                let numStr = currentNum.toString().padStart(len, '0');
+                if(lang === 'bn') numStr = toBn(numStr); 
+                
+                output = pref + numStr + suff;
+            } 
+            else if (type.toUpperCase() === 'RANDOM' || type.toUpperCase() === 'RANDOM_NUM') {
+                let len = parseInt(p[1]) || 6;
+                let pref = p[2] || '';
+                let suff = p[3] || '';
+                
+                let cacheKey = `_rand_${match}`;
+                if (!st[cacheKey]) {
+                    let r = "";
+                    // যদি RANDOM_NUM হয় তাহলে শুধু সংখ্যা, না হলে অক্ষর ও সংখ্যা মিক্স
+                    const chars = type.toUpperCase() === 'RANDOM_NUM' ? "0123456789" : "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                    for(let i=0; i<len; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+                    st[cacheKey] = r;
+                }
+                
+                let numStr = st[cacheKey];
+                if(lang === 'bn') numStr = toBn(numStr);
+                
+                output = pref + numStr + suff;
+            }
         }
-        return msg;
-    }
+        return forPreview ? `<span class="tag-hl" data-tag="${match}" contenteditable="false">${output}</span>` : output;
+    });
+    // --- NEW NUMBER GENERATOR ENGINE END ---
 
-    function wrapTagsWithoutData(text) {
-        const tags = ['[StudentNameBn]', '[RollBn]', '[ClassBn]', '[IDBn]', '[GenderBn]', '[AgeBn]', '[StudentNameEn]', '[RollEn]', '[ClassEn]', '[IDEn]', '[GenderEn]', '[AgeEn]', '[FatherNameBn]', '[FatherNameEn]', '[MotherNameBn]', '[MotherNameEn]', '[WhatsApp]', '[EmergencyNo]', '[DOB]', '[BloodGroup]', '[BRN]', '[VillageBn]', '[FullAddressBn]', '[VillageEn]', '[FullAddressEn]'];
-        let msg = text;
-        tags.forEach(tag => {
-            msg = msg.split(tag).join(`<span class="tag-hl" data-tag="${tag}" contenteditable="false">${tag}</span>`);
-        });
-        return msg;
-    }
+    // --- NEW LOGIC RULE ENGINE START ---
+    const classOrderMap = { "প্লে": 1, "নার্সারি": 2, "কেজি": 3, "১ম": 4, "২য়": 5, "৩য়": 6, "৪র্থ": 7, "৫ম": 8, "৬ষ্ঠ": 9, "৭ম": 10, "৮ম": 11, "৯ম": 12, "১০ম": 13 };
 
+    const logicRegex = /\[LOGIC:([^\]]+)\]/gi;
+    msg = msg.replace(logicRegex, function(match, ruleName) {
+        if(forPreview && !st) return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+        
+        let rule = customLogicRules.find(r => r.name === ruleName);
+        let finalOutput = match; 
+
+        if(rule && st) {
+            finalOutput = rule.fallback || "";
+            for(let cond of rule.conditions) {
+                let stVal = st[cond.field];
+                if (stVal === undefined || stVal === null) stVal = "";
+                
+                let conditionMet = false;
+                let condVal = String(cond.value).trim();
+                let numStVal = parseFloat(toEn(String(stVal)));
+                let strStVal = String(stVal).toLowerCase().trim();
+
+                if (cond.operator === 'empty') { conditionMet = (strStVal === ""); }
+                else if (cond.operator === 'not_empty') { conditionMet = (strStVal !== ""); }
+                else if (cond.operator === 'between') {
+                    let parts = condVal.split('|');
+                    let minVal = parts[0] ? String(parts[0]).trim() : '';
+                    let maxVal = parts[1] ? String(parts[1]).trim() : '';
+                    
+                    if(cond.field === 'ClassBn') {
+                        let stRank = classOrderMap[stVal] || 99;
+                        let minRank = classOrderMap[minVal] || 0;
+                        let maxRank = classOrderMap[maxVal] || 99;
+                        conditionMet = (stRank >= minRank && stRank <= maxRank);
+                    } else {
+                        let min = parseFloat(toEn(minVal));
+                        let max = parseFloat(toEn(maxVal));
+                        if (!isNaN(numStVal) && !isNaN(min) && !isNaN(max)) { conditionMet = (numStVal >= min && numStVal <= max); }
+                    }
+                }
+                else if (cond.operator === 'in_list') {
+                    let listArr = condVal.split(',').map(s => String(toEn(s)).trim().toLowerCase());
+                    let targetVal = String(toEn(stVal)).trim().toLowerCase();
+                    conditionMet = listArr.includes(targetVal);
+                }
+                else {
+                    let isClassCmp = cond.field === 'ClassBn';
+                    let isNum = !isNaN(numStVal) && !isNaN(parseFloat(toEn(condVal))) && !isClassCmp && cond.field !== 'Gender';
+                    
+                    let val1 = isClassCmp ? (classOrderMap[stVal] || 99) : (isNum ? numStVal : strStVal);
+                    let val2 = isClassCmp ? (classOrderMap[condVal] || 99) : (isNum ? parseFloat(toEn(condVal)) : condVal.toLowerCase());
+                    
+                    switch(cond.operator) {
+                        case '==': conditionMet = (val1 === val2); break;
+                        case '!=': conditionMet = (val1 !== val2); break;
+                        case '<': conditionMet = (val1 < val2); break;
+                        case '>': conditionMet = (val1 > val2); break;
+                        case '<=': conditionMet = (val1 <= val2); break;
+                        case '>=': conditionMet = (val1 >= val2); break;
+                        case 'contains': conditionMet = String(val1).includes(String(val2)); break;
+                        case 'not_contains': conditionMet = !String(val1).includes(String(val2)); break;
+                    }
+                }
+
+                if(conditionMet) { finalOutput = cond.output; break; }
+            }
+        }
+        return forPreview ? `<span class="tag-hl" data-tag="${match}" contenteditable="false">${finalOutput}</span>` : finalOutput;
+    });
+    // --- NEW LOGIC RULE ENGINE END ---
+
+    const wrap = (tag, val) => forPreview ? `<span class="tag-hl" data-tag="${tag}" contenteditable="false">${val || '-'}</span>` : (val || '-');
+
+    const map = {
+        '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
+        '[IDBn]': wrap('[IDBn]', toBn(st.ID)), '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
+        '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn), '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
+        '[IDEn]': wrap('[IDEn]', st.ID), '[GenderEn]': wrap('[GenderEn]', st.Gender), '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
+        '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn),
+        '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn),
+        '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
+        '[DOB]': wrap('[DOB]', formatDate(st.DOB)), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),
+        '[VillageBn]': wrap('[VillageBn]', st.VillageBn), '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
+        '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
+    };
+
+    for (const [key, val] of Object.entries(map)) { msg = msg.split(key).join(val); }
+    return msg;
+}
+
+function wrapTagsWithoutData(text) {
+    const tags = ['[StudentNameBn]', '[RollBn]', '[ClassBn]', '[IDBn]', '[GenderBn]', '[AgeBn]', '[StudentNameEn]', '[RollEn]', '[ClassEn]', '[IDEn]', '[GenderEn]', '[AgeEn]', '[FatherNameBn]', '[FatherNameEn]', '[MotherNameBn]', '[MotherNameEn]', '[WhatsApp]', '[EmergencyNo]', '[DOB]', '[BloodGroup]', '[BRN]', '[VillageBn]', '[FullAddressBn]', '[VillageEn]', '[FullAddressEn]'];
+    let msg = text;
+    tags.forEach(tag => {
+        msg = msg.split(tag).join(`<span class="tag-hl" data-tag="${tag}" contenteditable="false">${tag}</span>`);
+    });
+    msg = msg.replace(/\[LOGIC:([^\]]+)\]/gi, function(match) {
+        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+    });
+    // রেন্ডম এবং সিরিয়াল ট্যাগের জন্য হাইলাইট (RANDOM_NUM যোগ করা হলো)
+    msg = msg.replace(/\[NUM:(SERIAL|RANDOM|RANDOM_NUM):([^\]]+)\]/gi, function(match) {
+        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+    });
+    return msg;
+}
+
+  
     // ==========================================      
     // EDITOR BUTTONS      
     // ==========================================      
-    function loadTemplate() {
-        const select = document.getElementById('template-select');
-        const val = select.value;
-        const textarea = document.getElementById('msg-template');
 
-        if (val === 'clear') {
-            if(confirm("আপনি কি নিশ্চিত পুরো লেখা মুছে ফেলতে চান?")) textarea.value = "";
-        } else if (TEMPLATES[val]) {
-            if(textarea.value.trim() !== "") {
-                if(!confirm("নতুন টেমপ্লেট লোড করলে আগের লেখা মুছে যাবে। নিশ্চিত?")) { select.selectedIndex = 0; return; }
-            }
-            textarea.value = TEMPLATES[val];
+function loadTemplate() {
+    const select = document.getElementById('template-select');
+    const val = select.value;
+    const textarea = document.getElementById('msg-template');
+
+    // কোনো অ্যাকশন নেওয়ার আগে ভিজ্যুয়াল বক্সের ডাটা টেক্সটএরিয়াতে সিঙ্ক করে নিচ্ছি
+    if(isPreviewMode) syncVisualToCode();
+
+    if (val === 'clear') {
+        if(confirm("আপনি কি নিশ্চিত পুরো লেখা মুছে ফেলতে চান?")) {
+            textarea.value = "";
+        } else {
+            select.selectedIndex = 0; return;
         }
-
-        // Reset memory because text changed entirely
-        savedSelectionRange = null;
-        savedTextareaStart = 0;
-        savedTextareaEnd = 0;
-
-        syncCodeToVisual();
-        select.selectedIndex = 0;
+    } 
+    else if (val === 'clear_format') {
+        if(confirm("শুধু ফরম্যাটিং (বোল্ড, সাইজ, এলাইন, স্পেসিং ইত্যাদি) মুছে ফেলতে চান? লেখা এবং ডাটা ট্যাগ ঠিক থাকবে।")) {
+            let txt = textarea.value;
+            
+            // ১. এলাইনমেন্ট রিমুভ (সবচেয়ে নিখুঁত রেজেক্স)
+            txt = txt.replace(/\[align=[^\]]+\]/gi, '');
+            txt = txt.replace(/\[\/align\]/gi, '');
+            
+            // ২. স্পেসিং রিমুভ
+            txt = txt.replace(/\[space=[^\]]+\]/gi, '');
+            txt = txt.replace(/\[\/space\]/gi, '');
+            
+            // ৩. ফন্ট সাইজ রিমুভ
+            txt = txt.replace(/\[size=[^\]]+\]/gi, '');
+            txt = txt.replace(/\[\/size\]/gi, '');
+            
+            // ৪. বোল্ড, ইটালিক, স্ট্রাইক রিমুভ
+            txt = txt.replace(/[*_~]/g, '');
+            
+            // ৫. অতিরিক্ত স্পেস ও এন্টার ক্লিন করা
+            txt = txt.replace(/\n{3,}/g, '\n\n');
+            
+            textarea.value = txt.trim();
+            showToast("ফরম্যাট পরিষ্কার করা হয়েছে!");
+        } else {
+            select.selectedIndex = 0; return;
+        }
+    } 
+    else if (val === 'factory_reset') {
+        if(confirm("সতর্কতা! এডিটর, সেভ করা লেখা এবং কাস্টম লজিক রুলস সব ডিলিট হয়ে অ্যাপ একদম নতুনের মতো হয়ে যাবে। আপনি কি নিশ্চিত?")) {
+            textarea.value = "";
+            localStorage.removeItem('ardm_notice_msg');
+            localStorage.removeItem('ardm_notice_font');
+            localStorage.removeItem('ardm_logic_rules');
+            
+            showToast("ফ্যাক্টরি রিসেট সম্পন্ন হয়েছে! রিলোড হচ্ছে...");
+            setTimeout(() => location.reload(), 1000); 
+            return;
+        } else {
+            select.selectedIndex = 0; return;
+        }
+    } 
+    else if (TEMPLATES[val]) {
+        if(textarea.value.trim() !== "" && textarea.value.trim() !== "🧹 এডিটর পরিষ্কার করুন") {
+            if(!confirm("নতুন টেমপ্লেট লোড করলে আগের লেখা মুছে যাবে। নিশ্চিত?")) { 
+                select.selectedIndex = 0; return; 
+            }
+        }
+        textarea.value = TEMPLATES[val];
     }
+
+    savedSelectionRange = null;
+    savedTextareaStart = 0;
+    savedTextareaEnd = 0;
+
+    // আপডেট ও সেভ
+    textarea.blur();
+    syncCodeToVisual();
+    
+    if(isPreviewMode) {
+        if(parsedStudents.length === 0) {
+            document.getElementById('msg-preview-box').innerHTML = convertToHTML(wrapTagsWithoutData(textarea.value));
+        } else {
+            renderPreview();
+        }
+    }
+    
+    select.selectedIndex = 0;
+}
 
     function insertIntoTextarea(textToInsert) {
         if(isPreviewMode){
@@ -859,8 +1178,7 @@ function convertToRaw(htmlContent) {
         if(select.value) insertIntoTextarea(select.value);
         select.selectedIndex = 0;
     }
-
-    function insertDateTime() {
+function insertDateTime() {
         const select = document.getElementById('datetime-select');
         const val = select.value;
         if(!val) return;
@@ -868,20 +1186,50 @@ function convertToRaw(htmlContent) {
         const now = new Date();
         let insertStr = "";
 
-        if(val === 'date_en') { insertStr = now.toLocaleDateString('en-GB'); }
-        else if(val === 'date_bn') {
-            const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
-            insertStr = `${toBn(now.getDate())} ${months[now.getMonth()]} ${toBn(now.getFullYear())}`;
-        } else if(val === 'time_en') { insertStr = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}); }
+        const bnDays = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+        const enDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+        const enMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        const d = now.getDate();
+        const m = now.getMonth();
+        const y = now.getFullYear();
+        const day = now.getDay();
+
+        // তারিখের ফরম্যাটগুলো
+        if(val === 'date_bn_short') { 
+            insertStr = `${toBn(d.toString().padStart(2,'0'))}/${toBn((m+1).toString().padStart(2,'0'))}/${toBn(y)}`;
+        }
+        else if(val === 'date_bn') { 
+            insertStr = `${toBn(d)} ${bnMonths[m]} ${toBn(y)}`;
+        }
+        else if(val === 'date_bn_full') { 
+            insertStr = `${toBn(d)} ${bnMonths[m]} ${toBn(y)} খ্রিষ্টাব্দ, রোজ ${bnDays[day]}`;
+        }
+        else if(val === 'date_en_short') { 
+            insertStr = `${d.toString().padStart(2,'0')}/${(m+1).toString().padStart(2,'0')}/${y}`;
+        }
+        else if(val === 'date_en') { 
+            insertStr = `${d} ${enMonths[m]} ${y}`;
+        }
+        else if(val === 'date_en_full') { 
+            insertStr = `${enDays[day]}, ${d} ${enMonths[m]} ${y}`;
+        }
+        // সময়ের ফরম্যাটগুলো
+        else if(val === 'time_en') { 
+            insertStr = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}); 
+        }
         else if(val === 'time_bn') {
             let timeStr = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
             timeStr = timeStr.replace('AM', 'এএম').replace('PM', 'পিএম');
             insertStr = toBn(timeStr);
         }
+
+        // এডিটরে যুক্ত করা
         insertIntoTextarea(insertStr);
         select.selectedIndex = 0;
     }
-
+  
     function applyFormat(wrapper, cmd) {
         if(isPreviewMode) { 
             // Restore selection first
@@ -1272,26 +1620,36 @@ function applyFontSize() {
         const field = row.querySelector('.rule-field').value;
         const operator = row.querySelector('.rule-operator').value;
         const valContainer = row.querySelector('.rule-value-container');
-
+    
         let prevVal = "";
         const prevInput = valContainer.querySelector('.rule-val-single');
         if(prevInput && prevInput.tagName === 'INPUT') prevVal = prevInput.value;
-
+    
         if (operator === 'empty' || operator === 'not_empty') {
             valContainer.innerHTML = `<input type="hidden" class="rule-val-single" value="">`;
             return;
         }
-
+    
         if (operator === 'between') {
-            valContainer.innerHTML = `
-                <div class="flex gap-2">
-                    <input type="text" class="rule-val-min w-1/2 border rounded p-1.5 text-sm outline-none" placeholder="Min">
-                    <input type="text" class="rule-val-max w-1/2 border rounded p-1.5 text-sm outline-none" placeholder="Max">
-                </div>`;
+            if (field === 'ClassBn') {
+                const classes = ['প্লে', 'নার্সারি', 'কেজি', '১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম'];
+                let opts = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+                valContainer.innerHTML = `
+                    <div class="flex gap-2">
+                        <select class="rule-val-min w-1/2 border rounded p-1.5 text-sm outline-none">${opts}</select>
+                        <select class="rule-val-max w-1/2 border rounded p-1.5 text-sm outline-none">${opts}</select>
+                    </div>`;
+            } else {
+                valContainer.innerHTML = `
+                    <div class="flex gap-2">
+                        <input type="text" class="rule-val-min w-1/2 border rounded p-1.5 text-sm outline-none" placeholder="Min">
+                        <input type="text" class="rule-val-max w-1/2 border rounded p-1.5 text-sm outline-none" placeholder="Max">
+                    </div>`;
+            }
             return;
         }
-
-        if (field === 'ClassBn' && ['==', '!='].includes(operator)) {
+    
+        if (field === 'ClassBn' && ['==', '!=', '<', '>', '<=', '>='].includes(operator)) {
             valContainer.innerHTML = `
                 <select class="rule-val-single w-full border rounded p-1.5 text-sm font-bold text-[#005A34] outline-none">
                     <option value="প্লে">প্লে</option><option value="নার্সারি">নার্সারি</option>
@@ -1304,7 +1662,7 @@ function applyFontSize() {
                 </select>`;
             return;
         }
-
+    
         if (field === 'Gender' && ['==', '!='].includes(operator)) {
             valContainer.innerHTML = `
                 <select class="rule-val-single w-full border rounded p-1.5 text-sm font-bold text-[#005A34] outline-none">
@@ -1313,12 +1671,12 @@ function applyFontSize() {
                 </select>`;
             return;
         }
-
+    
         let placeholder = "Value...";
         if (operator === 'in_list') placeholder = "১, ২, ৩ (কমা দিয়ে)";
         valContainer.innerHTML = `<input type="text" class="rule-val-single w-full border rounded p-1.5 text-sm outline-none" placeholder="${placeholder}" value="${prevVal}">`;
     }
-
+    
     function insertRuleAfter(targetRuleId) {
         const targetRule = document.getElementById(targetRuleId);
         const ruleId = Date.now();
@@ -1396,7 +1754,7 @@ function applyFontSize() {
     function applyAdvancedFilter() {
         if(originalParsedStudents.length === 0) return;
         const allRuleItems = document.querySelectorAll('.filter-rule-item');
-
+    
         const validRules = Array.from(allRuleItems).filter(item => {
             const operator = item.querySelector('.rule-operator').value;
             if (operator === 'empty' || operator === 'not_empty') return true;
@@ -1408,42 +1766,51 @@ function applyFontSize() {
             const valInput = item.querySelector('.rule-val-single');
             return valInput && valInput.value.trim() !== '';
         });
-
+    
         if(validRules.length === 0) {
             parsedStudents = [...originalParsedStudents];
             updateFilterUIAfterApply();
             return;
         }
-
+    
+        const classOrderMap = { "প্লে": 1, "নার্সারি": 2, "কেজি": 3, "১ম": 4, "২য়": 5, "৩য়": 6, "৪র্থ": 7, "৫ম": 8, "৬ষ্ঠ": 9, "৭ম": 10, "৮ম": 11, "৯ম": 12, "১০ম": 13 };
+    
         parsedStudents = originalParsedStudents.filter(st => {
             let finalResult = false;
             let currentGroupResult = true;
-
+    
             validRules.forEach((item, index) => {
                 const field = item.querySelector('.rule-field').value;
                 const operator = item.querySelector('.rule-operator').value;
                 let connector = index > 0 ? item.querySelector('.rule-connector').value : "";
-
+    
                 let valInput1 = item.querySelector('.rule-val-single');
                 let valInputMin = item.querySelector('.rule-val-min');
                 let valInputMax = item.querySelector('.rule-val-max');
-
+    
                 let inputVal = valInput1 ? valInput1.value.trim() : '';
                 let inputMin = valInputMin ? valInputMin.value.trim() : '';
                 let inputMax = valInputMax ? valInputMax.value.trim() : '';
-
+    
                 let stVal = st[field];
                 if (stVal === undefined || stVal === null) stVal = "";
-
+    
                 let conditionMet = false;
-                let numStVal = parseFloat(toEn(stVal));
+                let numStVal = parseFloat(toEn(String(stVal)));
                 let strStVal = String(stVal).toLowerCase();
-
+    
                 if (operator === 'empty') { conditionMet = (strStVal === ""); }
                 else if (operator === 'not_empty') { conditionMet = (strStVal !== ""); }
                 else if (operator === 'between') {
-                    let min = parseFloat(toEn(inputMin)); let max = parseFloat(toEn(inputMax));
-                    if (!isNaN(numStVal) && !isNaN(min) && !isNaN(max)) { conditionMet = (numStVal >= min && numStVal <= max); }
+                    if (field === 'ClassBn') {
+                        let stRank = classOrderMap[stVal] || 99;
+                        let minRank = classOrderMap[inputMin] || 0;
+                        let maxRank = classOrderMap[inputMax] || 99;
+                        conditionMet = (stRank >= minRank && stRank <= maxRank);
+                    } else {
+                        let min = parseFloat(toEn(inputMin)); let max = parseFloat(toEn(inputMax));
+                        if (!isNaN(numStVal) && !isNaN(min) && !isNaN(max)) { conditionMet = (numStVal >= min && numStVal <= max); }
+                    }
                 }
                 else if (operator === 'in_list') {
                     let listArr = inputVal.split(',').map(s => String(toEn(s)).trim().toLowerCase());
@@ -1451,21 +1818,24 @@ function applyFontSize() {
                     conditionMet = listArr.includes(targetVal);
                 }
                 else {
-                    let numValInput = parseFloat(toEn(inputVal)); let strValInput = String(inputVal).toLowerCase();
-                    let isNumericComparison = !isNaN(numStVal) && !isNaN(numValInput) && field !== 'ClassBn' && field !== 'StudentNameBn' && field !== 'Gender';
-
+                    let isClassCmp = field === 'ClassBn';
+                    let isNum = !isNaN(numStVal) && !isNaN(parseFloat(toEn(inputVal))) && !isClassCmp && field !== 'StudentNameBn' && field !== 'Gender';
+    
+                    let val1 = isClassCmp ? (classOrderMap[stVal] || 99) : (isNum ? numStVal : strStVal);
+                    let val2 = isClassCmp ? (classOrderMap[inputVal] || 99) : (isNum ? parseFloat(toEn(inputVal)) : inputVal.toLowerCase());
+    
                     switch(operator) {
-                        case '==': conditionMet = isNumericComparison ? (numStVal === numValInput) : (strStVal === strValInput); break;
-                        case '!=': conditionMet = isNumericComparison ? (numStVal !== numValInput) : (strStVal !== strValInput); break;
-                        case '<': conditionMet = isNumericComparison ? (numStVal < numValInput) : (strStVal < strValInput); break;
-                        case '>': conditionMet = isNumericComparison ? (numStVal > numValInput) : (strStVal > strValInput); break;
-                        case '<=': conditionMet = isNumericComparison ? (numStVal <= numValInput) : (strStVal <= strValInput); break;
-                        case '>=': conditionMet = isNumericComparison ? (numStVal >= numValInput) : (strStVal >= strValInput); break;
-                        case 'contains': conditionMet = strStVal.includes(strValInput); break;
-                        case 'not_contains': conditionMet = !strStVal.includes(strValInput); break;
+                        case '==': conditionMet = (val1 === val2); break;
+                        case '!=': conditionMet = (val1 !== val2); break;
+                        case '<': conditionMet = (val1 < val2); break;
+                        case '>': conditionMet = (val1 > val2); break;
+                        case '<=': conditionMet = (val1 <= val2); break;
+                        case '>=': conditionMet = (val1 >= val2); break;
+                        case 'contains': conditionMet = String(val1).includes(String(val2)); break;
+                        case 'not_contains': conditionMet = !String(val1).includes(String(val2)); break;
                     }
                 }
-
+    
                 if (index === 0) { currentGroupResult = conditionMet; } 
                 else {
                     if (connector === '||') {
@@ -1478,10 +1848,11 @@ function applyFontSize() {
             });
             return finalResult || currentGroupResult;
         });
-
+    
         updateFilterUIAfterApply();
         showToast(`ফিল্টার অ্যাপ্লাই হয়েছে (${parsedStudents.length} জন)`);
     }
+    
 
     function updateFilterUIAfterApply() {
         closeFilterModal();
@@ -1728,6 +2099,443 @@ function applyFontSize() {
 
         window.print();
     }
+    // ==========================================      
+    // ADVANCED LOGIC SYSTEM      
+    // ==========================================  
+    let defaultLogicRules = [
+        {
+            id: 'rule_default_fee',
+            name: 'মাসিক বেতন',
+            conditions: [
+                { field: 'ClassBn', operator: '==', value: 'প্লে', output: '৩০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: 'নার্সারি', output: '৩০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: 'কেজি', output: '৩৫০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '১ম', output: '৪০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '২য়', output: '৪০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৩য়', output: '৪৫০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৪র্থ', output: '৪৫০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৫ম', output: '৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৬ষ্ঠ', output: '৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৭ম', output: '৫৫০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৮ম', output: '৬০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৯ম', output: '৭০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '১০ম', output: '৭০০ টাকা' }
+            ],
+            fallback: 'অনির্ধারিত'
+        },
+        {
+            id: 'rule_exam_fee',
+            name: 'পরীক্ষার ফি',
+            conditions: [
+                { field: 'ClassBn', operator: '==', value: 'প্লে', output: '৩০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: 'নার্সারি', output: '৩০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: 'কেজি', output: '৩৫০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '১ম', output: '৪০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '২য়', output: '৪০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৩য়', output: '৪০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৪র্থ', output: '৪০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৫ম', output: '৪০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৬ষ্ঠ', output: '৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৭ম', output: '৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৮ম', output: '৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৯ম', output: '৬০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '১০ম', output: '৬০০ টাকা' }
+            ],
+            fallback: 'অনির্ধারিত'
+        },
+        {
+            id: 'rule_session_fee',
+            name: 'সেশন চার্জ',
+            conditions: [
+                { field: 'ClassBn', operator: '==', value: 'প্লে', output: '১০০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: 'নার্সারি', output: '১০০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: 'কেজি', output: '১০০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '১ম', output: '১৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '২য়', output: '১৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৩য়', output: '১৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৪র্থ', output: '১৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৫ম', output: '১৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৬ষ্ঠ', output: '২০০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৭ম', output: '২০০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৮ম', output: '২০০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '৯ম', output: '২৫০০ টাকা' },
+                { field: 'ClassBn', operator: '==', value: '১০ম', output: '২৫০০ টাকা' }
+            ],
+            fallback: 'অনির্ধারিত'
+        },
+        {
+            id: 'rule_gender_title',
+            name: 'জনাব/জনাবা',
+            conditions: [
+                { field: 'Gender', operator: '==', value: 'Male', output: 'জনাব' },
+                { field: 'Gender', operator: '==', value: 'Female', output: 'জনাবা' }
+            ],
+            fallback: 'শিক্ষার্থী'
+        },
+        {
+            id: 'rule_son_daughter',
+            name: 'ছেলে/মেয়ে',
+            conditions: [
+                { field: 'Gender', operator: '==', value: 'Male', output: 'আপনার ছেলে' },
+                { field: 'Gender', operator: '==', value: 'Female', output: 'আপনার মেয়ে' }
+            ],
+            fallback: 'আপনার সন্তান'
+        }
+    ];
+    
+    
+    let customLogicRules = JSON.parse(localStorage.getItem('ardm_logic_rules'));
+    if (!customLogicRules || customLogicRules.length < 2) {
+        customLogicRules = defaultLogicRules;
+        localStorage.setItem('ardm_logic_rules', JSON.stringify(customLogicRules));
+    }
+    
+    let editingRuleId = null;
+    
+    function saveLogicRulesToDB() {
+        localStorage.setItem('ardm_logic_rules', JSON.stringify(customLogicRules));
+    }
+    
+    function openLogicManager() {
+        if (isPreviewMode) {
+            const sel = window.getSelection();
+            if (!savedSelectionRange) { saveSelectionState(); }
+        } else {
+            const textarea = document.getElementById('msg-template');
+            textarea.focus();
+            saveSelectionState();
+        }
+        renderLogicManagerList();
+        document.getElementById('logic-manager-modal').classList.remove('hidden');
+    }
+    
+    function closeLogicManager() { document.getElementById('logic-manager-modal').classList.add('hidden'); }
+    
+    function renderLogicManagerList() {
+        const listContainer = document.getElementById('logic-rule-list');
+        listContainer.innerHTML = '';
+        customLogicRules.forEach(rule => {
+            listContainer.innerHTML += `
+            <div class="flex flex-col gap-2 bg-white p-3 border rounded-lg shadow-sm mb-2 relative">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-bold text-sm text-[#005A34]">[LOGIC:${rule.name}]</h4>
+                        <p class="text-[10px] text-gray-500 font-bold mt-1">${rule.conditions.length} টি শর্ত যুক্ত আছে</p>
+                    </div>
+                    <button onclick="insertLogicTag('${rule.name}')" class="bg-[#005A34] text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm hover:bg-[#004225] transition-colors">ইনসার্ট</button>
+                </div>
+                <div class="flex gap-1 border-t pt-2 mt-1">
+                    <button onclick="editLogicRule('${rule.id}')" class="flex-1 bg-gray-100 text-gray-700 p-1 rounded text-[11px] font-bold hover:bg-gray-200 flex justify-center items-center gap-1"><i data-lucide="edit" class="w-3 h-3"></i> এডিট</button>
+                    <button onclick="duplicateLogicRule('${rule.id}')" class="flex-1 bg-yellow-50 text-yellow-700 p-1 rounded text-[11px] font-bold hover:bg-yellow-100 flex justify-center items-center gap-1"><i data-lucide="copy" class="w-3 h-3"></i> কপি</button>
+                    <button onclick="deleteLogicRule('${rule.id}')" class="flex-1 bg-red-50 text-red-600 p-1 rounded text-[11px] font-bold hover:bg-red-100 flex justify-center items-center gap-1"><i data-lucide="trash-2" class="w-3 h-3"></i> ডিলিট</button>
+                </div>
+            </div>`;
+        });
+        lucide.createIcons();
+    }
+    
+    function insertLogicTag(name) {
+        closeLogicManager();
+        insertIntoTextarea(`[LOGIC:${name}]`);
+    }
+    
+    function deleteLogicRule(id) {
+        if(confirm('রুলটি চিরতরে মুছে ফেলতে চান?')) {
+            customLogicRules = customLogicRules.filter(r => r.id !== id);
+            saveLogicRulesToDB();
+            renderLogicManagerList();
+        }
+    }
+    
+    function duplicateLogicRule(id) {
+        const rule = customLogicRules.find(r => r.id === id);
+        if(rule) {
+            let newRule = JSON.parse(JSON.stringify(rule));
+            newRule.id = 'rule_' + Date.now();
+            newRule.name = newRule.name + ' (Copy)';
+            customLogicRules.push(newRule);
+            saveLogicRulesToDB();
+            renderLogicManagerList();
+            showToast('রুল কপি করা হয়েছে!');
+        }
+    }
+    
+    function openLogicEditor(isNew = false) {
+        document.getElementById('logic-manager-modal').classList.add('hidden');
+        document.getElementById('logic-editor-modal').classList.remove('hidden');
+        const container = document.getElementById('logic-conditions-container');
+        container.innerHTML = '';
+    
+        if(isNew) {
+            editingRuleId = 'rule_' + Date.now();
+            document.getElementById('logic-rule-name').value = 'নতুন রুল';
+            document.getElementById('logic-rule-fallback').value = '';
+            addConditionRow(); 
+        } else {
+            const rule = customLogicRules.find(r => r.id === editingRuleId);
+            document.getElementById('logic-rule-name').value = rule.name;
+            document.getElementById('logic-rule-fallback').value = rule.fallback;
+            rule.conditions.forEach(cond => addConditionRow(cond));
+        }
+    }
+    
+    function editLogicRule(id) {
+        editingRuleId = id;
+        openLogicEditor(false);
+    }
+    
+    function closeLogicEditor() {
+        document.getElementById('logic-editor-modal').classList.add('hidden');
+        document.getElementById('logic-manager-modal').classList.remove('hidden');
+    }
+    
+    function updateLogicValUI(el) {
+        const row = el.closest('.logic-cond-row');
+        const container = row.querySelector('.val-container');
+        const field = row.querySelector('.l-field').value;
+        const operator = row.querySelector('.l-op').value;
+        
+        let prevVal = "";
+        const prevInput = container.querySelector('.l-val-hidden');
+        if(prevInput) { prevVal = prevInput.value; }
+        
+        if (operator === 'empty' || operator === 'not_empty') {
+            container.innerHTML = `<input type="hidden" class="l-val" value="">`;
+            return;
+        }
+        
+        if (operator === 'between') {
+            let parts = prevVal.split('|');
+            let minVal = parts[0] || ''; let maxVal = parts[1] || '';
+            
+            if (field === 'ClassBn') {
+                const classes = ['প্লে', 'নার্সারি', 'কেজি', '১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম'];
+                let html = `<select class="l-val-min input-field p-1 text-[11px] w-[48%]">`;
+                classes.forEach(c => { html += `<option value="${c}" ${minVal===c?'selected':''}>${c}</option>`; });
+                html += `</select><span class="text-gray-400 mt-1">-</span><select class="l-val-max input-field p-1 text-[11px] w-[48%]">`;
+                classes.forEach(c => { html += `<option value="${c}" ${maxVal===c?'selected':''}>${c}</option>`; });
+                html += `</select>`;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `
+                    <input type="text" class="l-val-min input-field p-1 text-[11px] w-[48%]" placeholder="Min" value="${minVal}">
+                    <input type="text" class="l-val-max input-field p-1 text-[11px] w-[48%]" placeholder="Max" value="${maxVal}">
+                `;
+            }
+            return;
+        }
+        
+        let valHTML = '';
+        if (field === 'ClassBn' && ['==', '!=', '>', '<', '>=', '<='].includes(operator)) {
+            const classes = ['প্লে', 'নার্সারি', 'কেজি', '১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম'];
+            valHTML = `<select class="l-val input-field p-1 text-[11px] w-full">`;
+            classes.forEach(c => { valHTML += `<option value="${c}" ${prevVal === c ? 'selected' : ''}>${c}</option>`; });
+            valHTML += `</select>`;
+        } else if (field === 'Gender' && ['==', '!='].includes(operator)) {
+            valHTML = `
+            <select class="l-val input-field p-1 text-[11px] w-full">
+                <option value="Male" ${prevVal === 'Male' ? 'selected' : ''}>Male</option>
+                <option value="Female" ${prevVal === 'Female' ? 'selected' : ''}>Female</option>
+            </select>`;
+        } else {
+            let placeholder = operator === 'in_list' ? "১,২,৩" : "মান";
+            valHTML = `<input type="text" class="l-val input-field p-1 text-[11px] w-full" placeholder="${placeholder}" value="${prevVal}">`;
+        }
+        container.innerHTML = valHTML;
+    }
+    
+    function addConditionRow(cond = {field:'ClassBn', operator:'==', value:'', output:''}) {
+        const id = Date.now() + Math.random();
+        const ops = `
+            <option value="==" ${cond.operator==='=='?'selected':''}>= (সমান)</option>
+            <option value="!=" ${cond.operator==='!='?'selected':''}>≠ (অসমান)</option>
+            <option value=">" ${cond.operator==='>'?'selected':''}>&gt; (বড়)</option>
+            <option value="<" ${cond.operator==='<'?'selected':''}>&lt; (ছোট)</option>
+            <option value=">=" ${cond.operator==='>='?'selected':''}>&ge; (বড়/সমান)</option>
+            <option value="<=" ${cond.operator==='<='?'selected':''}>&le; (ছোট/সমান)</option>
+            <option value="contains" ${cond.operator==='contains'?'selected':''}>Contains</option>
+            <option value="not_contains" ${cond.operator==='not_contains'?'selected':''}>Not contains</option>
+            <option value="in_list" ${cond.operator==='in_list'?'selected':''}>লিস্টে আছে</option>
+            <option value="between" ${cond.operator==='between'?'selected':''}>মাঝামাঝি</option>
+            <option value="empty" ${cond.operator==='empty'?'selected':''}>ফাঁকা</option>
+            <option value="not_empty" ${cond.operator==='not_empty'?'selected':''}>ফাঁকা নয়</option>
+        `;
+        const html = `
+        <div class="flex gap-1 items-center bg-white p-1.5 rounded border border-gray-200 logic-cond-row" id="lcond-${id}">
+            <select class="l-field input-field p-1 text-[11px] w-[22%]" onchange="updateLogicValUI(this)">
+                <option value="ClassBn" ${cond.field==='ClassBn'?'selected':''}>শ্রেণি</option>
+                <option value="Gender" ${cond.field==='Gender'?'selected':''}>লিঙ্গ</option>
+                <option value="Roll" ${cond.field==='Roll'?'selected':''}>রোল</option>
+                <option value="Age" ${cond.field==='Age'?'selected':''}>বয়স</option>
+            </select>
+            <select class="l-op input-field p-1 text-[10px] w-[22%] font-bold px-0" onchange="updateLogicValUI(this)">
+                ${ops}
+            </select>
+            <div class="val-container w-[28%] flex justify-between">
+                <input type="hidden" class="l-val-hidden" value="${cond.value}">
+            </div>
+            <i data-lucide="arrow-right" class="w-3 h-3 text-gray-400"></i>
+            <input type="text" class="l-out input-field p-1 text-[11px] w-[20%]" placeholder="ফলাফল" value="${cond.output}">
+            <button onclick="document.getElementById('lcond-${id}').remove()" class="text-red-500 hover:bg-red-50 rounded p-1"><i data-lucide="x" class="w-3 h-3"></i></button>
+        </div>`;
+        document.getElementById('logic-conditions-container').insertAdjacentHTML('beforeend', html);
+        
+        const newRow = document.getElementById(`lcond-${id}`);
+        updateLogicValUI(newRow.querySelector('.l-field'));
+        lucide.createIcons();
+    }
+    
+    function saveLogicRule() {
+        const name = document.getElementById('logic-rule-name').value.trim();
+        const fallback = document.getElementById('logic-rule-fallback').value.trim();
+        if(!name) { showToast('রুলের একটি নাম দিন!'); return; }
+    
+        const existing = customLogicRules.find(r => r.name === name && r.id !== editingRuleId);
+        if(existing) { showToast('এই নামের রুল ইতিমধ্যে আছে!'); return; }
+    
+        let conditions = [];
+        document.querySelectorAll('.logic-cond-row').forEach(row => {
+            let field = row.querySelector('.l-field').value;
+            let operator = row.querySelector('.l-op').value;
+            let output = row.querySelector('.l-out').value.trim();
+            let value = "";
+            
+            if (operator === 'empty' || operator === 'not_empty') {
+                value = "";
+            } else if (operator === 'between') {
+                let min = row.querySelector('.l-val-min') ? row.querySelector('.l-val-min').value.trim() : "";
+                let max = row.querySelector('.l-val-max') ? row.querySelector('.l-val-max').value.trim() : "";
+                value = min + "|" + max;
+            } else {
+                value = row.querySelector('.l-val') ? row.querySelector('.l-val').value.trim() : "";
+            }
+            
+            if(operator === 'empty' || operator === 'not_empty' || value !== "") { 
+                conditions.push({field, operator, value, output}); 
+            }
+        });
+    
+        if(conditions.length === 0) { showToast('অন্তত একটি শর্ত যুক্ত করুন!'); return; }
+    
+        const existingIndex = customLogicRules.findIndex(r => r.id === editingRuleId);
+        const newRule = { id: editingRuleId, name, conditions, fallback };
+    
+        if(existingIndex >= 0) { customLogicRules[existingIndex] = newRule; } 
+        else { customLogicRules.push(newRule); }
+    
+        saveLogicRulesToDB();
+        closeLogicEditor();
+        renderLogicManagerList();
+        showToast('রুল সেভ হয়েছে!');
+        
+        if(isPreviewMode) renderPreview();
+    }
+    // ==========================================      
+    // EXCEL (CSV) DOWNLOAD LOGIC      
+    // ==========================================  
+    function downloadExcel() {
+        if(parsedStudents.length === 0) {
+            showToast("কোনো ডাটা নেই!");
+            return;
+        }
+    
+        const rawTemplate = document.getElementById('msg-template').value;
+        if(!rawTemplate.trim()) { 
+            showToast("মেসেজ ফাঁকা!"); 
+            return; 
+        }
+    
+        // সিলেক্ট করা ক্লাস এবং সাল বের করে আনা
+        const cls = document.getElementById('api-class').value;
+        const yr = document.getElementById('api-year').value;
+        
+        // ডাইনামিক ফাইলের নাম তৈরি করা
+        const fileName = `SMS_List_${cls}_${yr}.csv`;
+    
+        // UTF-8 BOM যুক্ত করছি যেন এক্সেলে বাংলা ফন্ট একদম ঠিক থাকে
+        let csvContent = "\uFEFF"; 
+        csvContent += "Mobile Number,Message\n";
+    
+        parsedStudents.forEach(student => {
+            // শিক্ষার্থীর ডাটা দিয়ে মেসেজ রিপ্লেস করা
+            let msgRaw = replaceTagsWithData(rawTemplate, student, false);
+            
+            // এক্সেলে/এসএমএসে কোনো ধরনের ফরম্যাটিং যেন না থাকে, তাই সব মুছে ফেলা হচ্ছে
+            let cleanMsg = msgRaw
+                .replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '') // size, align, space ট্যাগ মুছবে
+                .replace(/[*_~]/g, ''); // বোল্ড (*), ইটালিক (_), স্ট্রাইকথ্রু (~) চিহ্ন মুছবে
+    
+            // অতিরিক্ত ফাঁকা লাইনগুলো ক্লিন করে সুন্দর করা
+            cleanMsg = cleanMsg.replace(/\n{3,}/g, '\n\n').trim();
+    
+            // মোবাইল নম্বর সংগ্রহ ও ফরম্যাট (শুরুতে 88 যুক্ত করা)
+            let phone = String(student.WhatsApp || student.EmergencyNo).replace(/[^0-9]/g, '');
+            if (phone.startsWith('0')) phone = '88' + phone;
+    
+            // এক্সেলে কমা (,) বা লাইন ব্রেক (Enter) থাকলে তা ডাবল কোটেশনে ("") রাখতে হয়
+            let safeMsg = '"' + cleanMsg.replace(/"/g, '""') + '"';
+    
+            // ফাইলে একটি করে নতুন লাইন যুক্ত করা
+            csvContent += `${phone},${safeMsg}\n`;
+        });
+    
+        // ফাইল তৈরি এবং অটোমেটিক ডাউনলোড
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName); // ডাইনামিক নাম এখানে বসানো হয়েছে
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    
+        showToast("এক্সেল ফাইল ডাউনলোড সফল হয়েছে!");
+    }
+    // ==========================================      
+    // NUMBER GENERATOR LOGIC      
+    // ==========================================  
+    function openNumberModal() {
+    if (isPreviewMode) {
+    const sel = window.getSelection();
+    if (!savedSelectionRange) { saveSelectionState(); }
+    } else {
+    const textarea = document.getElementById('msg-template');
+    textarea.focus();
+    saveSelectionState();
+    }
+    document.getElementById('number-modal').classList.remove('hidden');
+    }
+    
+    function closeNumberModal() {
+    document.getElementById('number-modal').classList.add('hidden');
+    }
+    
+    function toggleNumFields() {
+    const type = document.getElementById('num-type').value;
+    document.getElementById('num-start-container').style.display = type === 'SERIAL' ? 'block' : 'none';
+    }
+function insertNumberTag() {
+    const type = document.getElementById('num-type').value;
+    const lang = document.getElementById('num-lang').value;
+    const start = document.getElementById('num-start').value || 1;
+    const length = document.getElementById('num-length').value || 4;
+    const prefix = document.getElementById('num-prefix').value || '';
+    const suffix = document.getElementById('num-suffix').value || '';
+    
+    let tag = '';
+    if (type === 'SERIAL') {
+        tag = `[NUM:SERIAL:${lang}|${start}|${length}|${prefix}|${suffix}]`;
+    } else if (type === 'RANDOM_NUM') {
+        tag = `[NUM:RANDOM_NUM:${lang}|${length}|${prefix}|${suffix}]`;
+    } else {
+        tag = `[NUM:RANDOM:${lang}|${length}|${prefix}|${suffix}]`;
+    }
+    
+    closeNumberModal();
+    insertIntoTextarea(tag);
+}
+
 </script>
 </body>
 </html>
