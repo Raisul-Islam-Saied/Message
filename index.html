@@ -2644,8 +2644,46 @@ function getApiErrorMessage(code) {
     
     return `অজানা সমস্যা! সার্ভার রেসপন্স: ${code.substring(0, 15)}`;
 }
+// ==========================================
+// SMS COST & AUTHENTICATION MANAGER
+// ==========================================
+let isSingleSmsAuthenticated = false; // একবার পাসওয়ার্ড দিলে এটি true হয়ে যাবে
+const SMS_RATE = 0.30; // প্রতি SMS পার্টের খরচ (৩০ পয়সা)
 
-// ২. সিঙ্গেল মেসেজ ফাংশন (আপডেটেড)
+// ব্যালেন্স নীরবে চেক করার হেল্পার ফাংশন
+async function getCurrentBalanceSilent() {
+    try {
+        let res = await fetch(`/proxy/balance?api_key=${SMS_API_KEY}`);
+        let bal = await res.text();
+        if (bal && !isNaN(bal.trim())) return parseFloat(bal.trim()).toFixed(2);
+        return "অজানা";
+    } catch (e) {
+        return "অজানা";
+    }
+}
+
+// ক্যারেক্টার ও পার্ট হিসাব করার হেল্পার ফাংশন
+function getSmsCalculation(msg) {
+    const charCount = msg.length;
+    const isUnicode = /[\u0980-\u09FF]/.test(msg);
+    let parts = 1;
+    let limit = isUnicode ? 70 : 160;
+    
+    if (charCount > limit) {
+        let nextLimit = isUnicode ? 67 : 153;
+        parts = Math.ceil(charCount / nextLimit);
+    }
+    if (charCount === 0) parts = 0;
+    
+    return {
+        chars: charCount,
+        parts: parts,
+        cost: (parts * SMS_RATE).toFixed(2)
+    };
+}
+
+
+// ১. সিঙ্গেল মেসেজ (JSON Data Format)
 async function sendSingleSMS(index, phone, isBulk = false) {
     if (!phone || phone.length < 11) { 
         if(!isBulk) showToast("সঠিক মোবাইল নম্বর পাওয়া যায়নি!", "warning"); 
@@ -2656,18 +2694,58 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     const rawTemplate = document.getElementById('msg-template').value;
     let msgRaw = replaceTagsWithData(rawTemplate, student, false);
     
-    let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
+    // ফরম্যাটিং ট্যাগ রিমুভ করে ক্লিন মেসেজ তৈরি
+    let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space|LOGIC|NUM)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
     
+    // ==========================================
+    // DETAILED PROMPT & CONFIRMATION LOGIC
+    // ==========================================
     if (!isBulk) {
-        if (!confirm(`আপনি কি ${student.StudentNameBn} (${phone}) কে মেসেজ পাঠাতে চান?\n\nমেসেজ:\n${cleanMsg}`)) return false;
+        const btn = document.getElementById(`btn-sms-${index}`);
+        let oldHtml = btn.innerHTML;
+        
+        // ব্যালেন্স চেক করার সময় বাটনে লোডিং দেখাবে
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+        if (window.lucide) lucide.createIcons();
+        
+        let currentBalance = await getCurrentBalanceSilent();
+        let calc = getSmsCalculation(cleanMsg);
+        
+        btn.innerHTML = oldHtml; // লোডিং শেষে আগের অবস্থায় ফেরত
+
+        let alertText = `প্রাপক: ${student.StudentNameBn} (${phone})\n\n` +
+                        `📊 মেসেজ তথ্য:\n` +
+                        `-----------------------\n` +
+                        `অক্ষর: ${calc.chars} টি\n` +
+                        `SMS পার্ট: ${calc.parts} টি\n` +
+                        `প্রতি পার্ট খরচ: ${SMS_RATE} ৳\n` +
+                        `মোট কাটবে: ${calc.cost} ৳\n` +
+                        `বর্তমান ব্যালেন্স: ${currentBalance} ৳\n` +
+                        `-----------------------\n\n` +
+                        `মেসেজ:\n${cleanMsg}`;
+
+        if (!isSingleSmsAuthenticated) {
+            // প্রথমবার পাসওয়ার্ড চাইবে
+            let pass = prompt(alertText + "\n\nসিস্টেম আনলক করতে অ্যাডমিন পাসওয়ার্ড দিন:");
+            if (pass === null) return false; // ক্যান্সেল করলে
+            if (pass !== SMS_BULK_PASS) {
+                showToast("পাসওয়ার্ড ভুল হয়েছে!", "error");
+                return false;
+            }
+            isSingleSmsAuthenticated = true; // একবার সঠিক দিলে আনলক হয়ে যাবে
+            showToast("সিস্টেম আনলক হয়েছে!", "success");
+        } else {
+            // আনলক থাকলে শুধু কনফার্ম করবে
+            if (!confirm(alertText + "\n\nআপনি কি মেসেজটি পাঠাতে চান?")) return false;
+        }
     }
 
     const btn = document.getElementById(`btn-sms-${index}`);
-    const originalHTML = btn.innerHTML;
     btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span class="btn-text">...</span>`;
     btn.style.background = '#9ca3af';
     btn.disabled = true;
 
+    // API Payload
     const payload = {
         "api_key": SMS_API_KEY,
         "senderid": SMS_SENDER_ID,
@@ -2687,11 +2765,10 @@ async function sendSingleSMS(index, phone, isBulk = false) {
         if (resultText.includes("202")) {
             btn.classList.add('sent');
             btn.style.background = '#10b981';
-            btn.style.pointerEvents = 'none'; // বাটন লক করা হলো
+            btn.style.pointerEvents = 'none';
             btn.innerHTML = `✅ <span class="btn-text">Sent</span>`;
             if (window.lucide) lucide.createIcons(); 
             
-            // মেমরিতে সেভ করা হলো
             if (typeof saveCampaignData === "function") {
                 saveCampaignData([phone], rawTemplate);
             }
@@ -2715,35 +2792,22 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     }
 }
 
-// ৩. বাল্ক মেসেজ ফাংশন (আপডেটেড)
+
+// ২. বাল্ক মেসেজ (JSON Data Format : Many to Many)
 async function sendBulkSMS() {
     if(parsedStudents.length === 0) { 
         showToast("মেসেজ পাঠানোর মতো কোনো ডাটা নেই!", "warning"); 
         return; 
     }
     
-    let pass = prompt("সবাইকে একসাথে SMS পাঠাতে অ্যাডমিন পাসওয়ার্ড দিন:");
-    if (pass !== SMS_BULK_PASS) { 
-        if (pass !== null) showToast("অ্যাডমিন পাসওয়ার্ড ভুল হয়েছে!", "error"); 
-        return; 
-    }
-
-    if(!confirm(`আপনি কি নিশ্চিত লিস্টে থাকা ${parsedStudents.length} জনকে SMS পাঠাবেন?`)) return;
-
-    showToast("বাল্ক মেসেজ প্রসেসিং শুরু হয়েছে...", "info");
-    
     const rawTemplate = document.getElementById('msg-template').value;
+    
+    // ==========================================
+    // BULK PRE-CALCULATION LOGIC
+    // ==========================================
+    let validRecipients = 0;
+    let totalParts = 0;
     let messagesArray = [];
-
-    // লোডিং স্টেট আগে সেট করে নেওয়া
-    parsedStudents.forEach((st, idx) => {
-        const btn = document.getElementById(`btn-sms-${idx}`);
-        if (btn && !btn.classList.contains('sent')) {
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
-            btn.style.background = '#9ca3af';
-        }
-    });
-    if (window.lucide) lucide.createIcons();
 
     for (let i = 0; i < parsedStudents.length; i++) {
         let phone = String(parsedStudents[i].WhatsApp || parsedStudents[i].EmergencyNo).replace(/[^0-9]/g, '');
@@ -2752,20 +2816,61 @@ async function sendBulkSMS() {
         
         const btn = document.getElementById(`btn-sms-${i}`);
         if (phone.length >= 11 && btn && !btn.classList.contains('sent')) {
+            validRecipients++;
             let msgRaw = replaceTagsWithData(rawTemplate, parsedStudents[i], false);
-            let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
+            let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space|LOGIC|NUM)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
             
             messagesArray.push({
                 "to": phone,
                 "message": cleanMsg
             });
+            
+            // মোট পার্ট যোগ করা হচ্ছে
+            totalParts += getSmsCalculation(cleanMsg).parts;
         }
     }
 
-    if(messagesArray.length === 0) {
+    if(validRecipients === 0) {
         showToast("সবাইকে ইতিমধ্যে মেসেজ পাঠানো হয়ে গেছে!", "info");
         return;
     }
+
+    let totalCost = (totalParts * SMS_RATE).toFixed(2);
+    
+    // ব্যালেন্স ফেচ করার সময় ইউজারকে ওয়েট করানোর জন্য কার্সর চেঞ্জ
+    document.body.style.cursor = 'wait';
+    let currentBalance = await getCurrentBalanceSilent();
+    document.body.style.cursor = 'default';
+    
+    let promptText = `আপনি কি নিশ্চিত লিস্টে থাকা ${validRecipients} জনকে SMS পাঠাবেন?\n\n` +
+                     `📊 বাল্ক ক্যাম্পেইন তথ্য:\n` +
+                     `-----------------------\n` +
+                     `মোট প্রাপক: ${validRecipients} জন\n` +
+                     `সর্বমোট SMS পার্ট: ${totalParts} টি\n` +
+                     `প্রতি পার্ট খরচ: ${SMS_RATE} ৳\n` +
+                     `সর্বমোট কাটবে: ${totalCost} ৳\n` +
+                     `বর্তমান ব্যালেন্স: ${currentBalance} ৳\n` +
+                     `-----------------------\n\n` +
+                     `চালিয়ে যেতে অ্যাডমিন পাসওয়ার্ড দিন:`;
+
+    let pass = prompt(promptText);
+    if (pass === null) return; // ক্যান্সেল করলে
+    if (pass !== SMS_BULK_PASS) { 
+        showToast("অ্যাডমিন পাসওয়ার্ড ভুল হয়েছে!", "error"); 
+        return; 
+    }
+
+    showToast("বাল্ক মেসেজ প্রসেসিং শুরু হয়েছে...", "info");
+
+    // লোডিং স্টেট সেট করা
+    parsedStudents.forEach((st, idx) => {
+        const btn = document.getElementById(`btn-sms-${idx}`);
+        if (btn && !btn.classList.contains('sent')) {
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+            btn.style.background = '#9ca3af';
+        }
+    });
+    if (window.lucide) lucide.createIcons();
 
     const payload = {
         "api_key": SMS_API_KEY,
@@ -2794,13 +2899,12 @@ async function sendBulkSMS() {
 
                     btn.classList.add('sent');
                     btn.style.background = '#10b981';
-                    btn.style.pointerEvents = 'none'; // বাটন লক করা হলো
+                    btn.style.pointerEvents = 'none';
                     btn.innerHTML = `✅ <span class="btn-text">Sent</span>`;
                 }
             });
             if (window.lucide) lucide.createIcons();
             
-            // মেমরিতে সব ফোন নাম্বার এবং টেমপ্লেট সেভ করা হলো
             if (typeof saveCampaignData === "function") {
                 saveCampaignData(successPhones, rawTemplate);
             }
