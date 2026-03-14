@@ -2553,7 +2553,7 @@ function insertNumberTag() {
     closeNumberModal();
     insertIntoTextarea(tag);
 }
-    // ১. সিঙ্গেল মেসেজ (JSON Format: One to Many)
+    // ১. সিঙ্গেল মেসেজ (JSON Data Format : One to Many)
 async function sendSingleSMS(index, phone, isBulk = false) {
     if (!phone || phone.length < 11) { 
         showToast("সঠিক মোবাইল নম্বর নেই!"); 
@@ -2568,8 +2568,7 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
     
     if (!isBulk) {
-        let confirmSend = confirm(`আপনি কি ${student.StudentNameBn} (${phone}) কে মেসেজ পাঠাতে চান?\n\nমেসেজ:\n${cleanMsg}`);
-        if (!confirmSend) return false;
+        if (!confirm(`আপনি কি ${student.StudentNameBn} (${phone}) কে মেসেজ পাঠাতে চান?\n\nমেসেজ:\n${cleanMsg}`)) return false;
     }
 
     const btn = document.getElementById(`btn-sms-${index}`);
@@ -2577,16 +2576,17 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     btn.style.background = '#9ca3af';
     btn.disabled = true;
 
-    // ডকুমেন্টেশন অনুযায়ী JSON অবজেক্ট তৈরি
+    // হুবহু ডকুমেন্টেশন অনুযায়ী JSON অবজেক্ট
     const payload = {
-        api_key: SMS_API_KEY,
-        senderid: SMS_SENDER_ID,
-        number: phone,
-        message: cleanMsg
+        "api_key": SMS_API_KEY,
+        "senderid": SMS_SENDER_ID,
+        "number": phone,
+        "message": cleanMsg
     };
 
     try {
-        let response = await fetch("http://bulksmsbd.net/api/smsapi", {
+        // ডাইরেক্ট API কল, শুধু http এর জায়গায় https দেওয়া হয়েছে
+        let response = await fetch("https://bulksmsbd.net/api/smsapi", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -2598,24 +2598,24 @@ async function sendSingleSMS(index, phone, isBulk = false) {
         
         if (resultText.includes("202")) {
             btn.classList.add('sent');
-            btn.style.background = '#10b981'; // সবুজ
+            btn.style.background = '#10b981';
             btn.innerHTML = `✅ <span class="btn-text">Sent</span>`;
             lucide.createIcons(); 
             return true;
         } else {
-            throw new Error(`API Error: ${resultText}`);
+            throw new Error(resultText);
         }
     } catch(e) {
-        btn.style.background = '#ef4444'; // লাল
+        btn.style.background = '#ef4444'; 
         btn.innerHTML = `❌ <span class="btn-text" style="font-size:10px;">Failed</span>`;
         btn.disabled = false; 
         lucide.createIcons(); 
-        if(!isBulk) alert("মেসেজ যায়নি! ব্রাউজার কনসোল (F12) চেক করুন।");
+        if(!isBulk) alert("Failed to fetch! দয়া করে নিশ্চিত হোন আপনি ফাইলটি Live Server থেকে রান করছেন।");
         return false;
     }
 }
 
-// ২. বাল্ক মেসেজ (JSON Format: Many to Many)
+// ২. বাল্ক মেসেজ (JSON Data Format : Many to Many)
 async function sendBulkSMS() {
     if(parsedStudents.length === 0) { showToast("মেসেজ পাঠানোর ডাটা নেই!"); return; }
     
@@ -2624,12 +2624,11 @@ async function sendBulkSMS() {
 
     if(!confirm(`আপনি কি নিশ্চিত লিস্টে থাকা ${parsedStudents.length} জনকে SMS পাঠাবেন?`)) return;
 
-    showToast("Bulk SMS পাঠানো শুরু হয়েছে, দয়া করে অপেক্ষা করুন...");
+    showToast("Bulk SMS পাঠানো শুরু হয়েছে...");
     
     const rawTemplate = document.getElementById('msg-template').value;
     let messagesArray = [];
 
-    // সকল বাটনে লোডিং স্পিনার দেখানো
     parsedStudents.forEach((st, idx) => {
         const btn = document.getElementById(`btn-sms-${idx}`);
         if (btn) {
@@ -2638,7 +2637,7 @@ async function sendBulkSMS() {
         }
     });
 
-    // ডাইনামিক মেসেজগুলো তৈরি করে Array তে পুশ করা
+    // Many to Many ফরম্যাট অনুযায়ী Array তৈরি
     for (let i = 0; i < parsedStudents.length; i++) {
         let phone = String(parsedStudents[i].WhatsApp || parsedStudents[i].EmergencyNo).replace(/[^0-9]/g, '');
         if (phone.length === 11 && phone.startsWith('0')) phone = '88' + phone;
@@ -2649,21 +2648,22 @@ async function sendBulkSMS() {
             let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
             
             messagesArray.push({
-                to: phone,
-                message: cleanMsg
+                "to": phone,
+                "message": cleanMsg
             });
         }
     }
 
-    // Many to Many API এর জন্য JSON পেলোড তৈরি
+    // হুবহু ডকুমেন্টেশন অনুযায়ী JSON অবজেক্ট
     const payload = {
-        api_key: SMS_API_KEY,
-        senderid: SMS_SENDER_ID,
-        messages: messagesArray
+        "api_key": SMS_API_KEY,
+        "senderid": SMS_SENDER_ID,
+        "messages": messagesArray
     };
 
     try {
-        let response = await fetch("http://bulksmsbd.net/api/smsapimany", {
+        // ডাইরেক্ট API কল, শুধু http এর জায়গায় https দেওয়া হয়েছে
+        let response = await fetch("https://bulksmsbd.net/api/smsapimany", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -2685,11 +2685,10 @@ async function sendBulkSMS() {
             lucide.createIcons();
             alert(`সফলভাবে ${messagesArray.length} জনের কাছে বাল্ক রিকোয়েস্ট পাঠানো হয়েছে!`);
         } else {
-            throw new Error(`API Error: ${resultText}`);
+            throw new Error(resultText);
         }
         
     } catch(e) {
-        // ফেইল হলে বাটনগুলো লাল করে দেওয়া
         parsedStudents.forEach((st, idx) => {
             const btn = document.getElementById(`btn-sms-${idx}`);
             if (btn && !btn.classList.contains('sent')) {
@@ -2698,7 +2697,7 @@ async function sendBulkSMS() {
             }
         });
         lucide.createIcons();
-        alert("বাল্ক মেসেজ পাঠাতে সমস্যা হয়েছে! ব্রাউজার কনসোল (F12) চেক করুন।");
+        alert("Failed to fetch! দয়া করে নিশ্চিত হোন আপনি ফাইলটি Live Server থেকে রান করছেন।");
     }
 }
 
