@@ -2049,11 +2049,11 @@ function applyFontSize() {
         return html;
     }
 
-    document.getElementById('btn-generate').addEventListener('click', async function() {
+document.getElementById('btn-generate').addEventListener('click', async function() {
         if(parsedStudents.length === 0) return;
 
         const rawTemplate = document.getElementById('msg-template').value;
-        if(!rawTemplate.trim() && !isPreviewMode) { showToast("অনুগ্রহ করে মেসেজ লিখুন!"); return; }
+        if(!rawTemplate.trim() && !isPreviewMode) { showToast("অনুগ্রহ করে মেসেজ লিখুন!", "warning"); return; }
 
         document.getElementById('loader-msg').innerText = "মেসেজ তৈরি হচ্ছে...";
         document.getElementById('loader').style.display = 'flex';
@@ -2093,6 +2093,14 @@ function applyFontSize() {
      
      const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(cleanWaText)}`;
      
+     // --- নতুন মেমরি চেকার কোড শুরু ---
+     let isSent = isAlreadySent(phone, rawTemplate);
+     let sentClass = isSent ? "sent" : "";
+     let sentStyle = isSent ? "background: #10b981; pointer-events: none; opacity: 0.8;" : "";
+     let sentText = isSent ? `✅ <span class="btn-text">Sent</span>` : `<i data-lucide="message-square" class="w-4 h-4 sms-icon"></i> <span class="btn-text">SMS</span>`;
+     let clickAttr = isSent ? "" : `onclick="sendSingleSMS(${index}, '${phone}')"`;
+     // --- নতুন মেমরি চেকার কোড শেষ ---
+     
      waListHTML += `      
      <div class="student-list-item flex-wrap gap-2" id="item-${index}">      
      <div class="w-full sm:w-auto flex-1">      
@@ -2100,10 +2108,11 @@ function applyFontSize() {
      <div class="text-xs text-gray-500 font-bold mt-1">শ্রেণি: <span class="text-blue-600">${student.ClassBn}</span> | রোল: <span class="text-blue-600">${toBn(student.Roll)}</span></div>      
      </div>      
      <div class="flex gap-2 w-full sm:w-auto justify-end">
-     <button class="btn-sms" id="btn-sms-${index}" onclick="sendSingleSMS(${index}, '${phone}')">
-     <i data-lucide="message-square" class="w-4 h-4 sms-icon"></i>
-     <span class="btn-text">SMS</span>
+     
+     <button class="btn-sms ${sentClass}" id="btn-sms-${index}" style="${sentStyle}" ${clickAttr}>
+     ${sentText}
      </button>
+     
      <a href="${waUrl}" target="_blank" class="btn-wa" id="btn-wa-${index}" onclick="markAsSent(${index})">      
      <i data-lucide="send-horizontal" class="w-4 h-4 wa-icon"></i>      
      <span class="btn-text">WhatsApp</span>      
@@ -2122,7 +2131,7 @@ function applyFontSize() {
         const printTab = document.getElementById('tab-print');
         printTab.style.pointerEvents = 'auto'; printTab.style.opacity = '1';
         switchTab('print');
-        showToast("আলহামদুলিল্লাহ! নোটিশ প্রস্তুত।");
+        showToast("আলহামদুলিল্লাহ! নোটিশ প্রস্তুত।", "success");
     });
 
     function markAsSent(index) {
@@ -2615,8 +2624,9 @@ function insertNumberTag() {
     // ==========================================      
 // PRO LEVEL SMS FUNCTIONS (NETLIFY PROXY + ADVANCED TOAST)      
 // ==========================================
-
-// API এরর কোড থেকে সুন্দর বাংলা মেসেজ বের করার হেল্পার ফাংশন
+// ==========================================
+      
+    // API এরর কোড থেকে সুন্দর বাংলা মেসেজ বের করার হেল্পার ফাংশন
 function getApiErrorMessage(code) {
     if (code.includes("1001")) return "অকার্যকর বা ভুল মোবাইল নম্বর!";
     if (code.includes("1006")) return "আপনার ব্যালেন্সের মেয়াদ শেষ!";
@@ -2670,8 +2680,14 @@ async function sendSingleSMS(index, phone, isBulk = false) {
         if (resultText.includes("202")) {
             btn.classList.add('sent');
             btn.style.background = '#10b981';
+            btn.style.pointerEvents = 'none'; // বাটন লক করা হলো
             btn.innerHTML = `✅ <span class="btn-text">Sent</span>`;
             if (window.lucide) lucide.createIcons(); 
+            
+            // মেমরিতে নাম্বার ও মেসেজ সেভ করা হলো
+            if (typeof saveCampaignData === "function") {
+                saveCampaignData([phone], rawTemplate);
+            }
             
             if(!isBulk) showToast(`${student.StudentNameBn}-কে সফলভাবে মেসেজ পাঠানো হয়েছে!`, "success");
             return true;
@@ -2762,15 +2778,30 @@ async function sendBulkSMS() {
         let resultText = await response.text();
 
         if (resultText.includes("202")) {
+            let successPhones = []; // সফল নাম্বার জমানোর জন্য
+            
             parsedStudents.forEach((st, idx) => {
                 const btn = document.getElementById(`btn-sms-${idx}`);
                 if (btn && !btn.classList.contains('sent')) {
+                    
+                    // সফল নাম্বারটি বের করে লিস্টে রাখা
+                    let p = String(st.WhatsApp || st.EmergencyNo).replace(/[^0-9]/g, '');
+                    if (p.length === 11 && p.startsWith('0')) p = '88' + p;
+                    else if (p.length === 10) p = '880' + p;
+                    successPhones.push(p);
+
                     btn.classList.add('sent');
                     btn.style.background = '#10b981';
+                    btn.style.pointerEvents = 'none'; // বাটন লক করা হলো
                     btn.innerHTML = `✅ <span class="btn-text">Sent</span>`;
                 }
             });
             if (window.lucide) lucide.createIcons();
+            
+            // সফল হওয়া সবার নাম্বার একসাথে মেমরিতে সেভ করা হলো
+            if (typeof saveCampaignData === "function") {
+                saveCampaignData(successPhones, rawTemplate);
+            }
             
             showToast(`আলহামদুলিল্লাহ! ${messagesArray.length} জনের কাছে সফলভাবে মেসেজ পাঠানো হয়েছে।`, "success", 6000);
         } else {
@@ -2792,12 +2823,42 @@ async function sendBulkSMS() {
     }
 }
 
-// ==========================================
-        // AUTO LOAD DATA ON PAGE START
+    
+                                         // AUTO LOAD DATA ON PAGE START
         // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             fetchOnlineStudents();
         });
+// ==========================================      
+// SMART CAMPAIGN MEMORY TRACKER      
+// ==========================================
+function isAlreadySent(phone, currentTemplate) {
+    let savedMsg = localStorage.getItem('ardm_campaign_msg') || '';
+    let savedList = JSON.parse(localStorage.getItem('ardm_campaign_list') || '[]');
+    // যদি বর্তমান মেসেজটি সেভ করা মেসেজের সাথে মিলে যায় এবং লিস্টে নাম্বারটি থাকে
+    return (savedMsg === currentTemplate && savedList.includes(phone));
+}
+
+function saveCampaignData(phonesArray, currentTemplate) {
+    let savedMsg = localStorage.getItem('ardm_campaign_msg') || '';
+    let savedList = JSON.parse(localStorage.getItem('ardm_campaign_list') || '[]');
+    
+    // যদি নতুন মেসেজ তৈরি করা হয়, তাহলে আগের রেকর্ড মুছে ফেলবে
+    if (savedMsg !== currentTemplate) {
+        savedMsg = currentTemplate;
+        savedList = []; 
+        console.log("নতুন মেসেজ ডিটেক্ট করা হয়েছে, ট্র্যাকিং রিসেট করা হলো!");
+    }
+    
+    // নতুন নাম্বারগুলো লিস্টে যুক্ত করা
+    phonesArray.forEach(p => {
+        if(!savedList.includes(p)) savedList.push(p);
+    });
+    
+    // লোকাল স্টোরেজে সেভ করা
+    localStorage.setItem('ardm_campaign_msg', savedMsg);
+    localStorage.setItem('ardm_campaign_list', JSON.stringify(savedList));
+}
 
 </script>
 </body>
