@@ -2132,10 +2132,7 @@ document.getElementById('btn-generate').addEventListener('click', async function
         printTab.style.pointerEvents = 'auto'; printTab.style.opacity = '1';
         switchTab('print');
         showToast("আলহামদুলিল্লাহ! নোটিশ প্রস্তুত।", "success");
-        localStorage.setItem('ardm_processed_students', JSON.stringify(parsedStudents));
-localStorage.setItem('ardm_processed_template', rawTemplate);
-localStorage.setItem('ardm_last_list_html', waListHTML);
-});
+        });
 
     function markAsSent(index) {
         const btn = document.getElementById(`btn-wa-${index}`);
@@ -2828,48 +2825,11 @@ async function sendBulkSMS() {
     }
 }
 window.addEventListener('DOMContentLoaded', () => {
-
-const savedStudents = localStorage.getItem('ardm_processed_students');
-const savedTemplate = localStorage.getItem('ardm_processed_template');
-const savedList = localStorage.getItem('ardm_last_list_html');
-
-if(savedStudents && savedTemplate && savedList){
-
-parsedStudents = JSON.parse(savedStudents);
-
-document.getElementById('msg-template').value = savedTemplate;
-
-document.getElementById('whatsapp-list').innerHTML = savedList;
-
-document.getElementById('success-count').innerText = parsedStudents.length;
-
-// SEND TAB ENABLE
-const printTab = document.getElementById('tab-print');
-printTab.style.pointerEvents = 'auto';
-printTab.style.opacity = '1';
-
-// OPEN SEND TAB
-switchTab('print');
-
-// ICON RELOAD
-if(typeof lucide !== "undefined"){
-lucide.createIcons();
-}
-
-}
-
-// যদি কোনো saved data না থাকে
-else{
-
-const printTab = document.getElementById('tab-print');
-printTab.style.pointerEvents = 'none';
-printTab.style.opacity = '0.5';
-
-}
-
-});
-                                         // ==========================================
-// ==========================================      
+    // শুধু API থেকে ডাটা আনবে, রিলোড দিলে সব ফ্রেশ থাকবে
+    fetchOnlineStudents();
+    
+    
+});// ==========================================      
 // SMART CAMPAIGN MEMORY TRACKER      
 // ==========================================
 function isAlreadySent(phone, currentTemplate) {
