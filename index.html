@@ -2827,36 +2827,7 @@ async function sendBulkSMS() {
         showToast(`বাল্ক মেসেজ ফেইল: ${errorMsg}`, "error", 6000);
     }
 }
-
-                                         // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
-    // ১. শিক্ষার্থী ডাটা লোড করা
-    fetchOnlineStudents();
-
-    // ২. রিলোড দিলে আগের প্রসেস করা লিস্ট ফিরিয়ে আনা
-    const savedStudents = localStorage.getItem('ardm_processed_students');
-const savedTemplate = localStorage.getItem('ardm_processed_template');
-
-if(savedStudents && savedTemplate){
-
-parsedStudents = JSON.parse(savedStudents);
-
-document.getElementById('msg-template').value = savedTemplate;
-
-document.getElementById('success-count').innerText = parsedStudents.length;
-
-const printTab = document.getElementById('tab-print');
-printTab.style.pointerEvents = 'auto';
-printTab.style.opacity = '1';
-
-switchTab('print');
-
-}
-
-    // ৩. মেসেজ টাইপ করলে বা নতুন করে লিখলে মেমরি ক্লিয়ার করা
-document.getElementById('msg-template').addEventListener('input', () => {
-
-saveMessageLocally();
 
 const savedStudents = localStorage.getItem('ardm_processed_students');
 const savedTemplate = localStorage.getItem('ardm_processed_template');
@@ -2872,25 +2843,32 @@ document.getElementById('whatsapp-list').innerHTML = savedList;
 
 document.getElementById('success-count').innerText = parsedStudents.length;
 
+// SEND TAB ENABLE
 const printTab = document.getElementById('tab-print');
-
 printTab.style.pointerEvents = 'auto';
 printTab.style.opacity = '1';
 
+// OPEN SEND TAB
 switchTab('print');
 
+// ICON RELOAD
+if(typeof lucide !== "undefined"){
 lucide.createIcons();
+}
 
 }
-document.getElementById('tab-print').style.pointerEvents = 'none';
-document.getElementById('tab-print').style.opacity = '0.5';
 
+// যদি কোনো saved data না থাকে
+else{
 
-    });
-    
-    lucide.createIcons();
+const printTab = document.getElementById('tab-print');
+printTab.style.pointerEvents = 'none';
+printTab.style.opacity = '0.5';
+
+}
+
 });
-
+                                         // ==========================================
 // ==========================================      
 // SMART CAMPAIGN MEMORY TRACKER      
 // ==========================================
