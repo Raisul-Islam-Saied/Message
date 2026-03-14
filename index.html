@@ -2858,9 +2858,30 @@ document.getElementById('msg-template').addEventListener('input', () => {
 
 saveMessageLocally();
 
-localStorage.removeItem('ardm_processed_students');
-localStorage.removeItem('ardm_processed_template');
+const savedStudents = localStorage.getItem('ardm_processed_students');
+const savedTemplate = localStorage.getItem('ardm_processed_template');
+const savedList = localStorage.getItem('ardm_last_list_html');
 
+if(savedStudents && savedTemplate && savedList){
+
+parsedStudents = JSON.parse(savedStudents);
+
+document.getElementById('msg-template').value = savedTemplate;
+
+document.getElementById('whatsapp-list').innerHTML = savedList;
+
+document.getElementById('success-count').innerText = parsedStudents.length;
+
+const printTab = document.getElementById('tab-print');
+
+printTab.style.pointerEvents = 'auto';
+printTab.style.opacity = '1';
+
+switchTab('print');
+
+lucide.createIcons();
+
+}
 document.getElementById('tab-print').style.pointerEvents = 'none';
 document.getElementById('tab-print').style.opacity = '0.5';
 
