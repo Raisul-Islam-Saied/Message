@@ -2628,19 +2628,19 @@ function insertNumberTag() {
 // PRO LEVEL SMS FUNCTIONS (NETLIFY PROXY + ADVANCED TOAST)      
 // ==========================================
 // ==========================================
-      
-    // API এরর কোড থেকে সুন্দর বাংলা মেসেজ বের করার হেল্পার ফাংশন
+// ১. আপডেট করা এরর মেসেজ হেল্পার
 function getApiErrorMessage(code) {
     if (code.includes("1001")) return "অকার্যকর বা ভুল মোবাইল নম্বর!";
     if (code.includes("1006")) return "আপনার ব্যালেন্সের মেয়াদ শেষ!";
     if (code.includes("1007")) return "অ্যাকাউন্টে পর্যাপ্ত SMS ব্যালেন্স নেই!";
     if (code.includes("1012")) return "মাস্কিং এসএমএস অবশ্যই বাংলায় হতে হবে!";
     if (code.includes("1002")) return "সেন্ডার আইডি (Sender ID) ভুল!";
-    if (code.includes("1032")) return "Netlify প্রক্সি কনফিগারেশন এরর!";
+    // ১০৩২ এর সঠিক মানে: IP Whitelist না হওয়া বা প্রক্সি ফাইল কাজ না করা
+    if (code.includes("1032")) return "আপনার সার্ভারের আইপি হোয়াইটলিস্ট করা নেই (IP Whitelist Error)!";
     return `অজানা সমস্যা! সার্ভার রেসপন্স: ${code.substring(0, 15)}`;
 }
 
-// ১. সিঙ্গেল মেসেজ (JSON Data Format)
+// ২. সিঙ্গেল মেসেজ ফাংশন (আপডেটেড)
 async function sendSingleSMS(index, phone, isBulk = false) {
     if (!phone || phone.length < 11) { 
         if(!isBulk) showToast("সঠিক মোবাইল নম্বর পাওয়া যায়নি!", "warning"); 
@@ -2651,7 +2651,6 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     const rawTemplate = document.getElementById('msg-template').value;
     let msgRaw = replaceTagsWithData(rawTemplate, student, false);
     
-    // ফরম্যাটিং ট্যাগ রিমুভ করে ক্লিন মেসেজ তৈরি
     let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
     
     if (!isBulk) {
@@ -2659,11 +2658,11 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     }
 
     const btn = document.getElementById(`btn-sms-${index}`);
-    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span class="btn-text">পাঠাচ্ছে...</span>`;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span class="btn-text">...</span>`;
     btn.style.background = '#9ca3af';
     btn.disabled = true;
 
-    // API Payload
     const payload = {
         "api_key": SMS_API_KEY,
         "senderid": SMS_SENDER_ID,
@@ -2687,12 +2686,12 @@ async function sendSingleSMS(index, phone, isBulk = false) {
             btn.innerHTML = `✅ <span class="btn-text">Sent</span>`;
             if (window.lucide) lucide.createIcons(); 
             
-            // মেমরিতে নাম্বার ও মেসেজ সেভ করা হলো
+            // মেমরিতে সেভ করা হলো
             if (typeof saveCampaignData === "function") {
                 saveCampaignData([phone], rawTemplate);
             }
             
-            if(!isBulk) showToast(`${student.StudentNameBn}-কে সফলভাবে মেসেজ পাঠানো হয়েছে!`, "success");
+            if(!isBulk) showToast(`${student.StudentNameBn}-কে মেসেজ পাঠানো হয়েছে!`, "success");
             return true;
         } else {
             throw new Error(resultText.trim());
@@ -2711,7 +2710,7 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     }
 }
 
-// ২. বাল্ক মেসেজ (JSON Data Format : Many to Many)
+// ৩. বাল্ক মেসেজ ফাংশন (আপডেটেড)
 async function sendBulkSMS() {
     if(parsedStudents.length === 0) { 
         showToast("মেসেজ পাঠানোর মতো কোনো ডাটা নেই!", "warning"); 
@@ -2731,24 +2730,22 @@ async function sendBulkSMS() {
     const rawTemplate = document.getElementById('msg-template').value;
     let messagesArray = [];
 
-    // লোডিং স্টেট সেট করা
+    // লোডিং স্টেট আগে সেট করে নেওয়া
     parsedStudents.forEach((st, idx) => {
         const btn = document.getElementById(`btn-sms-${idx}`);
-        if (btn && btn.style.background !== 'rgb(16, 185, 129)') { // শুধু যেগুলো পাঠানো হয়নি
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span class="btn-text">...</span>`;
+        if (btn && !btn.classList.contains('sent')) {
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
             btn.style.background = '#9ca3af';
         }
     });
     if (window.lucide) lucide.createIcons();
 
-    // Many to Many Array তৈরি
     for (let i = 0; i < parsedStudents.length; i++) {
         let phone = String(parsedStudents[i].WhatsApp || parsedStudents[i].EmergencyNo).replace(/[^0-9]/g, '');
         if (phone.length === 11 && phone.startsWith('0')) phone = '88' + phone;
         else if (phone.length === 10) phone = '880' + phone;
         
         const btn = document.getElementById(`btn-sms-${i}`);
-        // শুধু যেগুলোতে এখনো পাঠানো হয়নি, তাদের লিস্টে এড করব
         if (phone.length >= 11 && btn && !btn.classList.contains('sent')) {
             let msgRaw = replaceTagsWithData(rawTemplate, parsedStudents[i], false);
             let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
@@ -2781,16 +2778,13 @@ async function sendBulkSMS() {
         let resultText = await response.text();
 
         if (resultText.includes("202")) {
-            let successPhones = []; // সফল নাম্বার জমানোর জন্য
+            let successPhones = []; 
             
             parsedStudents.forEach((st, idx) => {
                 const btn = document.getElementById(`btn-sms-${idx}`);
                 if (btn && !btn.classList.contains('sent')) {
-                    
-                    // সফল নাম্বারটি বের করে লিস্টে রাখা
                     let p = String(st.WhatsApp || st.EmergencyNo).replace(/[^0-9]/g, '');
-                    if (p.length === 11 && p.startsWith('0')) p = '88' + p;
-                    else if (p.length === 10) p = '880' + p;
+                    if (p.length === 11 && p.startsWith('0')) p = '88' + p; else if (p.length === 10) p = '880' + p;
                     successPhones.push(p);
 
                     btn.classList.add('sent');
@@ -2801,12 +2795,12 @@ async function sendBulkSMS() {
             });
             if (window.lucide) lucide.createIcons();
             
-            // সফল হওয়া সবার নাম্বার একসাথে মেমরিতে সেভ করা হলো
+            // মেমরিতে সব ফোন নাম্বার এবং টেমপ্লেট সেভ করা হলো
             if (typeof saveCampaignData === "function") {
                 saveCampaignData(successPhones, rawTemplate);
             }
             
-            showToast(`আলহামদুলিল্লাহ! ${messagesArray.length} জনের কাছে সফলভাবে মেসেজ পাঠানো হয়েছে।`, "success", 6000);
+            showToast(`সফলভাবে ${messagesArray.length} জনকে মেসেজ পাঠানো হয়েছে।`, "success", 6000);
         } else {
             throw new Error(resultText.trim());
         }
@@ -2822,11 +2816,10 @@ async function sendBulkSMS() {
         if (window.lucide) lucide.createIcons();
         
         let errorMsg = getApiErrorMessage(e.message);
-        showToast(`বাল্ক মেসেজ ফেইল হয়েছে: ${errorMsg}`, "error", 6000);
+        showToast(`বাল্ক মেসেজ ফেইল: ${errorMsg}`, "error", 6000);
     }
 }
 
-    
                                          // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
     // ১. শিক্ষার্থী ডাটা লোড করা
