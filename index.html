@@ -96,9 +96,26 @@
         /* NEW TAG HIGHLIGHT: contenteditable=false safe block */
         .tag-hl { background: #dbeafe; color: #1e40af; padding: 0 4px; margin: 0 2px; border-radius: 3px; font-weight: bold; display: inline-block; border: 1px solid #bfdbfe;}
 
-        /* Toast & Loader */
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: bold; z-index: 9999; opacity: 0; pointer-events: none; transition: 0.3s; }
-        .toast.show { opacity: 1; }
+        /* =========================================================      
+   NEXT LEVEL TOAST ANIMATIONS      
+   ========================================================= */
+@keyframes slideDownBounce {
+    0% { opacity: 0; transform: translateY(-30px) scale(0.9); }
+    50% { opacity: 1; transform: translateY(5px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes slideUpFade {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+}
+@keyframes shrinkProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+.toast-enter { animation: slideDownBounce 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: auto; }
+.toast-exit { animation: slideUpFade 0.3s ease-in forwards; pointer-events: none; }
+.toast-progress { animation: shrinkProgress linear forwards; }
+
         .loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9998; flex-direction: column; justify-content: center; align-items: center; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e5e7eb; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -138,7 +155,6 @@
     </style>
 </head>
 <body>
-<div id="toast" class="toast">মেসেজ</div>
 <div id="loader" class="loader">
     <div class="spinner"></div>
     <h2 class="mt-4 font-bold text-[#005A34] text-lg" id="loader-msg">সিস্টেম প্রসেস করছে...</h2>
@@ -722,12 +738,55 @@ const SMS_BULK_PASS = "saied783";
         }
     }
 
-    function showToast(msg) {
-        const toast = document.getElementById('toast');
-        toast.innerText = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+    // ==========================================      
+// NEXT LEVEL TOAST SYSTEM      
+// ==========================================
+function showToast(msg, type = 'info', duration = 3000) {
+    // কন্টেইনার না থাকলে অটোমেটিক তৈরি করে নেবে
+    let container = document.getElementById('next-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'next-toast-container';
+        container.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-[99999] flex flex-col gap-3 w-11/12 max-w-sm pointer-events-none';
+        document.body.appendChild(container);
     }
+
+    const toast = document.createElement('div');
+    
+    // ধরন অনুযায়ী রঙ ও আইকন নির্ধারণ
+    const styles = {
+        success: { bg: 'bg-white', border: 'border-l-4 border-emerald-500', icon: 'check-circle-2', iconColor: 'text-emerald-600', iconBg: 'bg-emerald-100', progress: 'bg-emerald-500' },
+        error: { bg: 'bg-white', border: 'border-l-4 border-red-500', icon: 'x-circle', iconColor: 'text-red-600', iconBg: 'bg-red-100', progress: 'bg-red-500' },
+        warning: { bg: 'bg-white', border: 'border-l-4 border-amber-500', icon: 'alert-triangle', iconColor: 'text-amber-600', iconBg: 'bg-amber-100', progress: 'bg-amber-500' },
+        info: { bg: 'bg-white', border: 'border-l-4 border-blue-500', icon: 'info', iconColor: 'text-blue-600', iconBg: 'bg-blue-100', progress: 'bg-blue-500' }
+    };
+    
+    const style = styles[type] || styles.info;
+
+    // টোস্টের ডিজাইন
+    toast.className = `relative overflow-hidden flex items-center p-3 sm:p-4 rounded-xl shadow-2xl ${style.bg} ${style.border} toast-enter`;
+    
+    toast.innerHTML = `
+        <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${style.iconBg} ${style.iconColor} mr-3 shadow-sm">
+            <i data-lucide="${style.icon}" class="w-4 h-4"></i>
+        </div>
+        <div class="flex-1 pr-2">
+            <p class="text-[13px] sm:text-sm font-bold text-gray-800 leading-snug">${msg}</p>
+        </div>
+        <div class="absolute bottom-0 left-0 h-1 ${style.progress} toast-progress" style="animation-duration: ${duration}ms;"></div>
+    `;
+
+    container.appendChild(toast);
+    if (window.lucide) window.lucide.createIcons();
+
+    // নির্দিষ্ট সময় পর অটোমেটিক গায়েব হয়ে যাবে
+    setTimeout(() => {
+        toast.classList.remove('toast-enter');
+        toast.classList.add('toast-exit');
+        setTimeout(() => toast.remove(), 300); // অ্যানিমেশন শেষ হলে ডোম থেকে মুছে যাবে
+    }, duration);
+}
+
 
     function switchTab(tabId) {
         document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
@@ -2553,11 +2612,25 @@ function insertNumberTag() {
     closeNumberModal();
     insertIntoTextarea(tag);
 }
-    
-  // ১. সিঙ্গেল মেসেজ (JSON Data Format : One to Many)
+    // ==========================================      
+// PRO LEVEL SMS FUNCTIONS (NETLIFY PROXY + ADVANCED TOAST)      
+// ==========================================
+
+// API এরর কোড থেকে সুন্দর বাংলা মেসেজ বের করার হেল্পার ফাংশন
+function getApiErrorMessage(code) {
+    if (code.includes("1001")) return "অকার্যকর বা ভুল মোবাইল নম্বর!";
+    if (code.includes("1006")) return "আপনার ব্যালেন্সের মেয়াদ শেষ!";
+    if (code.includes("1007")) return "অ্যাকাউন্টে পর্যাপ্ত SMS ব্যালেন্স নেই!";
+    if (code.includes("1012")) return "মাস্কিং এসএমএস অবশ্যই বাংলায় হতে হবে!";
+    if (code.includes("1002")) return "সেন্ডার আইডি (Sender ID) ভুল!";
+    if (code.includes("1032")) return "Netlify প্রক্সি কনফিগারেশন এরর!";
+    return `অজানা সমস্যা! সার্ভার রেসপন্স: ${code.substring(0, 15)}`;
+}
+
+// ১. সিঙ্গেল মেসেজ (JSON Data Format)
 async function sendSingleSMS(index, phone, isBulk = false) {
     if (!phone || phone.length < 11) { 
-        showToast("সঠিক মোবাইল নম্বর নেই!"); 
+        if(!isBulk) showToast("সঠিক মোবাইল নম্বর পাওয়া যায়নি!", "warning"); 
         return false; 
     }
     
@@ -2565,6 +2638,7 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     const rawTemplate = document.getElementById('msg-template').value;
     let msgRaw = replaceTagsWithData(rawTemplate, student, false);
     
+    // ফরম্যাটিং ট্যাগ রিমুভ করে ক্লিন মেসেজ তৈরি
     let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
     
     if (!isBulk) {
@@ -2576,7 +2650,7 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     btn.style.background = '#9ca3af';
     btn.disabled = true;
 
-    // ডকুমেন্টেশন অনুযায়ী হুবহু JSON অবজেক্ট
+    // API Payload
     const payload = {
         "api_key": SMS_API_KEY,
         "senderid": SMS_SENDER_ID,
@@ -2585,12 +2659,9 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     };
 
     try {
-        // Netlify এর নিজস্ব প্রক্সি লিংক ব্যবহার করা হচ্ছে (CORS এর ঝামেলা শেষ!)
         let response = await fetch("/proxy/smsapi", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
         
@@ -2600,49 +2671,66 @@ async function sendSingleSMS(index, phone, isBulk = false) {
             btn.classList.add('sent');
             btn.style.background = '#10b981';
             btn.innerHTML = `✅ <span class="btn-text">Sent</span>`;
-            lucide.createIcons(); 
+            if (window.lucide) lucide.createIcons(); 
+            
+            if(!isBulk) showToast(`${student.StudentNameBn}-কে সফলভাবে মেসেজ পাঠানো হয়েছে!`, "success");
             return true;
         } else {
-            throw new Error(resultText);
+            throw new Error(resultText.trim());
         }
     } catch(e) {
         btn.style.background = '#ef4444'; 
         btn.innerHTML = `❌ <span class="btn-text" style="font-size:10px;">Failed</span>`;
         btn.disabled = false; 
-        lucide.createIcons(); 
-        if(!isBulk) alert("এরর: " + e.message);
+        if (window.lucide) lucide.createIcons(); 
+        
+        if(!isBulk) {
+            let errorMsg = getApiErrorMessage(e.message);
+            showToast(errorMsg, "error", 5000);
+        }
         return false;
     }
 }
 
 // ২. বাল্ক মেসেজ (JSON Data Format : Many to Many)
 async function sendBulkSMS() {
-    if(parsedStudents.length === 0) { showToast("মেসেজ পাঠানোর ডাটা নেই!"); return; }
+    if(parsedStudents.length === 0) { 
+        showToast("মেসেজ পাঠানোর মতো কোনো ডাটা নেই!", "warning"); 
+        return; 
+    }
     
     let pass = prompt("সবাইকে একসাথে SMS পাঠাতে অ্যাডমিন পাসওয়ার্ড দিন:");
-    if (pass !== SMS_BULK_PASS) { alert("পাসওয়ার্ড ভুল!"); return; }
+    if (pass !== SMS_BULK_PASS) { 
+        if (pass !== null) showToast("অ্যাডমিন পাসওয়ার্ড ভুল হয়েছে!", "error"); 
+        return; 
+    }
 
     if(!confirm(`আপনি কি নিশ্চিত লিস্টে থাকা ${parsedStudents.length} জনকে SMS পাঠাবেন?`)) return;
 
-    showToast("Bulk SMS পাঠানো শুরু হয়েছে...");
+    showToast("বাল্ক মেসেজ প্রসেসিং শুরু হয়েছে...", "info");
     
     const rawTemplate = document.getElementById('msg-template').value;
     let messagesArray = [];
 
+    // লোডিং স্টেট সেট করা
     parsedStudents.forEach((st, idx) => {
         const btn = document.getElementById(`btn-sms-${idx}`);
-        if (btn) {
+        if (btn && btn.style.background !== 'rgb(16, 185, 129)') { // শুধু যেগুলো পাঠানো হয়নি
             btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span class="btn-text">...</span>`;
             btn.style.background = '#9ca3af';
         }
     });
+    if (window.lucide) lucide.createIcons();
 
+    // Many to Many Array তৈরি
     for (let i = 0; i < parsedStudents.length; i++) {
         let phone = String(parsedStudents[i].WhatsApp || parsedStudents[i].EmergencyNo).replace(/[^0-9]/g, '');
         if (phone.length === 11 && phone.startsWith('0')) phone = '88' + phone;
         else if (phone.length === 10) phone = '880' + phone;
         
-        if (phone.length >= 11) {
+        const btn = document.getElementById(`btn-sms-${i}`);
+        // শুধু যেগুলোতে এখনো পাঠানো হয়নি, তাদের লিস্টে এড করব
+        if (phone.length >= 11 && btn && !btn.classList.contains('sent')) {
             let msgRaw = replaceTagsWithData(rawTemplate, parsedStudents[i], false);
             let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
             
@@ -2653,7 +2741,11 @@ async function sendBulkSMS() {
         }
     }
 
-    // ডকুমেন্টেশন অনুযায়ী হুবহু JSON অবজেক্ট
+    if(messagesArray.length === 0) {
+        showToast("সবাইকে ইতিমধ্যে মেসেজ পাঠানো হয়ে গেছে!", "info");
+        return;
+    }
+
     const payload = {
         "api_key": SMS_API_KEY,
         "senderid": SMS_SENDER_ID,
@@ -2661,12 +2753,9 @@ async function sendBulkSMS() {
     };
 
     try {
-        // Netlify এর নিজস্ব প্রক্সি লিংক
         let response = await fetch("/proxy/smsapimany", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
         
@@ -2675,16 +2764,17 @@ async function sendBulkSMS() {
         if (resultText.includes("202")) {
             parsedStudents.forEach((st, idx) => {
                 const btn = document.getElementById(`btn-sms-${idx}`);
-                if (btn) {
+                if (btn && !btn.classList.contains('sent')) {
                     btn.classList.add('sent');
                     btn.style.background = '#10b981';
                     btn.innerHTML = `✅ <span class="btn-text">Sent</span>`;
                 }
             });
-            lucide.createIcons();
-            alert(`সফলভাবে ${messagesArray.length} জনের কাছে বাল্ক রিকোয়েস্ট পাঠানো হয়েছে!`);
+            if (window.lucide) lucide.createIcons();
+            
+            showToast(`আলহামদুলিল্লাহ! ${messagesArray.length} জনের কাছে সফলভাবে মেসেজ পাঠানো হয়েছে।`, "success", 6000);
         } else {
-            throw new Error(resultText);
+            throw new Error(resultText.trim());
         }
         
     } catch(e) {
@@ -2695,8 +2785,10 @@ async function sendBulkSMS() {
                 btn.innerHTML = `❌ <span class="btn-text" style="font-size:10px;">Failed</span>`;
             }
         });
-        lucide.createIcons();
-        alert("এরর: " + e.message);
+        if (window.lucide) lucide.createIcons();
+        
+        let errorMsg = getApiErrorMessage(e.message);
+        showToast(`বাল্ক মেসেজ ফেইল হয়েছে: ${errorMsg}`, "error", 6000);
     }
 }
 
