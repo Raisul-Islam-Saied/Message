@@ -2553,7 +2553,8 @@ function insertNumberTag() {
     closeNumberModal();
     insertIntoTextarea(tag);
 }
-    // ১. সিঙ্গেল মেসেজ (JSON Data Format : One to Many)
+    
+  // ১. সিঙ্গেল মেসেজ (JSON Data Format : One to Many)
 async function sendSingleSMS(index, phone, isBulk = false) {
     if (!phone || phone.length < 11) { 
         showToast("সঠিক মোবাইল নম্বর নেই!"); 
@@ -2564,7 +2565,6 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     const rawTemplate = document.getElementById('msg-template').value;
     let msgRaw = replaceTagsWithData(rawTemplate, student, false);
     
-    // ফরম্যাটিং মুছে ফ্রেশ টেক্সট তৈরি
     let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '').replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n').trim();
     
     if (!isBulk) {
@@ -2576,7 +2576,7 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     btn.style.background = '#9ca3af';
     btn.disabled = true;
 
-    // হুবহু ডকুমেন্টেশন অনুযায়ী JSON অবজেক্ট
+    // ডকুমেন্টেশন অনুযায়ী হুবহু JSON অবজেক্ট
     const payload = {
         "api_key": SMS_API_KEY,
         "senderid": SMS_SENDER_ID,
@@ -2585,8 +2585,8 @@ async function sendSingleSMS(index, phone, isBulk = false) {
     };
 
     try {
-        // ডাইরেক্ট API কল, শুধু http এর জায়গায় https দেওয়া হয়েছে
-        let response = await fetch("https://bulksmsbd.net/api/smsapi", {
+        // Netlify এর নিজস্ব প্রক্সি লিংক ব্যবহার করা হচ্ছে (CORS এর ঝামেলা শেষ!)
+        let response = await fetch("/proxy/smsapi", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -2610,7 +2610,7 @@ async function sendSingleSMS(index, phone, isBulk = false) {
         btn.innerHTML = `❌ <span class="btn-text" style="font-size:10px;">Failed</span>`;
         btn.disabled = false; 
         lucide.createIcons(); 
-        if(!isBulk) alert("Failed to fetch! দয়া করে নিশ্চিত হোন আপনি ফাইলটি Live Server থেকে রান করছেন।");
+        if(!isBulk) alert("এরর: " + e.message);
         return false;
     }
 }
@@ -2637,7 +2637,6 @@ async function sendBulkSMS() {
         }
     });
 
-    // Many to Many ফরম্যাট অনুযায়ী Array তৈরি
     for (let i = 0; i < parsedStudents.length; i++) {
         let phone = String(parsedStudents[i].WhatsApp || parsedStudents[i].EmergencyNo).replace(/[^0-9]/g, '');
         if (phone.length === 11 && phone.startsWith('0')) phone = '88' + phone;
@@ -2654,7 +2653,7 @@ async function sendBulkSMS() {
         }
     }
 
-    // হুবহু ডকুমেন্টেশন অনুযায়ী JSON অবজেক্ট
+    // ডকুমেন্টেশন অনুযায়ী হুবহু JSON অবজেক্ট
     const payload = {
         "api_key": SMS_API_KEY,
         "senderid": SMS_SENDER_ID,
@@ -2662,8 +2661,8 @@ async function sendBulkSMS() {
     };
 
     try {
-        // ডাইরেক্ট API কল, শুধু http এর জায়গায় https দেওয়া হয়েছে
-        let response = await fetch("https://bulksmsbd.net/api/smsapimany", {
+        // Netlify এর নিজস্ব প্রক্সি লিংক
+        let response = await fetch("/proxy/smsapimany", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -2697,7 +2696,7 @@ async function sendBulkSMS() {
             }
         });
         lucide.createIcons();
-        alert("Failed to fetch! দয়া করে নিশ্চিত হোন আপনি ফাইলটি Live Server থেকে রান করছেন।");
+        alert("এরর: " + e.message);
     }
 }
 
