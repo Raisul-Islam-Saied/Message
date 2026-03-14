@@ -479,6 +479,17 @@
                                     <option value="certificate">🎓 সনদ/প্রত্যয়ন উত্তোলন</option>
                                     <option value="promotion">🏆 ফলাফল ও প্রমোশন</option>
                                 </optgroup>
+                                <optgroup label="English SMS (Short & Low Cost)">
+    <option value="id_card_en">🪪 ID Card Ready (Link)</option>
+    <option value="fee_paid_en">✅ Fee Paid Thanks</option>
+    <option value="fee_due_en">⚠️ Fee Due Reminder</option>
+    <option value="absent_en">❌ Absent Alert</option>
+    <option value="present_en">🏫 Campus Entry Update</option>
+    <option value="result_en">🏆 Result Published</option>
+    <option value="meeting_en">👥 Parents Meeting</option>
+    <option value="urgent_holiday_en">🚨 Urgent Holiday</option>
+</optgroup>
+
                                 <optgroup label="অন্যান্য">
                                 <option value="clear_format">✨ ফরম্যাট পরিষ্কার করুন</option>
                                 <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>
@@ -665,6 +676,23 @@ const SMS_BULK_PASS = "saied783";
         warning: "[align=center][size=16]*শৃঙ্খলা ভঙ্গের সতর্কীকরণ নোটিশ*[/size][/align]\n[space=10,0,10,0]স্মারক নং: ARDM/শৃঙ্খলা/২০২৬/[IDBn]\nতারিখ: [তারিখ]\n\nসম্মানিত অভিভাবক,\nঅত্যন্ত দুঃখের সাথে জানানো যাচ্ছে যে, আপনার সন্তান *[StudentNameBn]* (শ্রেণি: [ClassBn], রোল: [RollBn]) সম্প্রতি মাদ্রাসার শৃঙ্খলা পরিপন্থী কার্যকলাপে যুক্ত হয়েছে মর্মে রিপোর্ট পাওয়া গেছে। মাদ্রাসার সুষ্ঠু পরিবেশ বজায় রাখতে আমরা বদ্ধপরিকর।\n\nএমতাবস্থায়, আগামী [তারিখ] তারিখে মাদ্রাসার অফিসে উপস্থিত হয়ে এ বিষয়ে ব্যাখ্যা প্রদানের জন্য আপনাকে বিনীত অনুরোধ করা হলো। অন্যথায় প্রতিষ্ঠান কঠোর ব্যবস্থা গ্রহণে বাধ্য হবে।\n\nআদেশক্রমে,\nশৃঙ্খলা কমিটি\nআবদুর রাজ্জাক দাখিল মাদ্রাসা[/space]",
         certificate: "[align=center][size=16]*সনদপত্র/প্রত্যয়নপত্র উত্তোলন*[/size][/align]\n[space=10,0,10,0]স্মারক নং: ARDM/সনদ/২০২৬/[RollBn]\nতারিখ: [তারিখ]\n\nসম্মানিত অভিভাবক/শিক্ষার্থী,\nআপনার আবেদনকৃত প্রত্যয়নপত্র/সনদপত্রটি প্রস্তুত করা হয়েছে। দয়া করে আগামী কার্যদিবসে সকাল ১০:০০ টা থেকে দুপুর ২:০০ টার মধ্যে মাদ্রাসার অফিসকক্ষ হতে এটি সংগ্রহ করার জন্য বলা হলো।\n\nসনদ উত্তোলনের সময় অবশ্যই পূর্বের পরিচয়পত্র বা ফি পরিশোধের রশিদ সাথে আনতে হবে।\n\nধন্যবাদান্তে,\nঅফিস সহকারী\nআবদুর রাজ্জাক দাখিল মাদ্রাসা[/space]",
         promotion: "[align=center][size=16]*বার্ষিক ফলাফল ও প্রমোশন*[/size][/align]\n[space=10,0,10,0]তারিখ: [তারিখ]\n\nবরাবর,\n[FatherNameBn] / [MotherNameBn]\n\nবিষয়: বার্ষিক পরীক্ষার ফলাফল ও পরবর্তী শ্রেণিতে উত্তীর্ণ হওয়া প্রসঙ্গে।\n\nসম্মানিত অভিভাবক,\nআপনাকে আনন্দের সাথে জানানো যাচ্ছে যে, আপনার সন্তান *[StudentNameBn]* (বর্তমান রোল: [RollBn]) বার্ষিক পরীক্ষায় সফলতার সাথে উত্তীর্ণ হয়ে পরবর্তী শ্রেণিতে প্রমোশন পেয়েছে। তার এই সফলতায় আমরা আনন্দিত।\n\nনতুন শ্রেণির পাঠ্যবই সংগ্রহ ও ক্লাস রুটিন জানার জন্য মাদ্রাসার নোটিশ বোর্ড বা ওয়েবসাইটে চোখ রাখার অনুরোধ করা হলো।\n\nআন্তরিক শুভকামনায়,\nশ্রেণি শিক্ষক ও পরীক্ষা নিয়ন্ত্রক[/space]",
+                // --- নতুন ইংরেজি শর্ট টেমপ্লেট ---
+        id_card_en: "Congratulations [StudentNameEn]! Your Smart ID Card is ready.\nStudent ID: [IDEn]\n\nPlease collect it from the Madrasah office soon.\nProfile: https://ardm.netlify.app/[IDEn]\n- ARDM",
+        
+        fee_paid_en: "Dear Parent, we have successfully received the tuition fee for [StudentNameEn] (Class: [ClassEn]). Thank you for your timely payment! - ARDM",
+        
+        fee_due_en: "Reminder: Dear Parent, the monthly fee for [StudentNameEn] (Roll: [RollEn]) is currently due. Kindly clear the payment at your earliest convenience. - ARDM",
+        
+        absent_en: "Alert: Dear Parent, your child [StudentNameEn] is absent today without prior notice. Regular attendance is important for academic progress. - ARDM",
+        
+        present_en: "Update: Dear Parent, your child [StudentNameEn] has safely entered the Madrasah campus today. Have a wonderful day! - ARDM",
+        
+        result_en: "Great News! The exam results for Class [ClassEn] have been published. Please check [StudentNameEn]'s result from the Madrasah office or portal. - ARDM",
+        
+        meeting_en: "Dear Parent, a Parents-Teachers Meeting is scheduled on [Date]. Your presence is highly requested to discuss [StudentNameEn]'s progress. - ARDM",
+        
+        urgent_holiday_en: "Urgent Notice: Due to unavoidable circumstances, all classes will remain suspended tomorrow. Please stay safe. - ARDM",
+
         clear: "🧹 এডিটর পরিষ্কার করুন"
     };
 
