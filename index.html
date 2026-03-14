@@ -2655,13 +2655,21 @@ async function getCurrentBalanceSilent() {
     try {
         let res = await fetch(`/proxy/balance?api_key=${SMS_API_KEY}`);
         let bal = await res.text();
-        if (bal && !isNaN(bal.trim())) return parseFloat(bal.trim()).toFixed(2);
-        return "অজানা";
+        
+        let cleanBal = bal.trim(); // অতিরিক্ত স্পেস বা লাইন ব্রেক মুছে ফেলা
+        
+        // যদি ব্যালেন্সটি একটি সঠিক সংখ্যা হয়
+        if (cleanBal && !isNaN(cleanBal)) {
+            return parseFloat(cleanBal).toFixed(2);
+        } else {
+            console.log("Balance Error Response:", cleanBal);
+            return "API Error"; // যদি ব্যালেন্স না এসে অন্য কোনো এরর মেসেজ আসে
+        }
     } catch (e) {
-        return "অজানা";
+        console.error("Balance Fetch Error:", e);
+        return "Network Error";
     }
-}
-
+    }
 // ক্যারেক্টার ও পার্ট হিসাব করার হেল্পার ফাংশন
 function getSmsCalculation(msg) {
     const charCount = msg.length;
@@ -2928,12 +2936,25 @@ async function sendBulkSMS() {
         showToast(`বাল্ক মেসেজ ফেইল: ${errorMsg}`, "error", 6000);
     }
 }
+// ==========================================
+// AUTO LOAD & RELOAD CLEANER
+// ==========================================
 window.addEventListener('DOMContentLoaded', () => {
-    // শুধু API থেকে ডাটা আনবে, রিলোড দিলে সব ফ্রেশ থাকবে
+    // ম্যাজিক কমান্ড: রিলোড দিলে আগের পাঠানো লিস্টের মেমরি চিরতরে মুছে যাবে
+    localStorage.removeItem('ardm_campaign_msg');
+    localStorage.removeItem('ardm_campaign_list');
+    
+    // API থেকে ডাটা নতুন করে আনবে
     fetchOnlineStudents();
     
-    
-});// ==========================================      
+    // রিলোড দিলে Send ট্যাব লক থাকবে
+    const printTab = document.getElementById('tab-print');
+    if(printTab) {
+        printTab.style.pointerEvents = 'none';
+        printTab.style.opacity = '0.5';
+    }
+});
+// ==========================================      
 // SMART CAMPAIGN MEMORY TRACKER      
 // ==========================================
 function isAlreadySent(phone, currentTemplate) {
