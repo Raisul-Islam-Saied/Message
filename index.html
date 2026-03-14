@@ -1098,7 +1098,7 @@ function replaceTagsWithData(template, st, forPreview = false) {
 
     const wrap = (tag, val) => forPreview ? `<span class="tag-hl" data-tag="${tag}" contenteditable="false">${val || '-'}</span>` : (val || '-');
 
-    const map = {
+   /* const map = {
         '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
         '[IDBn]': wrap('[IDBn]', toBn(st.ID)), '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
         '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn), '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
@@ -1109,6 +1109,41 @@ function replaceTagsWithData(template, st, forPreview = false) {
         '[DOB]': wrap('[DOB]', formatDate(st.DOB)), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),
         '[VillageBn]': wrap('[VillageBn]', st.VillageBn), '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
         '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
+    };
+*/
+        const map = {
+        '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), 
+        '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), 
+        '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
+        '[IDBn]': wrap('[IDBn]', toBn(st.ID)), 
+        '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), 
+        '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
+        
+        // এখানে ইংরেজি নামগুলো সব বড় হাতের (Uppercase) করে দেওয়া হয়েছে
+        '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn ? st.StudentNameEn.toUpperCase() : ''), 
+        '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), 
+        '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
+        '[IDEn]': wrap('[IDEn]', st.ID), 
+        '[GenderEn]': wrap('[GenderEn]', st.Gender), 
+        '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
+        
+        '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), 
+        // পিতার ইংরেজি নাম বড় হাতের
+        '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn ? st.FatherNameEn.toUpperCase() : ''),
+        
+        '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), 
+        // মাতার ইংরেজি নাম বড় হাতের
+        '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn ? st.MotherNameEn.toUpperCase() : ''),
+        
+        '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), 
+        '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
+        '[DOB]': wrap('[DOB]', formatDate(st.DOB)), 
+        '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), 
+        '[BRN]': wrap('[BRN]', st.BRN),
+        '[VillageBn]': wrap('[VillageBn]', st.VillageBn), 
+        '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
+        '[VillageEn]': wrap('[VillageEn]', st.VillageEn), 
+        '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
     };
 
     for (const [key, val] of Object.entries(map)) { msg = msg.split(key).join(val); }
