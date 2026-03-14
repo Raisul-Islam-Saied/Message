@@ -2132,10 +2132,9 @@ document.getElementById('btn-generate').addEventListener('click', async function
         printTab.style.pointerEvents = 'auto'; printTab.style.opacity = '1';
         switchTab('print');
         showToast("আলহামদুলিল্লাহ! নোটিশ প্রস্তুত।", "success");
-    // নতুন যোগ করা লাইন: প্রসেস হওয়া লিস্ট এবং স্টেট মেমরিতে রাখা
-localStorage.setItem('ardm_last_list_html', waListHTML);
-localStorage.setItem('ardm_last_count', parsedStudents.length);
-    });
+        localStorage.setItem('ardm_processed_students', JSON.stringify(parsedStudents));
+localStorage.setItem('ardm_processed_template', rawTemplate);
+});
 
     function markAsSent(index) {
         const btn = document.getElementById(`btn-wa-${index}`);
@@ -2851,10 +2850,17 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // ৩. মেসেজ টাইপ করলে বা নতুন করে লিখলে মেমরি ক্লিয়ার করা
-    document.getElementById('msg-template').addEventListener('input', () => {
-        saveMessageLocally();
-        // মেসেজ চেঞ্জ করলে আগের প্রসেস করা লিস্ট মেমরি থেকে মুছে যাবে
-        localStorage.removeItem('ardm_last_list_html');
+document.getElementById('msg-template').addEventListener('input', () => {
+
+saveMessageLocally();
+
+localStorage.removeItem('ardm_processed_students');
+localStorage.removeItem('ardm_processed_template');
+
+document.getElementById('tab-print').style.pointerEvents = 'none';
+document.getElementById('tab-print').style.opacity = '0.5';
+
+
     });
     
     lucide.createIcons();
