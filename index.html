@@ -2134,6 +2134,7 @@ document.getElementById('btn-generate').addEventListener('click', async function
         showToast("আলহামদুলিল্লাহ! নোটিশ প্রস্তুত।", "success");
         localStorage.setItem('ardm_processed_students', JSON.stringify(parsedStudents));
 localStorage.setItem('ardm_processed_template', rawTemplate);
+localStorage.setItem('ardm_last_list_html', waListHTML);
 });
 
     function markAsSent(index) {
@@ -2833,21 +2834,24 @@ window.addEventListener('DOMContentLoaded', () => {
     fetchOnlineStudents();
 
     // ২. রিলোড দিলে আগের প্রসেস করা লিস্ট ফিরিয়ে আনা
-    const savedList = localStorage.getItem('ardm_last_list_html');
-    const savedCount = localStorage.getItem('ardm_last_count');
-    const savedMsg = localStorage.getItem('ardm_notice_msg');
+    const savedStudents = localStorage.getItem('ardm_processed_students');
+const savedTemplate = localStorage.getItem('ardm_processed_template');
 
-    if (savedList && savedList.trim() !== "") {
-        // লিস্ট এবং কাউন্ট বসানো
-        document.getElementById('whatsapp-list').innerHTML = savedList;
-        document.getElementById('success-count').innerText = savedCount;
-        
-        // 'পাঠান' ট্যাব আনলক এবং সেখানে নিয়ে যাওয়া
-        const printTab = document.getElementById('tab-print');
-        printTab.style.pointerEvents = 'auto'; 
-        printTab.style.opacity = '1';
-        switchTab('print');
-    }
+if(savedStudents && savedTemplate){
+
+parsedStudents = JSON.parse(savedStudents);
+
+document.getElementById('msg-template').value = savedTemplate;
+
+document.getElementById('success-count').innerText = parsedStudents.length;
+
+const printTab = document.getElementById('tab-print');
+printTab.style.pointerEvents = 'auto';
+printTab.style.opacity = '1';
+
+switchTab('print');
+
+}
 
     // ৩. মেসেজ টাইপ করলে বা নতুন করে লিখলে মেমরি ক্লিয়ার করা
 document.getElementById('msg-template').addEventListener('input', () => {
