@@ -2824,11 +2824,24 @@ async function sendBulkSMS() {
 }
 
     
-                                         // AUTO LOAD DATA ON PAGE START
-        // ==========================================
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchOnlineStudents();
-        });
+                                         // ==========================================
+// AUTO LOAD & TAB RESTORE ON RELOAD
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    // ১. স্টুডেন্ট ডাটা অটো লোড
+    fetchOnlineStudents();
+
+    // ২. রিলোড দেওয়ার পর ট্যাব আনলক করার লজিক
+    const savedMsg = localStorage.getItem('ardm_notice_msg');
+    const printTab = document.getElementById('tab-print');
+    
+    // যদি আগে থেকে মেসেজ সেভ করা থাকে, তবে পাঠান ট্যাব আনলক করে দাও
+    if (savedMsg && savedMsg.trim() !== "") {
+        printTab.style.pointerEvents = 'auto'; 
+        printTab.style.opacity = '1';
+    }
+});
+
 // ==========================================      
 // SMART CAMPAIGN MEMORY TRACKER      
 // ==========================================
