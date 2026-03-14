@@ -2535,7 +2535,12 @@ function insertNumberTag() {
     closeNumberModal();
     insertIntoTextarea(tag);
 }
-
+// ==========================================
+        // AUTO LOAD DATA ON PAGE START
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchOnlineStudents();
+        });
 </script>
 </body>
 </html>
