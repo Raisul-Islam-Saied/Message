@@ -625,7 +625,46 @@
         <div class="nav-btn" id="tab-print" onclick="switchTab('print')" style="pointer-events: none; opacity: 0.5;"><i data-lucide="send" class="w-6 h-6"></i> পাঠান (Send)</div>
     </nav>
 </div>
-<div id="print-engine"></div>
+<div id="print-engine">
+    <div id="custom-alert-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] hidden flex justify-center items-center transition-opacity">
+    <div class="bg-white w-11/12 max-w-sm rounded-2xl p-5 shadow-2xl transform scale-95 transition-transform">
+        <div id="alert-icon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"></div>
+        <h3 id="alert-title" class="text-lg font-bold text-center text-gray-800 mb-2"></h3>
+        <p id="alert-message" class="text-sm text-center text-gray-600 mb-5 whitespace-pre-wrap leading-relaxed"></p>
+        <button id="alert-ok-btn" class="w-full bg-[#005A34] text-white font-bold py-3 rounded-xl hover:bg-[#004225] transition-colors active:scale-[0.98]">ঠিক আছে</button>
+    </div>
+</div>
+
+<div id="custom-confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] hidden flex justify-center items-center transition-opacity">
+    <div class="bg-white w-11/12 max-w-sm rounded-2xl p-5 shadow-2xl transform scale-95 transition-transform">
+        <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center mx-auto mb-3">
+            <i data-lucide="help-circle" class="w-6 h-6"></i>
+        </div>
+        <h3 id="confirm-title" class="text-lg font-bold text-center text-gray-800 mb-2"></h3>
+        <p id="confirm-message" class="text-sm text-center text-gray-600 mb-5 whitespace-pre-wrap leading-relaxed"></p>
+        <div class="flex gap-3">
+            <button id="confirm-cancel-btn" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors active:scale-[0.98]">বাতিল</button>
+            <button id="confirm-yes-btn" class="flex-1 bg-[#005A34] text-white font-bold py-3 rounded-xl hover:bg-[#004225] transition-colors active:scale-[0.98]">কনফার্ম</button>
+        </div>
+    </div>
+</div>
+
+<div id="custom-prompt-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] hidden flex justify-center items-center transition-opacity">
+    <div class="bg-white w-11/12 max-w-sm rounded-2xl p-5 shadow-2xl transform scale-95 transition-transform">
+        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mx-auto mb-3">
+            <i data-lucide="edit-3" class="w-6 h-6"></i>
+        </div>
+        <h3 id="prompt-title" class="text-lg font-bold text-center text-gray-800 mb-2"></h3>
+        <p id="prompt-message" class="text-[13px] text-center text-gray-600 mb-4 whitespace-pre-wrap leading-relaxed"></p>
+        <input type="text" id="prompt-input" class="w-full border-2 border-gray-200 rounded-xl p-3 mb-5 focus:border-[#005A34] focus:ring-0 outline-none text-center font-bold text-lg" autocomplete="off">
+        <div class="flex gap-3">
+            <button id="prompt-cancel-btn" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors active:scale-[0.98]">বাতিল</button>
+            <button id="prompt-submit-btn" class="flex-1 bg-[#005A34] text-white font-bold py-3 rounded-xl hover:bg-[#004225] transition-colors active:scale-[0.98]">সাবমিট</button>
+        </div>
+    </div>
+</div>
+
+</div>
 <script>
     lucide.createIcons();
     const toBn = (n) => {
@@ -660,6 +699,96 @@ const SMS_BULK_PASS = "saied783";
     let savedSelectionRange = null;
     let savedTextareaStart = 0;
     let savedTextareaEnd = 0;
+// ==========================================      
+// CUSTOM UI CONTROLLER (NEXSMS STYLE)      
+// ==========================================
+const CustomUI = {
+    alert: function(title, message, type = 'info') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('custom-alert-modal');
+            const iconEl = document.getElementById('alert-icon');
+            const okBtn = document.getElementById('alert-ok-btn');
+
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerText = message;
+
+            if(type === 'error') {
+                iconEl.className = 'w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-3';
+                iconEl.innerHTML = '<i data-lucide="x-circle" class="w-6 h-6"></i>';
+                okBtn.className = 'w-full bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition-colors';
+            } else {
+                iconEl.className = 'w-12 h-12 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mx-auto mb-3';
+                iconEl.innerHTML = '<i data-lucide="info" class="w-6 h-6"></i>';
+                okBtn.className = 'w-full bg-[#005A34] text-white font-bold py-3 rounded-xl hover:bg-[#004225] transition-colors';
+            }
+            if(window.lucide) lucide.createIcons();
+
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 10);
+
+            okBtn.onclick = () => {
+                modal.firstElementChild.classList.add('scale-95');
+                setTimeout(() => { modal.classList.add('hidden'); resolve(); }, 200);
+            };
+        });
+    },
+
+    confirm: function(title, message, yesText = "হ্যাঁ", cancelText = "বাতিল", isDanger = false) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('custom-confirm-modal');
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            const noBtn = document.getElementById('confirm-cancel-btn');
+            yesBtn.innerText = yesText;
+            noBtn.innerText = cancelText;
+
+            yesBtn.className = isDanger 
+                ? 'flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition-colors' 
+                : 'flex-1 bg-[#005A34] text-white font-bold py-3 rounded-xl hover:bg-[#004225] transition-colors';
+
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 10);
+
+            yesBtn.onclick = () => { close(); resolve(true); };
+            noBtn.onclick = () => { close(); resolve(false); };
+
+            function close() {
+                modal.firstElementChild.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
+        });
+    },
+
+    prompt: function(title, message, inputType = 'text', defaultVal = '') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('custom-prompt-modal');
+            document.getElementById('prompt-title').innerText = title;
+            document.getElementById('prompt-message').innerText = message;
+            const input = document.getElementById('prompt-input');
+            input.type = inputType;
+            input.value = defaultVal;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.firstElementChild.classList.remove('scale-95');
+                input.focus();
+            }, 10);
+
+            const submitBtn = document.getElementById('prompt-submit-btn');
+            const cancelBtn = document.getElementById('prompt-cancel-btn');
+
+            submitBtn.onclick = () => { close(); resolve(input.value); };
+            cancelBtn.onclick = () => { close(); resolve(null); };
+
+            function close() {
+                modal.firstElementChild.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
+        });
+    }
+};
 
     function saveSelectionState() {
         if (isPreviewMode) {
@@ -1225,88 +1354,58 @@ function wrapTagsWithoutData(text) {
     // EDITOR BUTTONS      
     // ==========================================      
 
-function loadTemplate() {
+async function loadTemplate() {
     const select = document.getElementById('template-select');
     const val = select.value;
     const textarea = document.getElementById('msg-template');
 
-    // কোনো অ্যাকশন নেওয়ার আগে ভিজ্যুয়াল বক্সের ডাটা টেক্সটএরিয়াতে সিঙ্ক করে নিচ্ছি
     if(isPreviewMode) syncVisualToCode();
 
     if (val === 'clear') {
-        if(confirm("আপনি কি নিশ্চিত পুরো লেখা মুছে ফেলতে চান?")) {
-            textarea.value = "";
-        } else {
-            select.selectedIndex = 0; return;
-        }
+        let ok = await CustomUI.confirm("নিশ্চিতকরণ", "আপনি কি নিশ্চিত পুরো লেখা মুছে ফেলতে চান?", "হ্যাঁ, মুছুন", "বাতিল", true);
+        if(ok) { textarea.value = ""; } else { select.selectedIndex = 0; return; }
     } 
     else if (val === 'clear_format') {
-        if(confirm("শুধু ফরম্যাটিং (বোল্ড, সাইজ, এলাইন, স্পেসিং ইত্যাদি) মুছে ফেলতে চান? লেখা এবং ডাটা ট্যাগ ঠিক থাকবে।")) {
+        let ok = await CustomUI.confirm("ফরম্যাট পরিষ্কার", "শুধু ফরম্যাটিং মুছে ফেলতে চান? ডাটা ট্যাগ ঠিক থাকবে।", "হ্যাঁ", "বাতিল");
+        if(ok) {
             let txt = textarea.value;
-            
-            // ১. এলাইনমেন্ট রিমুভ (সবচেয়ে নিখুঁত রেজেক্স)
-            txt = txt.replace(/\[align=[^\]]+\]/gi, '');
-            txt = txt.replace(/\[\/align\]/gi, '');
-            
-            // ২. স্পেসিং রিমুভ
-            txt = txt.replace(/\[space=[^\]]+\]/gi, '');
-            txt = txt.replace(/\[\/space\]/gi, '');
-            
-            // ৩. ফন্ট সাইজ রিমুভ
-            txt = txt.replace(/\[size=[^\]]+\]/gi, '');
-            txt = txt.replace(/\[\/size\]/gi, '');
-            
-            // ৪. বোল্ড, ইটালিক, স্ট্রাইক রিমুভ
-            txt = txt.replace(/[*_~]/g, '');
-            
-            // ৫. অতিরিক্ত স্পেস ও এন্টার ক্লিন করা
-            txt = txt.replace(/\n{3,}/g, '\n\n');
-            
+            txt = txt.replace(/\[align=[^\]]+\]/gi, '').replace(/\[\/align\]/gi, '');
+            txt = txt.replace(/\[space=[^\]]+\]/gi, '').replace(/\[\/space\]/gi, '');
+            txt = txt.replace(/\[size=[^\]]+\]/gi, '').replace(/\[\/size\]/gi, '');
+            txt = txt.replace(/[*_~]/g, '').replace(/\n{3,}/g, '\n\n');
             textarea.value = txt.trim();
             showToast("ফরম্যাট পরিষ্কার করা হয়েছে!");
-        } else {
-            select.selectedIndex = 0; return;
-        }
+        } else { select.selectedIndex = 0; return; }
     } 
     else if (val === 'factory_reset') {
-        if(confirm("সতর্কতা! এডিটর, সেভ করা লেখা এবং কাস্টম লজিক রুলস সব ডিলিট হয়ে অ্যাপ একদম নতুনের মতো হয়ে যাবে। আপনি কি নিশ্চিত?")) {
+        let ok = await CustomUI.confirm("ফ্যাক্টরি রিসেট", "সতর্কতা! এডিটর ও সেভ করা রুলস সব ডিলিট হয়ে যাবে। নিশ্চিত?", "রিসেট করুন", "বাতিল", true);
+        if(ok) {
             textarea.value = "";
             localStorage.removeItem('ardm_notice_msg');
             localStorage.removeItem('ardm_notice_font');
             localStorage.removeItem('ardm_logic_rules');
-            
             showToast("ফ্যাক্টরি রিসেট সম্পন্ন হয়েছে! রিলোড হচ্ছে...");
             setTimeout(() => location.reload(), 1000); 
             return;
-        } else {
-            select.selectedIndex = 0; return;
-        }
+        } else { select.selectedIndex = 0; return; }
     } 
     else if (TEMPLATES[val]) {
         if(textarea.value.trim() !== "" && textarea.value.trim() !== "🧹 এডিটর পরিষ্কার করুন") {
-            if(!confirm("নতুন টেমপ্লেট লোড করলে আগের লেখা মুছে যাবে। নিশ্চিত?")) { 
-                select.selectedIndex = 0; return; 
-            }
+            let ok = await CustomUI.confirm("টেমপ্লেট লোড", "নতুন টেমপ্লেট লোড করলে আগের লেখা মুছে যাবে। নিশ্চিত?", "হ্যাঁ, লোড করুন");
+            if(!ok) { select.selectedIndex = 0; return; }
         }
         textarea.value = TEMPLATES[val];
     }
 
-    savedSelectionRange = null;
-    savedTextareaStart = 0;
-    savedTextareaEnd = 0;
-
-    // আপডেট ও সেভ
+    savedSelectionRange = null; savedTextareaStart = 0; savedTextareaEnd = 0;
     textarea.blur();
     syncCodeToVisual();
     
     if(isPreviewMode) {
         if(parsedStudents.length === 0) {
             document.getElementById('msg-preview-box').innerHTML = convertToHTML(wrapTagsWithoutData(textarea.value));
-        } else {
-            renderPreview();
-        }
+        } else { renderPreview(); }
     }
-    
     select.selectedIndex = 0;
 }
 
@@ -2442,13 +2541,15 @@ document.getElementById('btn-generate').addEventListener('click', async function
         insertIntoTextarea(`[LOGIC:${name}]`);
     }
     
-    function deleteLogicRule(id) {
-        if(confirm('রুলটি চিরতরে মুছে ফেলতে চান?')) {
-            customLogicRules = customLogicRules.filter(r => r.id !== id);
-            saveLogicRulesToDB();
-            renderLogicManagerList();
-        }
+    async function deleteLogicRule(id) {
+    let ok = await CustomUI.confirm("রুল ডিলিট", "রুলটি চিরতরে মুছে ফেলতে চান?", "হ্যাঁ, মুছুন", "বাতিল", true);
+    if(ok) {
+        customLogicRules = customLogicRules.filter(r => r.id !== id);
+        saveLogicRulesToDB();
+        renderLogicManagerList();
     }
+}
+
     
     function duplicateLogicRule(id) {
         const rule = customLogicRules.find(r => r.id === id);
@@ -2852,19 +2953,15 @@ async function sendSingleSMS(index, phone, isBulk = false) {
                         `মেসেজ:\n${cleanMsg}`;
 
         if (!isSingleSmsAuthenticated) {
-            // প্রথমবার পাসওয়ার্ড চাইবে
-            let pass = prompt(alertText + "\n\nসিস্টেম আনলক করতে অ্যাডমিন পাসওয়ার্ড দিন:");
-            if (pass === null) return false; // ক্যান্সেল করলে
-            if (pass !== SMS_BULK_PASS) {
-                showToast("পাসওয়ার্ড ভুল হয়েছে!", "error");
-                return false;
-            }
-            isSingleSmsAuthenticated = true; // একবার সঠিক দিলে আনলক হয়ে যাবে
+            let pass = await CustomUI.prompt("সিস্টেম আনলক", alertText + "\n\nসিস্টেম আনলক করতে অ্যাডমিন পাসওয়ার্ড দিন:", "password");
+            if (pass === null) return false; 
+            if (pass !== SMS_BULK_PASS) { showToast("পাসওয়ার্ড ভুল হয়েছে!", "error"); return false; }
+            isSingleSmsAuthenticated = true;
             showToast("সিস্টেম আনলক হয়েছে!", "success");
         } else {
-            // আনলক থাকলে শুধু কনফার্ম করবে
-            if (!confirm(alertText + "\n\nআপনি কি মেসেজটি পাঠাতে চান?")) return false;
-        }
+            let ok = await CustomUI.confirm("মেসেজ কনফার্মেশন", alertText + "\n\nআপনি কি মেসেজটি পাঠাতে চান?");
+            if(!ok) return false;
+    }
     }
 
     const btn = document.getElementById(`btn-sms-${index}`);
@@ -2979,6 +3076,9 @@ async function sendBulkSMS() {
                      `বর্তমান ব্যালেন্স: ${currentBalance} ৳\n` +
                      `-----------------------\n\n` +
                      `চালিয়ে যেতে অ্যাডমিন পাসওয়ার্ড দিন:`;
+    let pass = await CustomUI.prompt("বাল্ক এসএমএস কনফার্মেশন", promptText, "password");
+    if (pass === null) return; 
+    if (pass !== SMS_BULK_PASS) { showToast("অ্যাডমিন পাসওয়ার্ড ভুল হয়েছে!", "error"); return; }
 
     let pass = prompt(promptText);
     if (pass === null) return; // ক্যান্সেল করলে
