@@ -34,9 +34,6 @@
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
         }
-span[data-trans="upper"] { text-transform: uppercase; }
-span[data-trans="lower"] { text-transform: lowercase; }
-span[data-trans="title"] { text-transform: capitalize; }
 
         /* App Shell */
         #app-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; width: 100%; }
@@ -395,13 +392,11 @@ span[data-trans="title"] { text-transform: capitalize; }
             </div>
 
         </div>
-        
-                    <div class="card" style="padding: 10px;">
+        <div class="card" style="padding: 10px;">
             <h3 class="font-bold text-sm text-gray-800 mb-2 border-b pb-2 flex justify-between items-center px-2">
                 <span>মেসেজ তৈরি করুন</span>
                 <span class="text-[10px] text-green-600 font-bold bg-green-100 px-2 py-1 rounded">✅ Auto Saved</span>
             </h3>
-
             <div class="toolbar">
                 <div class="toolbar-row">
                     <div class="tool-group">
@@ -420,154 +415,142 @@ span[data-trans="title"] { text-transform: capitalize; }
                         <button class="tool-btn" onmousedown="event.preventDefault()" onclick="applyAlignment('justify', 'justifyFull')" title="Justify"><i data-lucide="align-justify" class="w-4 h-4"></i></button>
                     </div>
                 </div>
-
-                <div class="toolbar-row border-t border-gray-200 pt-1 mt-1">
-                    <div class="tool-group">
-                        <div class="tool-select-wrapper" title="Font Style">
-                            <button class="tool-btn" onmousedown="event.preventDefault()"><i data-lucide="type" class="w-4 h-4"></i></button>
-                            <select id="font-select" onchange="applyFont()">
-                                <option value="'Anek Bangla', sans-serif">Anek Bangla (আধুনিক)</option>
-                                <option value="'Noto Serif Bengali', serif">Noto Serif (অফিসিয়াল)</option>
-                                <option value="'Hind Siliguri', sans-serif">Hind Siliguri (ক্লিন)</option>
-                                <option value="'Tiro Bangla', serif">Tiro Bangla (ট্র্যাডিশনাল)</option>
-                                <option value="'Baloo Da 2', cursive">Baloo Da 2 (রাউন্ডেড)</option>
+                <div class="toolbar-row border-t border-gray-200 pt-1">
+                    <div class="flex gap-2">
+                        <div class="tool-group">
+                            <div class="tool-select-wrapper" title="Font Style">
+                                <button class="tool-btn" onmousedown="event.preventDefault()"><i data-lucide="type" class="w-4 h-4"></i></button>
+                                <select id="font-select" onchange="applyFont()">
+                                    <option value="'Anek Bangla', sans-serif">Anek Bangla (আধুনিক)</option>
+                                    <option value="'Noto Serif Bengali', serif">Noto Serif (অফিসিয়াল)</option>
+                                    <option value="'Hind Siliguri', sans-serif">Hind Siliguri (ক্লিন)</option>
+                                    <option value="'Tiro Bangla', serif">Tiro Bangla (ট্র্যাডিশনাল)</option>
+                                    <option value="'Baloo Da 2', cursive">Baloo Da 2 (রাউন্ডেড)</option>
+                                </select>
+                            </div>
+                           <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openFontSizeModal()" title="Font Size">
+                           <i data-lucide="heading" class="w-4 h-4"></i>
+                           </button>
+                           
+                            <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openSpacingModal()" title="Paragraph Spacing"><i data-lucide="expand" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="tool-select-wrapper" title="Insert Data">
+                            <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="braces" class="w-4 h-4"></i></button>
+                            <select id="var-select" onchange="insertTagFromSelect()">
+                                <option value="" disabled selected>ডাটা ইনসার্ট...</option>
+                                <optgroup label="সাধারণ তথ্য (বাংলা)">
+                                    <option value="[StudentNameBn]">শিক্ষার্থীর নাম (বাংলা)</option>
+                                    <option value="[RollBn]">রোল নম্বর (বাংলা)</option>
+                                    <option value="[ClassBn]">শ্রেণি (বাংলা)</option>
+                                    <option value="[IDBn]">আইডি (বাংলা)</option>
+                                    <option value="[GenderBn]">লিঙ্গ (ছাত্র/ছাত্রী)</option>
+                                    <option value="[AgeBn]">বয়স (বাংলা)</option>
+                                </optgroup>
+                                <optgroup label="General Info (English)">
+                                    <option value="[StudentNameEn]">Student Name (Eng)</option>
+                                    <option value="[RollEn]">Roll (Eng)</option>
+                                    <option value="[ClassEn]">Class (Eng)</option>
+                                    <option value="[IDEn]">ID (Eng)</option>
+                                    <option value="[GenderEn]">Gender (Eng)</option>
+                                    <option value="[AgeEn]">Age (Eng)</option>
+                                </optgroup>
+                                <optgroup label="পারিবারিক তথ্য">
+                                    <option value="[FatherNameBn]">পিতার নাম (বাংলা)</option>
+                                    <option value="[FatherNameEn]">Father Name (Eng)</option>
+                                    <option value="[MotherNameBn]">মাতার নাম (বাংলা)</option>
+                                    <option value="[MotherNameEn]">Mother Name (Eng)</option>
+                                    <option value="[WhatsApp]">হোয়াটসঅ্যাপ নম্বর</option>
+                                    <option value="[EmergencyNo]">জরুরি নম্বর</option>
+                                </optgroup>
+                                <optgroup label="অন্যান্য ও ঠিকানা">
+                                    <option value="[DOB]">জন্ম তারিখ</option>
+                                    <option value="[BloodGroup]">রক্তের গ্রুপ</option>
+                                    <option value="[BRN]">জন্ম নিবন্ধন (BRN)</option>
+                                    <option value="[VillageBn]">গ্রাম (বাংলা)</option>
+                                    <option value="[VillageEn]">Village (Eng)</option>
+                                    <option value="[FullAddressBn]">সম্পূর্ণ ঠিকানা (বাংলা)</option>
+                                    <option value="[FullAddressEn]">Full Address (Eng)</option>
+                                </optgroup>
                             </select>
                         </div>
-                        <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openFontSizeModal()" title="Font Size"><i data-lucide="heading" class="w-4 h-4"></i></button>
-                        <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openSpacingModal()" title="Paragraph Spacing"><i data-lucide="expand" class="w-4 h-4"></i></button>
-                    </div>
-                    
-                    <div class="tool-group w-full justify-start border-none pr-0 mr-0">
-                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('upper')" title="সব বড় হাতের (UPPERCASE)">AB</button>
-                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('lower')" title="সব ছোট হাতের (lowercase)">ab</button>
-                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('title')" title="প্রথম অক্ষর বড় (Title Case)">Aa</button>
-                        <div class="w-[1px] h-5 bg-gray-300 mx-1"></div>
-                        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-blue-50 text-blue-700 hover:bg-blue-100" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('bn')" title="বাংলা নম্বর (১২৩)">১২৩</button>
-                        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-green-50 text-green-700 hover:bg-green-100" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('en')" title="ইংরেজি নম্বর (123)">123</button>
-                    </div>
-                </div>
+                        <div class="tool-select-wrapper" title="Templates">
+                            <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="folder-open" class="w-4 h-4"></i></button>
+                            <select id="template-select" onchange="loadTemplate()">
+                                <option value="" disabled selected>টেমপ্লেট নির্বাচন করুন...</option>
+                                <optgroup label="সাধারণ নোটিশ">
+                                    <option value="holiday">🕌 পবিত্র রমজান ও ঈদের ছুটি</option>
+                                    <option value="absent">❌ অনুপস্থিতির সতর্কতা</option>
+                                    <option value="leave">🗓️ ছুটি মঞ্জুরের নোটিশ</option>
+                                    <option value="exam">📝 পরীক্ষা সংক্রান্ত নোটিশ</option>
+                                    <option value="fees">💰 বকেয়া ফি পরিশোধ</option>
+                                    <option value="meeting">👥 অভিভাবক সমাবেশ</option>
+                                    <option value="trip">🚌 শিক্ষা সফর (বান্দরবান)</option>
+                                </optgroup>
+                                <optgroup label="অফিসিয়াল ও দাপ্তরিক">
+                                    <option value="testimonial">📜 চারিত্রিক সনদপত্র / প্রত্যয়নপত্র</option>
+                                    <option value="admission">📄 ভর্তি ও সেশন নবায়ন</option>
+                                    <option value="warning">⚠️ শৃঙ্খলা ভঙ্গের সতর্কতা</option>
+                                    <option value="certificate">🎓 সনদ/প্রত্যয়ন উত্তোলন</option>
+                                    <option value="promotion">🏆 ফলাফল ও প্রমোশন</option>
+                                </optgroup>
+                                <optgroup label="English SMS (Short & Low Cost)">
+    <option value="id_card_en">🪪 ID Card Ready (Link)</option>
+    <option value="fee_paid_en">✅ Fee Paid Thanks</option>
+    <option value="fee_due_en">⚠️ Fee Due Reminder</option>
+    <option value="absent_en">❌ Absent Alert</option>
+    <option value="present_en">🏫 Campus Entry Update</option>
+    <option value="result_en">🏆 Result Published</option>
+    <option value="meeting_en">👥 Parents Meeting</option>
+    <option value="urgent_holiday_en">🚨 Urgent Holiday</option>
+</optgroup>
+ <optgroup label="📊 পরীক্ষার ফলাফল (Result)">
+        <option value="result_short_bn">📝 রেজাল্ট: ছোট (বাংলা)</option>
+        <option value="result_full_bn">📄 রেজাল্ট: বিস্তারিত (বাংলা)</option>
+        <option value="result_en_short">📑 Result: Short (English)</option>
+    </optgroup>
 
-                <div class="toolbar-row border-t border-gray-200 pt-1 mt-1">
-                    <div class="tool-group border-none pr-0 mr-0 flex gap-2 w-full justify-between">
-                        <div class="flex gap-2">
-                            <div class="tool-select-wrapper" title="Insert Data">
-                                <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="braces" class="w-4 h-4"></i></button>
-                                <select id="var-select" onchange="insertTagFromSelect()">
-                                    <option value="" disabled selected>ডাটা ইনসার্ট...</option>
-                                    <optgroup label="সাধারণ তথ্য (বাংলা)">
-                                        <option value="[StudentNameBn]">শিক্ষার্থীর নাম (বাংলা)</option>
-                                        <option value="[RollBn]">রোল নম্বর (বাংলা)</option>
-                                        <option value="[ClassBn]">শ্রেণি (বাংলা)</option>
-                                        <option value="[IDBn]">আইডি (বাংলা)</option>
-                                        <option value="[GenderBn]">লিঙ্গ (ছাত্র/ছাত্রী)</option>
-                                        <option value="[AgeBn]">বয়স (বাংলা)</option>
-                                    </optgroup>
-                                    <optgroup label="General Info (English)">
-                                        <option value="[StudentNameEn]">Student Name (Eng)</option>
-                                        <option value="[RollEn]">Roll (Eng)</option>
-                                        <option value="[ClassEn]">Class (Eng)</option>
-                                        <option value="[IDEn]">ID (Eng)</option>
-                                        <option value="[GenderEn]">Gender (Eng)</option>
-                                        <option value="[AgeEn]">Age (Eng)</option>
-                                    </optgroup>
-                                    <optgroup label="পারিবারিক তথ্য">
-                                        <option value="[FatherNameBn]">পিতার নাম (বাংলা)</option>
-                                        <option value="[FatherNameEn]">Father Name (Eng)</option>
-                                        <option value="[MotherNameBn]">মাতার নাম (বাংলা)</option>
-                                        <option value="[MotherNameEn]">Mother Name (Eng)</option>
-                                        <option value="[WhatsApp]">হোয়াটসঅ্যাপ নম্বর</option>
-                                        <option value="[EmergencyNo]">জরুরি নম্বর</option>
-                                    </optgroup>
-                                    <optgroup label="অন্যান্য ও ঠিকানা">
-                                        <option value="[DOB]">জন্ম তারিখ</option>
-                                        <option value="[BloodGroup]">রক্তের গ্রুপ</option>
-                                        <option value="[BRN]">জন্ম নিবন্ধন (BRN)</option>
-                                        <option value="[VillageBn]">গ্রাম (বাংলা)</option>
-                                        <option value="[VillageEn]">Village (Eng)</option>
-                                        <option value="[FullAddressBn]">সম্পূর্ণ ঠিকানা (বাংলা)</option>
-                                        <option value="[FullAddressEn]">Full Address (Eng)</option>
-                                    </optgroup>
-                                </select>
-                            </div>
-                            
-                            <div class="tool-select-wrapper" title="Templates">
-                                <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="folder-open" class="w-4 h-4"></i></button>
-                                <select id="template-select" onchange="loadTemplate()">
-                                    <option value="" disabled selected>টেমপ্লেট নির্বাচন করুন...</option>
-                                    <optgroup label="সাধারণ নোটিশ">
-                                        <option value="holiday">🕌 পবিত্র রমজান ও ঈদের ছুটি</option>
-                                        <option value="absent">❌ অনুপস্থিতির সতর্কতা</option>
-                                        <option value="leave">🗓️ ছুটি মঞ্জুরের নোটিশ</option>
-                                        <option value="exam">📝 পরীক্ষা সংক্রান্ত নোটিশ</option>
-                                        <option value="fees">💰 বকেয়া ফি পরিশোধ</option>
-                                        <option value="meeting">👥 অভিভাবক সমাবেশ</option>
-                                        <option value="trip">🚌 শিক্ষা সফর (বান্দরবান)</option>
-                                    </optgroup>
-                                    <optgroup label="অফিসিয়াল ও দাপ্তরিক">
-                                        <option value="testimonial">📜 চারিত্রিক সনদপত্র / প্রত্যয়নপত্র</option>
-                                        <option value="admission">📄 ভর্তি ও সেশন নবায়ন</option>
-                                        <option value="warning">⚠️ শৃঙ্খলা ভঙ্গের সতর্কতা</option>
-                                        <option value="certificate">🎓 সনদ/প্রত্যয়ন উত্তোলন</option>
-                                        <option value="promotion">🏆 ফলাফল ও প্রমোশন</option>
-                                    </optgroup>
-                                    <optgroup label="English SMS (Short & Low Cost)">
-                                        <option value="id_card_en">🪪 ID Card Ready (Link)</option>
-                                        <option value="fee_paid_en">✅ Fee Paid Thanks</option>
-                                        <option value="fee_due_en">⚠️ Fee Due Reminder</option>
-                                        <option value="absent_en">❌ Absent Alert</option>
-                                        <option value="present_en">🏫 Campus Entry Update</option>
-                                        <option value="result_en">🏆 Result Published</option>
-                                        <option value="meeting_en">👥 Parents Meeting</option>
-                                        <option value="urgent_holiday_en">🚨 Urgent Holiday</option>
-                                    </optgroup>
-                                     <optgroup label="📊 পরীক্ষার ফলাফল (Result)">
-                                        <option value="result_short_bn">📝 রেজাল্ট: ছোট (বাংলা)</option>
-                                        <option value="result_full_bn">📄 রেজাল্ট: বিস্তারিত (বাংলা)</option>
-                                        <option value="result_en_short">📑 Result: Short (English)</option>
-                                    </optgroup>
-                                    <optgroup label="💰 বকেয়া ও ফি (Fees/Dues)">
-                                        <option value="due_short_bn">💸 বকেয়া বেতন: ছোট</option>
-                                        <option value="due_detailed_bn">🏦 বকেয়া বেতন: নোটিশ</option>
-                                        <option value="exam_due_bn">✍️ পরীক্ষার ফি বকেয়া</option>
-                                    </optgroup>
-                                    <optgroup label="অন্যান্য">
-                                        <option value="clear_format">✨ ফরম্যাট পরিষ্কার করুন</option>
-                                        <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>
-                                        <option value="factory_reset">⚠️ ফ্যাক্টরি রিসেট</option>
-                                    </optgroup>
-                                </select>
-                            </div>
-                            
-                            <div class="tool-select-wrapper" title="Date & Time">
-                                <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="calendar-clock" class="w-4 h-4"></i></button>
-                               <select id="datetime-select" onchange="insertDateTime()">
-                                   <option value="" disabled selected>সময়/তারিখ...</option>
-                                   <optgroup label="বাংলা তারিখ ও সময়">
-                                       <option value="date_bn_short">ছোট তারিখ (১০/০১/২০২৬)</option>
-                                       <option value="date_bn">সাধারণ তারিখ (১০ জানুয়ারি ২০২৬)</option>
-                                       <option value="date_bn_full">বিস্তারিত (১০ জানুয়ারি ২০২৬ খ্রি...)</option>
-                                       <option value="time_bn">বর্তমান সময় (বাংলা)</option>
-                                   </optgroup>
-                                   <optgroup label="English Date & Time">
-                                       <option value="date_en_short">Short Date (10/01/2026)</option>
-                                       <option value="date_en">Standard Date (10 Jan 2026)</option>
-                                       <option value="date_en_full">Full Date (Saturday, 10 Jan...)</option>
-                                       <option value="time_en">Current Time (Eng)</option>
-                                   </optgroup>
-                               </select>
-                            </div>
+    <optgroup label="💰 বকেয়া ও ফি (Fees/Dues)">
+        <option value="due_short_bn">💸 বকেয়া বেতন: ছোট</option>
+        <option value="due_detailed_bn">🏦 বকেয়া বেতন: নোটিশ</option>
+        <option value="exam_due_bn">✍️ পরীক্ষার ফি বকেয়া</option>
+    </optgroup>
+                                <optgroup label="অন্যান্য">
+                                <option value="clear_format">✨ ফরম্যাট পরিষ্কার করুন</option>
+                                <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>
+                                <option value="factory_reset">⚠️ ফ্যাক্টরি রিসেট</option>
+                                </optgroup>
+                            </select>
                         </div>
+                        <div class="tool-select-wrapper" title="Date & Time">
+                            <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="calendar-clock" class="w-4 h-4"></i></button>
+                           <select id="datetime-select" onchange="insertDateTime()">
+                               <option value="" disabled selected>সময়/তারিখ...</option>
+                               <optgroup label="বাংলা তারিখ ও সময়">
+                                   <option value="date_bn_short">ছোট তারিখ (১০/০১/২০২৬)</option>
+                                   <option value="date_bn">সাধারণ তারিখ (১০ জানুয়ারি ২০২৬)</option>
+                                   <option value="date_bn_full">বিস্তারিত (১০ জানুয়ারি ২০২৬ খ্রি., রোজ...)</option>
+                                   <option value="time_bn">বর্তমান সময় (বাংলা)</option>
+                               </optgroup>
+                               <optgroup label="English Date & Time">
+                                   <option value="date_en_short">Short Date (10/01/2026)</option>
+                                   <option value="date_en">Standard Date (10 Jan 2026)</option>
+                                   <option value="date_en_full">Full Date (Saturday, 10 Jan...)</option>
+                                   <option value="time_en">Current Time (Eng)</option>
+                               </optgroup>
+                           </select>
+                           
+                        </div>
+                    </div>
+                    <div class="flex gap-2 ml-3">
+                        <button class="tool-btn bg-gray-600 text-white hover:bg-gray-700" onmousedown="event.preventDefault()" onclick="openFilterModal()" title="ফিল্টার (Filter)"><i data-lucide="filter" class="w-4 h-4"></i></button>
+                        <button id="btn-toggle-preview" class="tool-btn bg-[#005A34] text-white hover:bg-[#004225]" onmousedown="event.preventDefault()" onclick="togglePreview()" title="কোড / এডিট (Code / Visual)"><i data-lucide="code" class="w-4 h-4"></i></button>
+                        <button class="tool-btn bg-purple-50 text-purple-800" onmousedown="event.preventDefault()" onclick="openLogicManager()" title="লজিক রুলস ম্যানেজার"><i data-lucide="git-merge" class="w-4 h-4"></i></button>
+                        <button class="tool-btn bg-orange-50 text-orange-800" onmousedown="event.preventDefault()" onclick="openNumberModal()" title="সিরিয়াল ও রেন্ডম নম্বর"><i data-lucide="hash" class="w-4 h-4"></i></button>
                         
-                        <div class="flex gap-2">
-                            <button class="tool-btn bg-gray-600 text-white hover:bg-gray-700" onmousedown="event.preventDefault()" onclick="openFilterModal()" title="ফিল্টার (Filter)"><i data-lucide="filter" class="w-4 h-4"></i></button>
-                            <button id="btn-toggle-preview" class="tool-btn bg-[#005A34] text-white hover:bg-[#004225]" onmousedown="event.preventDefault()" onclick="togglePreview()" title="কোড / এডিট (Code / Visual)"><i data-lucide="code" class="w-4 h-4"></i></button>
-                            <button class="tool-btn bg-purple-50 text-purple-800" onmousedown="event.preventDefault()" onclick="openLogicManager()" title="লজিক রুলস ম্যানেজার"><i data-lucide="git-merge" class="w-4 h-4"></i></button>
-                            <button class="tool-btn bg-orange-50 text-orange-800" onmousedown="event.preventDefault()" onclick="openNumberModal()" title="সিরিয়াল ও রেন্ডম নম্বর"><i data-lucide="hash" class="w-4 h-4"></i></button>
-                        </div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="relative">
                 <!-- Code Mode (Textarea) -->
                 <textarea id="msg-template" class="input-field hidden" style="border-radius: 4px;" placeholder="এখানে মেসেজ লিখুন..." oninput="syncCodeToVisual()"></textarea>
@@ -965,83 +948,6 @@ CustomUI.init();
         localStorage.setItem('ardm_notice_font', font);
     }
 
- // ==========================================      
-// SMART TEXT & TAG MODIFIER ENGINE      
-// ========================================== 
-function applyTransformWrapper(type) {
-    const textarea = document.getElementById('msg-template');
-    let hasTag = false;
-    let selectedText = "";
-    
-    if(isPreviewMode) { 
-        const sel = window.getSelection();
-        if (!savedSelectionRange || sel.isCollapsed) { showToast("প্রথমে লেখা বা ট্যাগ সিলেক্ট করুন!", "warning"); return; }
-        
-        const range = sel.getRangeAt(0);
-        const container = document.createElement('div');
-        container.appendChild(range.cloneContents());
-        
-        if (container.querySelector('.tag-hl') || container.innerHTML.includes('[')) hasTag = true;
-        selectedText = container.innerHTML;
-    } else {
-        textarea.setSelectionRange(savedTextareaStart, savedTextareaEnd);
-        textarea.focus();
-        const start = textarea.selectionStart; 
-        const end = textarea.selectionEnd;
-        if (start === end) { showToast("প্রথমে লেখা বা ট্যাগ সিলেক্ট করুন!", "warning"); return; }
-        
-        selectedText = textarea.value.substring(start, end);
-        if (selectedText.includes('[')) hasTag = true;
-    }
-    
-    // যদি শুধু সাধারণ লেখা হয়, তবে সাথে সাথে পরিবর্তন করে দেবে
-    if (!hasTag) {
-        let plainText = selectedText;
-        if (isPreviewMode) {
-            let tempDiv = document.createElement('div');
-            tempDiv.innerHTML = selectedText;
-            plainText = tempDiv.textContent;
-        }
-        
-        let newText = plainText;
-        if (type === 'upper') newText = newText.toUpperCase();
-        if (type === 'lower') newText = newText.toLowerCase();
-        if (type === 'title') newText = newText.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
-        if (type === 'bn') newText = newText.replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
-        if (type === 'en') {
-            const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
-            newText = newText.replace(/[০-৯]/g, d => bnToEn[d] || d);
-        }
-        
-        if (isPreviewMode) {
-            document.execCommand("insertText", false, newText);
-            saveSelectionState();
-            syncVisualToCode();
-        } else {
-            textarea.value = textarea.value.substring(0, textarea.selectionStart) + newText + textarea.value.substring(textarea.selectionEnd);
-            savedTextareaEnd = textarea.selectionStart + newText.length;
-            textarea.setSelectionRange(textarea.selectionStart, savedTextareaEnd);
-            syncCodeToVisual();
-        }
-        return;
-    }
-    
-    // যদি ভেতরে ট্যাগ থাকে, তবে সেফটি র্যাপিং করবে
-    if(isPreviewMode) { 
-        let wrapped = `<span class="data-transform" data-trans="${type}">${selectedText}</span>`;
-        document.execCommand("insertHTML", false, wrapped);
-        saveSelectionState();
-        syncVisualToCode();
-        // 🚀 ফিক্স: প্রিভিউ মোডে অপ্রয়োজনীয় রিলোড বন্ধ করা হয়েছে, ফলে কার্সর ঠিক থাকবে।
-    } else {
-        const newText = `[transform=${type}]${selectedText}[/transform]`;
-        textarea.value = textarea.value.substring(0, textarea.selectionStart) + newText + textarea.value.substring(textarea.selectionEnd);
-        savedTextareaEnd = textarea.selectionStart + newText.length;
-        textarea.setSelectionRange(textarea.selectionStart, savedTextareaEnd);
-        syncCodeToVisual();
-    }
-}
-
     function saveMessageLocally() {
         const msg = document.getElementById('msg-template').value;
         localStorage.setItem('ardm_notice_msg', msg);
@@ -1166,38 +1072,21 @@ function showToast(msg, type = 'info', duration = 3000) {
  return `<div style="text-align: ${align}; display: block;">${content}</div>`;
  });
  } while (html !== prevAlign);
- let prevTransform;
-    do {
-        prevTransform = html;
-        html = html.replace(/\[transform=([^\]]+)\]((?:(?!\[\/?transform)[^])*?)\[\/transform\]/gi, function(match, type, content) {
-            return `<span class="data-transform" data-trans="${type}">${content}</span>`;
-        });
-    } while (html !== prevTransform);
+ 
  return html;
  }
+ 
 function convertToRaw(htmlContent) {
     let tempDiv = document.createElement('div');
     tempDiv.innerHTML = htmlContent;
 
-    // ১. ট্যাগ ডাটা রিকভারি (সব ব্রাউজারের জন্য ১০০% সেফ)
-    let tags = tempDiv.querySelectorAll('.tag-hl');
-    for(let i=0; i<tags.length; i++) {
-        let tag = tags[i];
-        if (tag.parentNode) {
-            let txt = document.createTextNode(tag.getAttribute('data-tag') || '');
-            tag.parentNode.replaceChild(txt, tag);
-        }
-    }
+    // ১. ট্যাগ ডাটা রিকভারি
+    tempDiv.querySelectorAll('.tag-hl').forEach(tag => {
+        tag.replaceWith(tag.getAttribute('data-tag'));
+    });
 
     // ২. <br> ট্যাগগুলোকে নতুন লাইনে কনভার্ট
-    let brs = tempDiv.querySelectorAll('br');
-    for(let i=0; i<brs.length; i++) {
-        let br = brs[i];
-        if (br.parentNode) {
-            let txt = document.createTextNode('\n');
-            br.parentNode.replaceChild(txt, br);
-        }
-    }
+    tempDiv.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
 
     // ৩. বোল্ড, ইটালিক, স্ট্রাইক
     tempDiv.querySelectorAll('b, strong').forEach(el => { el.insertAdjacentText('afterbegin', '*'); el.insertAdjacentText('beforeend', '*'); });
@@ -1210,7 +1099,7 @@ function convertToRaw(htmlContent) {
         if (!sizeVal) {
             if (el.tagName === 'FONT') sizeVal = el.getAttribute('size');
             else {
-                const match = el.style.fontSize && el.style.fontSize.match(/(\d+)(pt|px)/);
+                const match = el.style.fontSize.match(/(\d+)(pt|px)/);
                 if (match) sizeVal = match[2] === 'px' ? Math.round(parseInt(match[1]) * 0.75) : match[1];
             }
         }
@@ -1238,16 +1127,7 @@ function convertToRaw(htmlContent) {
             }
         }
     });
-
-    // ট্রান্সফর্ম ডাটা রিকভারি
-    tempDiv.querySelectorAll('span.data-transform, span[data-trans]').forEach(el => {
-        let type = el.getAttribute('data-trans');
-        if (type) {
-            el.insertAdjacentText('afterbegin', `[transform=${type}]`);
-            el.insertAdjacentText('beforeend', `[/transform]`);
-        }
-    });
-
+    
     // ৬. স্পেস ও মার্জিন
     tempDiv.querySelectorAll('div[data-margin]').forEach(el => {
         const margin = el.getAttribute('data-margin');
@@ -1265,6 +1145,7 @@ function convertToRaw(htmlContent) {
     let raw = tempDiv.textContent || tempDiv.innerText || "";
     
     // ৯. অবাঞ্ছিত এন্টার বা লাইন ব্রেক ফিক্স করা
+    // এলাইন ও স্পেস এর আশেপাশের অতিরিক্ত স্পেস রিমুভ করে পারফেক্ট লাইন তৈরি করা
     raw = raw.replace(/\s*\[align=([a-zA-Z\-]+)\]\s*/gi, '\n[align=$1]\n');
     raw = raw.replace(/\s*\[\/align\]\s*/gi, '\n[/align]\n');
     raw = raw.replace(/\s*\[space=([\d,]+)\]\s*/gi, '\n[space=$1]\n');
@@ -1282,19 +1163,11 @@ function convertToRaw(htmlContent) {
     raw = raw.replace(/\[align=[a-zA-Z\-]+\][\s\n]*\[\/align\]/gi, '');
     raw = raw.replace(/\[space=[\d,]+\][\s\n]*\[\/space\]/gi, '');
 
+    // তিন বা ততোধিক লাইন ব্রেক থাকলে তা কমিয়ে সুন্দর দুটি লাইনে নিয়ে আসা
     raw = raw.replace(/\n{3,}/g, '\n\n'); 
-    
-    raw = raw.replace(/\s*\[transform=([a-zA-Z]+)\]\s*/gi, '[transform=$1]');
-    raw = raw.replace(/\s*\[\/transform\]\s*/gi, '[/transform]');
-    let prevRawT;
-    do {
-        prevRawT = raw;
-        raw = raw.replace(/\[transform=([a-zA-Z]+)\]([\s\S]*?)\[\/transform\]([\s\n]*)\[transform=\1\]/gi, '[transform=$1]$2$3');
-    } while (raw !== prevRawT);
-    raw = raw.replace(/\[transform=[a-zA-Z]+\][\s\n]*\[\/transform\]/gi, '');
-
     return raw.trim();
 }
+
 
 
     function syncCodeToVisual() {
@@ -1441,7 +1314,20 @@ function replaceTagsWithData(template, st, forPreview = false) {
 
     const wrap = (tag, val) => forPreview ? `<span class="tag-hl" data-tag="${tag}" contenteditable="false">${val || '-'}</span>` : (val || '-');
 
-    // --- NEW CSV DYNAMIC TAG ENGINE ---
+   /* const map = {
+        '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
+        '[IDBn]': wrap('[IDBn]', toBn(st.ID)), '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
+        '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn), '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
+        '[IDEn]': wrap('[IDEn]', st.ID), '[GenderEn]': wrap('[GenderEn]', st.Gender), '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
+        '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn),
+        '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn),
+        '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
+        '[DOB]': wrap('[DOB]', formatDate(st.DOB)), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),
+        '[VillageBn]': wrap('[VillageBn]', st.VillageBn), '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
+        '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
+    };
+*/
+        // --- NEW CSV DYNAMIC TAG ENGINE ---
     const csvRegex = /\[CSV_([^\]]+)\]/gi;
     msg = msg.replace(csvRegex, function(match, colName) {
         if(forPreview && !st) return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
@@ -1450,23 +1336,30 @@ function replaceTagsWithData(template, st, forPreview = false) {
     });
     // ----------------------------------
 
-    const map = {
+        const map = {
         '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), 
         '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), 
         '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
         '[IDBn]': wrap('[IDBn]', toBn(st.ID)), 
         '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), 
         '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
+        
+        // এখানে ইংরেজি নামগুলো সব বড় হাতের (Uppercase) করে দেওয়া হয়েছে
         '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn ? st.StudentNameEn.toUpperCase() : ''), 
         '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), 
         '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
         '[IDEn]': wrap('[IDEn]', st.ID), 
         '[GenderEn]': wrap('[GenderEn]', st.Gender), 
         '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
+        
         '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), 
+        // পিতার ইংরেজি নাম বড় হাতের
         '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn ? st.FatherNameEn.toUpperCase() : ''),
+        
         '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), 
+        // মাতার ইংরেজি নাম বড় হাতের
         '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn ? st.MotherNameEn.toUpperCase() : ''),
+        
         '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), 
         '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
         '[DOB]': wrap('[DOB]', formatDate(st.DOB)), 
@@ -1479,30 +1372,6 @@ function replaceTagsWithData(template, st, forPreview = false) {
     };
 
     for (const [key, val] of Object.entries(map)) { msg = msg.split(key).join(val); }
-
-    // --- 🚀 ডাইনামিক ডাটা ট্রান্সফর্ম ইঞ্জিন (সঠিক জায়গা) ---
-    let prevMsg;
-    do {
-        prevMsg = msg;
-        msg = msg.replace(/\[transform=([^\]]+)\]([\s\S]*?)\[\/transform\]/gi, function(match, type, content) {
-            if (forPreview && !st) return match; // প্রিভিউতে সুরক্ষিত রাখবে
-            
-            return content.replace(/(<[^>]+>)|([^<]+)/g, function(m, htmlTag, plainText) {
-                if (htmlTag) return htmlTag;
-                if (type === 'upper') return plainText.toUpperCase();
-                if (type === 'lower') return plainText.toLowerCase();
-                if (type === 'title') return plainText.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
-                if (type === 'bn') return plainText.replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
-                if (type === 'en') {
-                    const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
-                    return plainText.replace(/[০-৯]/g, d => bnToEn[d] || d);
-                }
-                return plainText;
-            });
-        });
-    } while (msg !== prevMsg);
-    // ----------------------------------------------------
-
     return msg;
 }
 
@@ -1515,15 +1384,18 @@ function wrapTagsWithoutData(text) {
     msg = msg.replace(/\[LOGIC:([^\]]+)\]/gi, function(match) {
         return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
     });
+    // রেন্ডম এবং সিরিয়াল ট্যাগের জন্য হাইলাইট (RANDOM_NUM যোগ করা হলো)
     msg = msg.replace(/\[NUM:(SERIAL|RANDOM|RANDOM_NUM):([^\]]+)\]/gi, function(match) {
         return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
     });
+        // CSV ট্যাগের জন্য ডাইনামিক হাইলাইট
     msg = msg.replace(/\[CSV_([^\]]+)\]/gi, function(match) {
         return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
     });
 
     return msg;
 }
+
   
     // ==========================================      
     // EDITOR BUTTONS      
