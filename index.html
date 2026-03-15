@@ -700,9 +700,20 @@ const SMS_BULK_PASS = "saied783";
     let savedTextareaStart = 0;
     let savedTextareaEnd = 0;
 // ==========================================      
-// CUSTOM UI CONTROLLER (NEXSMS STYLE)      
+// CUSTOM UI CONTROLLER (NEXSMS STYLE - PRO)      
 // ==========================================
 const CustomUI = {
+    activeCloseFn: null, // বর্তমানে ওপেন থাকা মডালকে ট্র্যাক করবে
+
+    init: function() {
+        // ১. মোবাইলের হার্ডওয়্যার ব্যাক বাটন ধরার লজিক
+        window.addEventListener('popstate', (e) => {
+            if (this.activeCloseFn) {
+                this.activeCloseFn(true); // 'true' মানে ব্যাক বাটন থেকে কল হয়েছে
+            }
+        });
+    },
+
     alert: function(title, message, type = 'info') {
         return new Promise((resolve) => {
             const modal = document.getElementById('custom-alert-modal');
@@ -723,13 +734,28 @@ const CustomUI = {
             }
             if(window.lucide) lucide.createIcons();
 
+            // ব্যাক বাটনের জন্য একটি ফেক হিস্ট্রি পুশ করা
+            history.pushState({ modal: 'alert' }, "");
+
+            // মডাল ক্লোজ করার মেইন ফাংশন
+            const closeFn = (fromPopState = false) => {
+                modal.firstElementChild.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+                CustomUI.activeCloseFn = null;
+                // যদি ইউজার স্ক্রিনের বাটনে ক্লিক করে, তাহলে ফেক হিস্ট্রিটা ডিলিট করে দিতে হবে
+                if (!fromPopState) history.back(); 
+                resolve();
+            };
+
+            CustomUI.activeCloseFn = closeFn;
+
+            // ২. মডালের বাইরে (কালো অংশে) ক্লিক করলে বন্ধ হওয়া
+            modal.onclick = (e) => { if(e.target === modal) closeFn(); };
+            
             modal.classList.remove('hidden');
             setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 10);
 
-            okBtn.onclick = () => {
-                modal.firstElementChild.classList.add('scale-95');
-                setTimeout(() => { modal.classList.add('hidden'); resolve(); }, 200);
-            };
+            okBtn.onclick = () => { closeFn(); };
         });
     },
 
@@ -748,16 +774,25 @@ const CustomUI = {
                 ? 'flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition-colors' 
                 : 'flex-1 bg-[#005A34] text-white font-bold py-3 rounded-xl hover:bg-[#004225] transition-colors';
 
+            history.pushState({ modal: 'confirm' }, "");
+
+            const closeFn = (result, fromPopState = false) => {
+                modal.firstElementChild.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+                CustomUI.activeCloseFn = null;
+                if (!fromPopState) history.back();
+                resolve(result); // কনফার্মেশনের ফলাফল (true/false) পাঠাবে
+            };
+
+            // বাইরে বা ব্যাক বাটন চাপলে false (বাতিল) হিসেবে কাজ করবে
+            CustomUI.activeCloseFn = (fromPopState) => closeFn(false, fromPopState);
+            modal.onclick = (e) => { if(e.target === modal) closeFn(false); };
+
             modal.classList.remove('hidden');
             setTimeout(() => modal.firstElementChild.classList.remove('scale-95'), 10);
 
-            yesBtn.onclick = () => { close(); resolve(true); };
-            noBtn.onclick = () => { close(); resolve(false); };
-
-            function close() {
-                modal.firstElementChild.classList.add('scale-95');
-                setTimeout(() => modal.classList.add('hidden'), 200);
-            }
+            yesBtn.onclick = () => closeFn(true);
+            noBtn.onclick = () => closeFn(false);
         });
     },
 
@@ -770,6 +805,20 @@ const CustomUI = {
             input.type = inputType;
             input.value = defaultVal;
 
+            history.pushState({ modal: 'prompt' }, "");
+
+            const closeFn = (result, fromPopState = false) => {
+                modal.firstElementChild.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+                CustomUI.activeCloseFn = null;
+                if (!fromPopState) history.back();
+                resolve(result); // প্রম্পটের ইনপুট ডাটা পাঠাবে
+            };
+
+            // বাইরে বা ব্যাক বাটন চাপলে null (ক্যান্সেল) হিসেবে কাজ করবে
+            CustomUI.activeCloseFn = (fromPopState) => closeFn(null, fromPopState);
+            modal.onclick = (e) => { if(e.target === modal) closeFn(null); };
+
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.firstElementChild.classList.remove('scale-95');
@@ -779,17 +828,15 @@ const CustomUI = {
             const submitBtn = document.getElementById('prompt-submit-btn');
             const cancelBtn = document.getElementById('prompt-cancel-btn');
 
-            submitBtn.onclick = () => { close(); resolve(input.value); };
-            cancelBtn.onclick = () => { close(); resolve(null); };
-
-            function close() {
-                modal.firstElementChild.classList.add('scale-95');
-                setTimeout(() => modal.classList.add('hidden'), 200);
-            }
+            submitBtn.onclick = () => closeFn(input.value);
+            cancelBtn.onclick = () => closeFn(null);
         });
     }
 };
 
+// অ্যাপ চালুর সাথে সাথে ইঞ্জিনটি স্টার্ট করে দেওয়া
+CustomUI.init(); 
+    
     function saveSelectionState() {
         if (isPreviewMode) {
             const box = document.getElementById('msg-preview-box');
