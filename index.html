@@ -1027,7 +1027,7 @@ function showToast(msg, type = 'info', duration = 3000) {
     setTimeout(() => {
         toast.classList.remove('toast-enter');
         toast.classList.add('toast-exit');
-        setTimeout(() => toast.remove(), 300); // অ্যানিমেশন শেষ হলে ডোম থেকে মুছে যাবে
+        setTimeout(() => toast.remove(), 200); // অ্যানিমেশন শেষ হলে ডোম থেকে মুছে যাবে
     }, duration);
 }
 
