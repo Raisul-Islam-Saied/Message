@@ -415,9 +415,8 @@
                         <button class="tool-btn" onmousedown="event.preventDefault()" onclick="applyAlignment('justify', 'justifyFull')" title="Justify"><i data-lucide="align-justify" class="w-4 h-4"></i></button>
                     </div>
                 </div>
-                <div class="toolbar-row border-t border-gray-200 pt-1">
-                    <div class="flex gap-2">
-                        <div class="tool-group">
+                <div class="toolbar-row border-t border-gray-200 pt-1 mt-1">
+                    <div class="tool-group">
                             <div class="tool-select-wrapper" title="Font Style">
                                 <button class="tool-btn" onmousedown="event.preventDefault()"><i data-lucide="type" class="w-4 h-4"></i></button>
                                 <select id="font-select" onchange="applyFont()">
@@ -434,6 +433,20 @@
                            
                             <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openSpacingModal()" title="Paragraph Spacing"><i data-lucide="expand" class="w-4 h-4"></i></button>
                         </div>
+                    <div class="tool-group w-full justify-start">
+                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="changeTextCase('upper')" title="সব বড় হাতের (UPPERCASE)">AB</button>
+                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="changeTextCase('lower')" title="সব ছোট হাতের (lowercase)">ab</button>
+                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="changeTextCase('title')" title="প্রতিটি শব্দের প্রথম অক্ষর বড় (Title Case)">Aa</button>
+                        
+                        <div class="w-[1px] h-5 bg-gray-300 mx-2"></div>
+                        
+                        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-blue-50 text-blue-700 hover:bg-blue-100" onmousedown="event.preventDefault()" onclick="changeNumberLocale('bn')" title="বাংলা নম্বর (১২৩)">১২৩</button>
+                        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-green-50 text-green-700 hover:bg-green-100" onmousedown="event.preventDefault()" onclick="changeNumberLocale('en')" title="ইংরেজি নম্বর (123)">123</button>
+                    </div>
+                            </div>
+                <div class="toolbar-row border-t border-gray-200 pt-1">
+                    <div class="flex gap-2">
+                        
                         <div class="tool-select-wrapper" title="Insert Data">
                             <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="braces" class="w-4 h-4"></i></button>
                             <select id="var-select" onchange="insertTagFromSelect()">
@@ -947,6 +960,99 @@ CustomUI.init();
         document.getElementById('msg-preview-box').style.fontFamily = font;
         localStorage.setItem('ardm_notice_font', font);
     }
+
+    // ==========================================      
+// TEXT CASE & NUMBER LOCALE MANAGER      
+// ==========================================  
+
+// ১. টেক্সট Case পরিবর্তন (Upper, Lower, Title)
+function applyCaseLogic(text, type) {
+    if (type === 'upper') return text.toUpperCase();
+    if (type === 'lower') return text.toLowerCase();
+    if (type === 'title') {
+        // প্রতিটি শব্দের প্রথম অক্ষর বড় করবে (যেমন: abdur razzaq -> Abdur Razzaq)
+        return text.replace(/\w\S*/g, function(txt){ 
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); 
+        });
+    }
+    return text;
+}
+
+function changeTextCase(caseType) {
+    if(isPreviewMode) { 
+        if (savedSelectionRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedSelectionRange);
+        }
+        let text = window.getSelection().toString();
+        if(!text) { showToast("প্রথমে কোনো লেখা সিলেক্ট করুন!", "warning"); return; }
+        
+        let newText = applyCaseLogic(text, caseType);
+        
+        document.execCommand("insertText", false, newText); 
+        saveSelectionState();
+        syncVisualToCode(); 
+        return; 
+    }
+
+    const textarea = document.getElementById('msg-template');
+    textarea.setSelectionRange(savedTextareaStart, savedTextareaEnd);
+    textarea.focus();
+
+    const start = textarea.selectionStart; 
+    const end = textarea.selectionEnd;
+    
+    if (start === end) { showToast("প্রথমে কোনো লেখা সিলেক্ট করুন!", "warning"); return; }
+    
+    let text = textarea.value.substring(start, end);
+    let newText = applyCaseLogic(text, caseType);
+
+    textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+    
+    savedTextareaEnd = start + newText.length;
+    textarea.setSelectionRange(start, savedTextareaEnd);
+    syncCodeToVisual();
+}
+
+// ২. নম্বর ভাষা পরিবর্তন (বাংলা / ইংরেজি)
+function changeNumberLocale(lang) {
+    if(isPreviewMode) { 
+        if (savedSelectionRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedSelectionRange);
+        }
+        let text = window.getSelection().toString();
+        if(!text) { showToast("প্রথমে কোনো সংখ্যা সিলেক্ট করুন!", "warning"); return; }
+        
+        let newText = lang === 'bn' ? toBn(text) : toEn(text);
+        
+        document.execCommand("insertText", false, newText); 
+        saveSelectionState();
+        syncVisualToCode(); 
+        return; 
+    }
+
+    const textarea = document.getElementById('msg-template');
+    textarea.setSelectionRange(savedTextareaStart, savedTextareaEnd);
+    textarea.focus();
+
+    const start = textarea.selectionStart; 
+    const end = textarea.selectionEnd;
+    
+    if (start === end) { showToast("প্রথমে কোনো সংখ্যা সিলেক্ট করুন!", "warning"); return; }
+    
+    let text = textarea.value.substring(start, end);
+    let newText = lang === 'bn' ? toBn(text) : toEn(text);
+
+    textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+    
+    savedTextareaEnd = start + newText.length;
+    textarea.setSelectionRange(start, savedTextareaEnd);
+    syncCodeToVisual();
+}
+
 
     function saveMessageLocally() {
         const msg = document.getElementById('msg-template').value;
