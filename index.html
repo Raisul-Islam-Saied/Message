@@ -34,6 +34,9 @@
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
         }
+span[data-trans="upper"] { text-transform: uppercase; }
+span[data-trans="lower"] { text-transform: lowercase; }
+span[data-trans="title"] { text-transform: capitalize; }
 
         /* App Shell */
         #app-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; width: 100%; }
@@ -433,17 +436,16 @@
                            
                             <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openSpacingModal()" title="Paragraph Spacing"><i data-lucide="expand" class="w-4 h-4"></i></button>
                         </div>
-                    <div class="tool-group w-full justify-start">
-                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="changeTextCase('upper')" title="সব বড় হাতের (UPPERCASE)">AB</button>
-                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="changeTextCase('lower')" title="সব ছোট হাতের (lowercase)">ab</button>
-                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="changeTextCase('title')" title="প্রতিটি শব্দের প্রথম অক্ষর বড় (Title Case)">Aa</button>
-                        
-                        <div class="w-[1px] h-5 bg-gray-300 mx-2"></div>
-                        
-                        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-blue-50 text-blue-700 hover:bg-blue-100" onmousedown="event.preventDefault()" onclick="changeNumberLocale('bn')" title="বাংলা নম্বর (১২৩)">১২৩</button>
-                        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-green-50 text-green-700 hover:bg-green-100" onmousedown="event.preventDefault()" onclick="changeNumberLocale('en')" title="ইংরেজি নম্বর (123)">123</button>
-                    </div>
-                            </div>
+                      <div class="tool-group w-full justify-start">
+        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('upper')" title="সব বড় হাতের (UPPERCASE)">AB</button>
+        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('lower')" title="সব ছোট হাতের (lowercase)">ab</button>
+        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('title')" title="প্রথম অক্ষর বড় (Title Case)">Aa</button>
+        
+        <div class="w-[1px] h-5 bg-gray-300 mx-2"></div>
+        
+        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-blue-50 text-blue-700 hover:bg-blue-100" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('bn')" title="বাংলা নম্বর (১২৩)">১২৩</button>
+        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-green-50 text-green-700 hover:bg-green-100" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('en')" title="ইংরেজি নম্বর (123)">123</button>
+    </div>
                 <div class="toolbar-row border-t border-gray-200 pt-1">
                     <div class="flex gap-2">
                         
@@ -961,96 +963,81 @@ CustomUI.init();
         localStorage.setItem('ardm_notice_font', font);
     }
 
-    // ==========================================      
-// TEXT CASE & NUMBER LOCALE MANAGER      
-// ==========================================  
-
-// ১. টেক্সট Case পরিবর্তন (Upper, Lower, Title)
-function applyCaseLogic(text, type) {
-    if (type === 'upper') return text.toUpperCase();
-    if (type === 'lower') return text.toLowerCase();
-    if (type === 'title') {
-        // প্রতিটি শব্দের প্রথম অক্ষর বড় করবে (যেমন: abdur razzaq -> Abdur Razzaq)
-        return text.replace(/\w\S*/g, function(txt){ 
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); 
-        });
-    }
-    return text;
-}
-
-function changeTextCase(caseType) {
-    if(isPreviewMode) { 
-        if (savedSelectionRange) {
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(savedSelectionRange);
-        }
-        let text = window.getSelection().toString();
-        if(!text) { showToast("প্রথমে কোনো লেখা সিলেক্ট করুন!", "warning"); return; }
-        
-        let newText = applyCaseLogic(text, caseType);
-        
-        document.execCommand("insertText", false, newText); 
-        saveSelectionState();
-        syncVisualToCode(); 
-        return; 
-    }
-
+  // ==========================================      
+// SMART TEXT & TAG MODIFIER ENGINE      
+// ========================================== 
+function applyTransformWrapper(type) {
     const textarea = document.getElementById('msg-template');
-    textarea.setSelectionRange(savedTextareaStart, savedTextareaEnd);
-    textarea.focus();
-
-    const start = textarea.selectionStart; 
-    const end = textarea.selectionEnd;
+    let hasTag = false;
+    let selectedText = "";
     
-    if (start === end) { showToast("প্রথমে কোনো লেখা সিলেক্ট করুন!", "warning"); return; }
-    
-    let text = textarea.value.substring(start, end);
-    let newText = applyCaseLogic(text, caseType);
-
-    textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
-    
-    savedTextareaEnd = start + newText.length;
-    textarea.setSelectionRange(start, savedTextareaEnd);
-    syncCodeToVisual();
-}
-
-// ২. নম্বর ভাষা পরিবর্তন (বাংলা / ইংরেজি)
-function changeNumberLocale(lang) {
     if(isPreviewMode) { 
-        if (savedSelectionRange) {
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(savedSelectionRange);
-        }
-        let text = window.getSelection().toString();
-        if(!text) { showToast("প্রথমে কোনো সংখ্যা সিলেক্ট করুন!", "warning"); return; }
+        const sel = window.getSelection();
+        if (!savedSelectionRange || sel.isCollapsed) { showToast("প্রথমে লেখা বা ট্যাগ সিলেক্ট করুন!", "warning"); return; }
         
-        let newText = lang === 'bn' ? toBn(text) : toEn(text);
+        const range = sel.getRangeAt(0);
+        const container = document.createElement('div');
+        container.appendChild(range.cloneContents());
         
-        document.execCommand("insertText", false, newText); 
-        saveSelectionState();
-        syncVisualToCode(); 
-        return; 
+        if (container.querySelector('.tag-hl') || container.innerHTML.includes('[')) hasTag = true;
+        selectedText = container.innerHTML;
+    } else {
+        textarea.setSelectionRange(savedTextareaStart, savedTextareaEnd);
+        textarea.focus();
+        const start = textarea.selectionStart; 
+        const end = textarea.selectionEnd;
+        if (start === end) { showToast("প্রথমে লেখা বা ট্যাগ সিলেক্ট করুন!", "warning"); return; }
+        
+        selectedText = textarea.value.substring(start, end);
+        if (selectedText.includes('[')) hasTag = true;
     }
-
-    const textarea = document.getElementById('msg-template');
-    textarea.setSelectionRange(savedTextareaStart, savedTextareaEnd);
-    textarea.focus();
-
-    const start = textarea.selectionStart; 
-    const end = textarea.selectionEnd;
     
-    if (start === end) { showToast("প্রথমে কোনো সংখ্যা সিলেক্ট করুন!", "warning"); return; }
+    // যদি শুধু সাধারণ লেখা হয়, তবে সাথে সাথে পরিবর্তন করে দেবে
+    if (!hasTag) {
+        let plainText = selectedText;
+        if (isPreviewMode) {
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = selectedText;
+            plainText = tempDiv.textContent;
+        }
+        
+        let newText = plainText;
+        if (type === 'upper') newText = newText.toUpperCase();
+        if (type === 'lower') newText = newText.toLowerCase();
+        if (type === 'title') newText = newText.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+        if (type === 'bn') newText = newText.replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+        if (type === 'en') {
+            const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+            newText = newText.replace(/[০-৯]/g, d => bnToEn[d] || d);
+        }
+        
+        if (isPreviewMode) {
+            document.execCommand("insertText", false, newText);
+            saveSelectionState();
+            syncVisualToCode();
+        } else {
+            textarea.value = textarea.value.substring(0, textarea.selectionStart) + newText + textarea.value.substring(textarea.selectionEnd);
+            savedTextareaEnd = textarea.selectionStart + newText.length;
+            textarea.setSelectionRange(textarea.selectionStart, savedTextareaEnd);
+            syncCodeToVisual();
+        }
+        return;
+    }
     
-    let text = textarea.value.substring(start, end);
-    let newText = lang === 'bn' ? toBn(text) : toEn(text);
-
-    textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
-    
-    savedTextareaEnd = start + newText.length;
-    textarea.setSelectionRange(start, savedTextareaEnd);
-    syncCodeToVisual();
+    // যদি ভেতরে ট্যাগ থাকে, তবে সেফটি র্যাপিং করবে
+    if(isPreviewMode) { 
+        let wrapped = `<span class="data-transform" data-trans="${type}">${selectedText}</span>`;
+        document.execCommand("insertHTML", false, wrapped);
+        saveSelectionState();
+        syncVisualToCode();
+        syncCodeToVisual();
+    } else {
+        const newText = `[transform=${type}]${selectedText}[/transform]`;
+        textarea.value = textarea.value.substring(0, textarea.selectionStart) + newText + textarea.value.substring(textarea.selectionEnd);
+        savedTextareaEnd = textarea.selectionStart + newText.length;
+        textarea.setSelectionRange(textarea.selectionStart, savedTextareaEnd);
+        syncCodeToVisual();
+    }
 }
 
 
@@ -1178,7 +1165,13 @@ function showToast(msg, type = 'info', duration = 3000) {
  return `<div style="text-align: ${align}; display: block;">${content}</div>`;
  });
  } while (html !== prevAlign);
- 
+ let prevTransform;
+    do {
+        prevTransform = html;
+        html = html.replace(/\[transform=([^\]]+)\]((?:(?!\[\/?transform)[^])*?)\[\/transform\]/gi, function(match, type, content) {
+            return `<span class="data-transform" data-trans="${type}">${content}</span>`;
+        });
+    } while (html !== prevTransform);
  return html;
  }
  
@@ -1233,7 +1226,15 @@ function convertToRaw(htmlContent) {
             }
         }
     });
-    
+        // ট্রান্সফর্ম ডাটা রিকভারি
+    tempDiv.querySelectorAll('span.data-transform, span[data-trans]').forEach(el => {
+        let type = el.getAttribute('data-trans');
+        if (type) {
+            el.insertAdjacentText('afterbegin', `[transform=${type}]`);
+            el.insertAdjacentText('beforeend', `[/transform]`);
+        }
+    });
+
     // ৬. স্পেস ও মার্জিন
     tempDiv.querySelectorAll('div[data-margin]').forEach(el => {
         const margin = el.getAttribute('data-margin');
@@ -1271,6 +1272,15 @@ function convertToRaw(htmlContent) {
 
     // তিন বা ততোধিক লাইন ব্রেক থাকলে তা কমিয়ে সুন্দর দুটি লাইনে নিয়ে আসা
     raw = raw.replace(/\n{3,}/g, '\n\n'); 
+        raw = raw.replace(/\s*\[transform=([a-zA-Z]+)\]\s*/gi, '[transform=$1]');
+    raw = raw.replace(/\s*\[\/transform\]\s*/gi, '[/transform]');
+    let prevRawT;
+    do {
+        prevRawT = raw;
+        raw = raw.replace(/\[transform=([a-zA-Z]+)\]([\s\S]*?)\[\/transform\]([\s\n]*)\[transform=\1\]/gi, '[transform=$1]$2$3');
+    } while (raw !== prevRawT);
+    raw = raw.replace(/\[transform=[a-zA-Z]+\][\s\n]*\[\/transform\]/gi, '');
+
     return raw.trim();
 }
 
@@ -1498,6 +1508,27 @@ function wrapTagsWithoutData(text) {
     msg = msg.replace(/\[CSV_([^\]]+)\]/gi, function(match) {
         return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
     });
+    // --- ডাইনামিক ডাটা ট্রান্সফর্ম ইঞ্জিন ---
+    let prevMsg;
+    do {
+        prevMsg = msg;
+        msg = msg.replace(/\[transform=([^\]]+)\]([\s\S]*?)\[\/transform\]/gi, function(match, type, content) {
+            if (forPreview && !st) return match; // প্রিভিউতে সুরক্ষিত রাখবে
+            
+            return content.replace(/(<[^>]+>)|([^<]+)/g, function(m, htmlTag, plainText) {
+                if (htmlTag) return htmlTag;
+                if (type === 'upper') return plainText.toUpperCase();
+                if (type === 'lower') return plainText.toLowerCase();
+                if (type === 'title') return plainText.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+                if (type === 'bn') return plainText.replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+                if (type === 'en') {
+                    const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+                    return plainText.replace(/[০-৯]/g, d => bnToEn[d] || d);
+                }
+                return plainText;
+            });
+        });
+    } while (msg !== prevMsg);
 
     return msg;
 }
