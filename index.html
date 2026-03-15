@@ -625,7 +625,7 @@
         <div class="nav-btn" id="tab-print" onclick="switchTab('print')" style="pointer-events: none; opacity: 0.5;"><i data-lucide="send" class="w-6 h-6"></i> পাঠান (Send)</div>
     </nav>
 </div>
-<div id="print-engine">
+
     <div id="custom-alert-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] hidden flex justify-center items-center transition-opacity">
     <div class="bg-white w-11/12 max-w-sm rounded-2xl p-5 shadow-2xl transform scale-95 transition-transform">
         <div id="alert-icon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"></div>
@@ -662,7 +662,7 @@
             <button id="prompt-submit-btn" class="flex-1 bg-[#005A34] text-white font-bold py-3 rounded-xl hover:bg-[#004225] transition-colors active:scale-[0.98]">সাবমিট</button>
         </div>
     </div>
-</div>
+<div id="print-engine"></div>
 
 </div>
 <script>
@@ -3080,12 +3080,7 @@ async function sendBulkSMS() {
     if (pass === null) return; 
     if (pass !== SMS_BULK_PASS) { showToast("অ্যাডমিন পাসওয়ার্ড ভুল হয়েছে!", "error"); return; }
 
-    let pass = prompt(promptText);
-    if (pass === null) return; // ক্যান্সেল করলে
-    if (pass !== SMS_BULK_PASS) { 
-        showToast("অ্যাডমিন পাসওয়ার্ড ভুল হয়েছে!", "error"); 
-        return; 
-    }
+    
 
     showToast("বাল্ক মেসেজ প্রসেসিং শুরু হয়েছে...", "info");
 
@@ -3203,31 +3198,38 @@ function saveCampaignData(phonesArray, currentTemplate) {
     localStorage.setItem('ardm_campaign_msg', savedMsg);
     localStorage.setItem('ardm_campaign_list', JSON.stringify(savedList));
 }
-        // ==========================================      
+       // ==========================================      
     // CSV & RESULT MERGE ENGINE (ULTRA PRO MAX)      
     // ==========================================  
     async function handleCSVUpload(e) {
         const file = e.target.files[0];
         if(!file) return;
         
-        if(originalParsedStudents.length === 0) {
-            showToast("প্রথমে ওপরের বাটন থেকে API ডাটা লোড করুন!", "error");
-            e.target.value = '';
-            return;
-        }
-        
+        // ১. SheetJS লাইব্রেরি চেক
         if (typeof XLSX === 'undefined') {
             showToast("SheetJS লাইব্রেরি লোড হয়নি! দয়া করে ইন্টারনেট সংযোগ চেক করে পেজ রিলোড দিন।", "error");
             e.target.value = '';
             return;
         }
+
+        // ২. ম্যাজিক: আগের ডাটা মুছে ফ্রেশ API ডাটা আনা
+        showToast("আগের ডাটা মুছে ফ্রেশ API ডাটা আনা হচ্ছে...", "info");
+        await fetchOnlineStudents(); // এটি অটোমেটিক আগের সব ডাটা ও ফিল্টার রিসেট করে দেবে
+
+        // ৩. API ডাটা চেক (যদি নেটওয়ার্ক বা অন্য কোনো কারণে ডাটা না আসে)
+        if(originalParsedStudents.length === 0) {
+            await CustomUI.alert("ত্রুটি", "API থেকে কোনো ডাটা পাওয়া যায়নি! ক্লাস ও শিক্ষাবর্ষ ঠিক আছে কিনা চেক করুন।", "error");
+            e.target.value = '';
+            return;
+        }
         
-        showToast("CSV ফাইল পড়া হচ্ছে...", "info");
-        document.getElementById('loader-msg').innerText = "ডাটা মার্জ হচ্ছে...";
+        // ৪. নতুন CSV ডাটা প্রসেস শুরু
+        showToast("নতুন CSV ফাইল পড়া হচ্ছে...", "info");
+        document.getElementById('loader-msg').innerText = "ফাইল থেকে ডাটা মার্জ হচ্ছে...";
         document.getElementById('loader').style.display = 'flex';
         
         const reader = new FileReader();
-        reader.onload = function(evt) {
+        reader.onload = async function(evt) {
             try {
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
@@ -3257,7 +3259,7 @@ function saveCampaignData(phonesArray, currentTemplate) {
                 });
                 
                 if(!idCol) {
-                    idCol = prompt("সিস্টেম 'ID' বা 'Roll' কলামটি নিজে খুঁজে পায়নি।\nআপনার ফাইলের কোন কলামে আইডি/রোল আছে, তার নাম হুবহু লিখুন:\n\nফাইলের কলামসমূহ:\n" + headers.join(", "));
+                    idCol = await CustomUI.prompt("ID কলাম খুঁজুন", "সিস্টেম 'ID' বা 'Roll' কলামটি নিজে খুঁজে পায়নি।\nআপনার ফাইলের কোন কলামে আইডি/রোল আছে, তার নাম হুবহু লিখুন:\n\nফাইলের কলামসমূহ:\n" + headers.join(", "));
                 }
                 
                 if(!idCol || !headers.includes(idCol)) {
@@ -3293,12 +3295,12 @@ function saveCampaignData(phonesArray, currentTemplate) {
                     updateFilterUIAfterApply(); 
                     showToast(`সফল! ${mergedCount} জন শিক্ষার্থীর ডাটা মার্জ করা হয়েছে।`, "success", 5000);
                 } else {
-                    showToast("ফাইলের আইডির সাথে API এর আইডির কোনো মিল পাওয়া যায়নি!", "error", 5000);
+                    await CustomUI.alert("ম্যাচিং ব্যর্থ", "ফাইলের আইডির সাথে API এর আইডির কোনো মিল পাওয়া যায়নি!", "error");
                 }
                 
             } catch (err) {
                 console.error("CSV Merge Error: ", err);
-                alert("Technical Error: " + err.message); 
+                await CustomUI.alert("টেকনিক্যাল এরর", "Technical Error: " + err.message, "error"); 
                 showToast("ফাইলটি প্রসেস করতে সমস্যা হয়েছে!", "error");
             }
             
