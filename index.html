@@ -965,7 +965,7 @@ CustomUI.init();
         localStorage.setItem('ardm_notice_font', font);
     }
 
-  // ==========================================      
+ // ==========================================      
 // SMART TEXT & TAG MODIFIER ENGINE      
 // ========================================== 
 function applyTransformWrapper(type) {
@@ -1032,7 +1032,7 @@ function applyTransformWrapper(type) {
         document.execCommand("insertHTML", false, wrapped);
         saveSelectionState();
         syncVisualToCode();
-        syncCodeToVisual();
+        // 🚀 ফিক্স: প্রিভিউ মোডে অপ্রয়োজনীয় রিলোড বন্ধ করা হয়েছে, ফলে কার্সর ঠিক থাকবে।
     } else {
         const newText = `[transform=${type}]${selectedText}[/transform]`;
         textarea.value = textarea.value.substring(0, textarea.selectionStart) + newText + textarea.value.substring(textarea.selectionEnd);
@@ -1041,7 +1041,6 @@ function applyTransformWrapper(type) {
         syncCodeToVisual();
     }
 }
-
 
     function saveMessageLocally() {
         const msg = document.getElementById('msg-template').value;
@@ -1176,18 +1175,29 @@ function showToast(msg, type = 'info', duration = 3000) {
     } while (html !== prevTransform);
  return html;
  }
- 
 function convertToRaw(htmlContent) {
     let tempDiv = document.createElement('div');
     tempDiv.innerHTML = htmlContent;
 
-    // ১. ট্যাগ ডাটা রিকভারি
-    tempDiv.querySelectorAll('.tag-hl').forEach(tag => {
-        tag.replaceWith(tag.getAttribute('data-tag'));
-    });
+    // ১. ট্যাগ ডাটা রিকভারি (সব ব্রাউজারের জন্য ১০০% সেফ)
+    let tags = tempDiv.querySelectorAll('.tag-hl');
+    for(let i=0; i<tags.length; i++) {
+        let tag = tags[i];
+        if (tag.parentNode) {
+            let txt = document.createTextNode(tag.getAttribute('data-tag') || '');
+            tag.parentNode.replaceChild(txt, tag);
+        }
+    }
 
     // ২. <br> ট্যাগগুলোকে নতুন লাইনে কনভার্ট
-    tempDiv.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+    let brs = tempDiv.querySelectorAll('br');
+    for(let i=0; i<brs.length; i++) {
+        let br = brs[i];
+        if (br.parentNode) {
+            let txt = document.createTextNode('\n');
+            br.parentNode.replaceChild(txt, br);
+        }
+    }
 
     // ৩. বোল্ড, ইটালিক, স্ট্রাইক
     tempDiv.querySelectorAll('b, strong').forEach(el => { el.insertAdjacentText('afterbegin', '*'); el.insertAdjacentText('beforeend', '*'); });
@@ -1200,7 +1210,7 @@ function convertToRaw(htmlContent) {
         if (!sizeVal) {
             if (el.tagName === 'FONT') sizeVal = el.getAttribute('size');
             else {
-                const match = el.style.fontSize.match(/(\d+)(pt|px)/);
+                const match = el.style.fontSize && el.style.fontSize.match(/(\d+)(pt|px)/);
                 if (match) sizeVal = match[2] === 'px' ? Math.round(parseInt(match[1]) * 0.75) : match[1];
             }
         }
@@ -1228,7 +1238,8 @@ function convertToRaw(htmlContent) {
             }
         }
     });
-        // ট্রান্সফর্ম ডাটা রিকভারি
+
+    // ট্রান্সফর্ম ডাটা রিকভারি
     tempDiv.querySelectorAll('span.data-transform, span[data-trans]').forEach(el => {
         let type = el.getAttribute('data-trans');
         if (type) {
@@ -1254,7 +1265,6 @@ function convertToRaw(htmlContent) {
     let raw = tempDiv.textContent || tempDiv.innerText || "";
     
     // ৯. অবাঞ্ছিত এন্টার বা লাইন ব্রেক ফিক্স করা
-    // এলাইন ও স্পেস এর আশেপাশের অতিরিক্ত স্পেস রিমুভ করে পারফেক্ট লাইন তৈরি করা
     raw = raw.replace(/\s*\[align=([a-zA-Z\-]+)\]\s*/gi, '\n[align=$1]\n');
     raw = raw.replace(/\s*\[\/align\]\s*/gi, '\n[/align]\n');
     raw = raw.replace(/\s*\[space=([\d,]+)\]\s*/gi, '\n[space=$1]\n');
@@ -1272,9 +1282,9 @@ function convertToRaw(htmlContent) {
     raw = raw.replace(/\[align=[a-zA-Z\-]+\][\s\n]*\[\/align\]/gi, '');
     raw = raw.replace(/\[space=[\d,]+\][\s\n]*\[\/space\]/gi, '');
 
-    // তিন বা ততোধিক লাইন ব্রেক থাকলে তা কমিয়ে সুন্দর দুটি লাইনে নিয়ে আসা
     raw = raw.replace(/\n{3,}/g, '\n\n'); 
-        raw = raw.replace(/\s*\[transform=([a-zA-Z]+)\]\s*/gi, '[transform=$1]');
+    
+    raw = raw.replace(/\s*\[transform=([a-zA-Z]+)\]\s*/gi, '[transform=$1]');
     raw = raw.replace(/\s*\[\/transform\]\s*/gi, '[/transform]');
     let prevRawT;
     do {
@@ -1285,7 +1295,6 @@ function convertToRaw(htmlContent) {
 
     return raw.trim();
 }
-
 
 
     function syncCodeToVisual() {
