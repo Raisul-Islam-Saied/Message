@@ -2786,18 +2786,18 @@ document.getElementById('btn-generate').addEventListener('click', async function
         
         if(isPreviewMode) renderPreview();
     }
-    // ==========================================      
+        // ==========================================      
     // EXCEL (CSV) DOWNLOAD LOGIC      
     // ==========================================  
-    function downloadExcel() {
+    async function downloadExcel() {
         if(parsedStudents.length === 0) {
-            showToast("কোনো ডাটা নেই!");
+            showToast("কোনো ডাটা নেই!", "warning");
             return;
         }
     
         const rawTemplate = document.getElementById('msg-template').value;
         if(!rawTemplate.trim()) { 
-            showToast("মেসেজ ফাঁকা!"); 
+            showToast("মেসেজ ফাঁকা!", "warning"); 
             return; 
         }
     
@@ -2805,8 +2805,22 @@ document.getElementById('btn-generate').addEventListener('click', async function
         const cls = document.getElementById('api-class').value;
         const yr = document.getElementById('api-year').value;
         
-        // ডাইনামিক ফাইলের নাম তৈরি করা
-        const fileName = `SMS_List_${cls}_${yr}.csv`;
+        // ডিফল্ট ফাইলের নাম তৈরি করা (CustomUI prompt-এ দেখানোর জন্য)
+        const defaultFileName = `SMS_List_${cls}_${yr}`;
+
+        // ইউজারের কাছে ফাইলের নাম জানতে চাওয়া
+        let userInputName = await CustomUI.prompt("ফাইলের নাম দিন", "ডাউনলোড করার আগে ফাইলের একটি নাম নির্ধারণ করুন:", "text", defaultFileName);
+        
+        // ইউজার যদি 'বাতিল' বাটনে ক্লিক করে
+        if (userInputName === null) return;
+
+        // ইউজার যদি পুরো নাম মুছে দিয়ে ফাঁকা সাবমিট করে, তাহলে ডিফল্ট নাম বসবে
+        let finalFileName = userInputName.trim() === "" ? defaultFileName : userInputName.trim();
+        
+        // নামের শেষে .csv না থাকলে অটোমেটিক যুক্ত করে দেওয়া
+        if (!finalFileName.toLowerCase().endsWith('.csv')) {
+            finalFileName += '.csv';
+        }
     
         // UTF-8 BOM যুক্ত করছি যেন এক্সেলে বাংলা ফন্ট একদম ঠিক থাকে
         let csvContent = "\uFEFF"; 
@@ -2818,15 +2832,16 @@ document.getElementById('btn-generate').addEventListener('click', async function
             
             // এক্সেলে/এসএমএসে কোনো ধরনের ফরম্যাটিং যেন না থাকে, তাই সব মুছে ফেলা হচ্ছে
             let cleanMsg = msgRaw
-                .replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '') // size, align, space ট্যাগ মুছবে
-                .replace(/[*_~]/g, ''); // বোল্ড (*), ইটালিক (_), স্ট্রাইকথ্রু (~) চিহ্ন মুছবে
+                .replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '') 
+                .replace(/[*_~]/g, ''); 
     
             // অতিরিক্ত ফাঁকা লাইনগুলো ক্লিন করে সুন্দর করা
             cleanMsg = cleanMsg.replace(/\n{3,}/g, '\n\n').trim();
     
             // মোবাইল নম্বর সংগ্রহ ও ফরম্যাট (শুরুতে 88 যুক্ত করা)
             let phone = String(student.WhatsApp || student.EmergencyNo).replace(/[^0-9]/g, '');
-            if (phone.startsWith('0')) phone = '88' + phone;
+            if (phone.length === 11 && phone.startsWith('0')) phone = '88' + phone;
+            else if (phone.length === 10) phone = '880' + phone;
     
             // এক্সেলে কমা (,) বা লাইন ব্রেক (Enter) থাকলে তা ডাবল কোটেশনে ("") রাখতে হয়
             let safeMsg = '"' + cleanMsg.replace(/"/g, '""') + '"';
@@ -2840,14 +2855,15 @@ document.getElementById('btn-generate').addEventListener('click', async function
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
-        link.setAttribute("download", fileName); // ডাইনামিক নাম এখানে বসানো হয়েছে
+        link.setAttribute("download", finalFileName); // ইউজারের দেওয়া নাম এখানে বসানো হয়েছে
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     
-        showToast("এক্সেল ফাইল ডাউনলোড সফল হয়েছে!");
+        showToast("এক্সেল ফাইল ডাউনলোড সফল হয়েছে!", "success");
     }
+
     // ==========================================      
     // NUMBER GENERATOR LOGIC      
     // ==========================================  
