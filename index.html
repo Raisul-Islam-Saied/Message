@@ -1432,20 +1432,7 @@ function replaceTagsWithData(template, st, forPreview = false) {
 
     const wrap = (tag, val) => forPreview ? `<span class="tag-hl" data-tag="${tag}" contenteditable="false">${val || '-'}</span>` : (val || '-');
 
-   /* const map = {
-        '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
-        '[IDBn]': wrap('[IDBn]', toBn(st.ID)), '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
-        '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn), '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
-        '[IDEn]': wrap('[IDEn]', st.ID), '[GenderEn]': wrap('[GenderEn]', st.Gender), '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
-        '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn),
-        '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn),
-        '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
-        '[DOB]': wrap('[DOB]', formatDate(st.DOB)), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),
-        '[VillageBn]': wrap('[VillageBn]', st.VillageBn), '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
-        '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
-    };
-*/
-        // --- NEW CSV DYNAMIC TAG ENGINE ---
+    // --- NEW CSV DYNAMIC TAG ENGINE ---
     const csvRegex = /\[CSV_([^\]]+)\]/gi;
     msg = msg.replace(csvRegex, function(match, colName) {
         if(forPreview && !st) return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
@@ -1454,30 +1441,23 @@ function replaceTagsWithData(template, st, forPreview = false) {
     });
     // ----------------------------------
 
-        const map = {
+    const map = {
         '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), 
         '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), 
         '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
         '[IDBn]': wrap('[IDBn]', toBn(st.ID)), 
         '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), 
         '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
-        
-        // এখানে ইংরেজি নামগুলো সব বড় হাতের (Uppercase) করে দেওয়া হয়েছে
         '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn ? st.StudentNameEn.toUpperCase() : ''), 
         '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), 
         '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
         '[IDEn]': wrap('[IDEn]', st.ID), 
         '[GenderEn]': wrap('[GenderEn]', st.Gender), 
         '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
-        
         '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), 
-        // পিতার ইংরেজি নাম বড় হাতের
         '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn ? st.FatherNameEn.toUpperCase() : ''),
-        
         '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), 
-        // মাতার ইংরেজি নাম বড় হাতের
         '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn ? st.MotherNameEn.toUpperCase() : ''),
-        
         '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), 
         '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
         '[DOB]': wrap('[DOB]', formatDate(st.DOB)), 
@@ -1490,27 +1470,8 @@ function replaceTagsWithData(template, st, forPreview = false) {
     };
 
     for (const [key, val] of Object.entries(map)) { msg = msg.split(key).join(val); }
-    return msg;
-}
 
-function wrapTagsWithoutData(text) {
-    const tags = ['[StudentNameBn]', '[RollBn]', '[ClassBn]', '[IDBn]', '[GenderBn]', '[AgeBn]', '[StudentNameEn]', '[RollEn]', '[ClassEn]', '[IDEn]', '[GenderEn]', '[AgeEn]', '[FatherNameBn]', '[FatherNameEn]', '[MotherNameBn]', '[MotherNameEn]', '[WhatsApp]', '[EmergencyNo]', '[DOB]', '[BloodGroup]', '[BRN]', '[VillageBn]', '[FullAddressBn]', '[VillageEn]', '[FullAddressEn]'];
-    let msg = text;
-    tags.forEach(tag => {
-        msg = msg.split(tag).join(`<span class="tag-hl" data-tag="${tag}" contenteditable="false">${tag}</span>`);
-    });
-    msg = msg.replace(/\[LOGIC:([^\]]+)\]/gi, function(match) {
-        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
-    });
-    // রেন্ডম এবং সিরিয়াল ট্যাগের জন্য হাইলাইট (RANDOM_NUM যোগ করা হলো)
-    msg = msg.replace(/\[NUM:(SERIAL|RANDOM|RANDOM_NUM):([^\]]+)\]/gi, function(match) {
-        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
-    });
-        // CSV ট্যাগের জন্য ডাইনামিক হাইলাইট
-    msg = msg.replace(/\[CSV_([^\]]+)\]/gi, function(match) {
-        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
-    });
-    // --- ডাইনামিক ডাটা ট্রান্সফর্ম ইঞ্জিন ---
+    // --- 🚀 ডাইনামিক ডাটা ট্রান্সফর্ম ইঞ্জিন (সঠিক জায়গা) ---
     let prevMsg;
     do {
         prevMsg = msg;
@@ -1531,10 +1492,29 @@ function wrapTagsWithoutData(text) {
             });
         });
     } while (msg !== prevMsg);
+    // ----------------------------------------------------
 
     return msg;
 }
 
+function wrapTagsWithoutData(text) {
+    const tags = ['[StudentNameBn]', '[RollBn]', '[ClassBn]', '[IDBn]', '[GenderBn]', '[AgeBn]', '[StudentNameEn]', '[RollEn]', '[ClassEn]', '[IDEn]', '[GenderEn]', '[AgeEn]', '[FatherNameBn]', '[FatherNameEn]', '[MotherNameBn]', '[MotherNameEn]', '[WhatsApp]', '[EmergencyNo]', '[DOB]', '[BloodGroup]', '[BRN]', '[VillageBn]', '[FullAddressBn]', '[VillageEn]', '[FullAddressEn]'];
+    let msg = text;
+    tags.forEach(tag => {
+        msg = msg.split(tag).join(`<span class="tag-hl" data-tag="${tag}" contenteditable="false">${tag}</span>`);
+    });
+    msg = msg.replace(/\[LOGIC:([^\]]+)\]/gi, function(match) {
+        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+    });
+    msg = msg.replace(/\[NUM:(SERIAL|RANDOM|RANDOM_NUM):([^\]]+)\]/gi, function(match) {
+        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+    });
+    msg = msg.replace(/\[CSV_([^\]]+)\]/gi, function(match) {
+        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+    });
+
+    return msg;
+}
   
     // ==========================================      
     // EDITOR BUTTONS      
