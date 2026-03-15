@@ -3077,16 +3077,23 @@ function saveCampaignData(phonesArray, currentTemplate) {
     localStorage.setItem('ardm_campaign_list', JSON.stringify(savedList));
 }
 
-        // ==========================================      
-    // CSV & RESULT MERGE ENGINE      
+       // ==========================================      
+    // CSV & RESULT MERGE ENGINE (ULTRA PRO MAX)      
     // ==========================================  
     async function handleCSVUpload(e) {
         const file = e.target.files[0];
         if(!file) return;
         
-        // প্রথমে API ডাটা লোড করা থাকতে হবে
+        // ১. API ডাটা চেক
         if(originalParsedStudents.length === 0) {
             showToast("প্রথমে ওপরের বাটন থেকে API ডাটা লোড করুন!", "error");
+            e.target.value = '';
+            return;
+        }
+        
+        // ২. SheetJS লাইব্রেরি চেক (স্লো ইন্টারনেটের কারণে মিসিং হলে)
+        if (typeof XLSX === 'undefined') {
+            showToast("SheetJS লাইব্রেরি লোড হয়নি! দয়া করে ইন্টারনেট সংযোগ চেক করে পেজ রিলোড দিন।", "error");
             e.target.value = '';
             return;
         }
@@ -3103,73 +3110,82 @@ function saveCampaignData(phonesArray, currentTemplate) {
                 const firstSheet = workbook.SheetNames[0];
                 const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
                 
-                if(jsonData.length === 0) {
-                    showToast("আপলোড করা ফাইলটি ফাঁকা!", "error");
-                    document.getElementById('loader').style.display = 'none';
-                    return;
+                // ৩. খালি ফাইল চেক
+                if(!jsonData || jsonData.length === 0) {
+                    throw new Error("আপনার আপলোড করা ফাইলটি ফাঁকা বা সঠিক ফরম্যাটে নেই!");
                 }
                 
                 const headers = Object.keys(jsonData[0]);
                 
-                // ১. অটোমেটিক ID কলাম খোঁজার চেষ্টা (id, ID, আইডি ইত্যাদি)
-                let idCol = headers.find(h => /id|আইডি/i.test(h));
+                // ৪. স্মার্ট ID কলাম ম্যাচিং (ভুল কলাম ধরবে না)
+                let idCol = headers.find(h => {
+                    let lower = h.trim().toLowerCase();
+                    return lower === 'id' || lower === 'student id' || lower === 'roll' || h.trim() === 'আইডি';
+                });
                 
-                // যদি অটোমেটিক না পায়, তবে ইউজারের কাছে নাম জানতে চাইবে
                 if(!idCol) {
-                    idCol = prompt("সিস্টেম 'Student ID' কলামটি নিজে খুঁজে পায়নি।\nআপনার ফাইলের কোন কলামে আইডি আছে, তার নাম হুবহু লিখুন:\n\nফাইলের কলামসমূহ:\n" + headers.join(", "));
+                    idCol = prompt("সিস্টেম 'ID' বা 'Roll' কলামটি নিজে খুঁজে পায়নি।\nআপনার ফাইলের কোন কলামে আইডি/রোল আছে, তার নাম হুবহু লিখুন:\n\nফাইলের কলামসমূহ:\n" + headers.join(", "));
                 }
                 
                 if(!idCol || !headers.includes(idCol)) {
-                    showToast("সঠিক ID কলামের নাম পাওয়া যায়নি। মার্জ বাতিল করা হলো!", "error");
-                    document.getElementById('loader').style.display = 'none';
-                    e.target.value = '';
-                    return;
+                    throw new Error("সঠিক ID কলাম পাওয়া যায়নি। মার্জ বাতিল করা হলো!");
                 }
                 
                 let mergedCount = 0;
                 let newParsed = [];
-                let newHeaders = headers.filter(h => h !== idCol); // ID ছাড়া বাকি সব কলাম
+                let newHeaders = headers.filter(h => h !== idCol); 
                 
-                // ২. API এর ডাটার সাথে CSV ডাটার ক্রস-ম্যাচিং (ID দিয়ে)
+                // ৫. নিখুঁত ডাটা ক্রস-ম্যাচিং
                 parsedStudents.forEach(st => {
-                    let csvRow = jsonData.find(row => String(row[idCol]).trim() === String(st.ID).trim());
+                    // API এর আইডি অথবা রোল যেটি পাওয়া যায়, সেটি দিয়ে ম্যাচ করবে
+                    let stTargetID = st.ID ? String(st.ID).trim() : (st.Roll ? String(st.Roll).trim() : "");
+                    
+                    let csvRow = jsonData.find(row => {
+                        if (row[idCol] === undefined || row[idCol] === null) return false;
+                        return String(row[idCol]).trim() === stTargetID;
+                    });
+                    
                     if(csvRow) {
-                        let mergedSt = { ...st }; // API এর ডাটা
-                        // CSV এর ডাটাগুলো যুক্ত করা হচ্ছে (নামের আগে CSV_ লাগিয়ে, যেন বুঝতে সুবিধা হয়)
+                        let mergedSt = { ...st }; 
                         newHeaders.forEach(col => {
-                            mergedSt[`CSV_${col}`] = csvRow[col];
+                            mergedSt[`CSV_${col}`] = csvRow[col] !== undefined ? csvRow[col] : '-';
                         });
                         newParsed.push(mergedSt);
                         mergedCount++;
                     }
                 });
                 
-                // ৩. যদি ম্যাচ পাওয়া যায়, তবে সিস্টেম আপডেট করা
+                // ৬. রেজাল্ট আপডেট
                 if(mergedCount > 0) {
                     parsedStudents = newParsed;
-                    originalParsedStudents = [...newParsed]; // ফিল্টার করার জন্যও এটি সেভ রাখা হলো
+                    originalParsedStudents = [...newParsed]; 
                     
-                    updateVarSelectDropdown(newHeaders); // ড্রপডাউনে মেনু যোগ করা
-                    updateFilterUIAfterApply(); // প্রিভিউ এবং কাউন্ট আপডেট করা
+                    updateVarSelectDropdown(newHeaders); 
+                    updateFilterUIAfterApply(); 
                     
-                    showToast(`সফল! ${mergedCount} জন শিক্ষার্থীর সাথে CSV ডাটা মার্জ করা হয়েছে।`, "success", 4000);
+                    showToast(`সফল! ${mergedCount} জন শিক্ষার্থীর ডাটা মার্জ করা হয়েছে।`, "success", 5000);
                 } else {
-                    showToast("CSV এর কোনো আইডির সাথে API এর আইডির মিল পাওয়া যায়নি!", "error", 5000);
+                    showToast("ফাইলের আইডির সাথে API এর আইডির কোনো মিল পাওয়া যায়নি!", "error", 5000);
                 }
                 
             } catch (err) {
-                console.error(err);
+                console.error("CSV Merge Error: ", err);
+                alert("Technical Error: " + err.message); // আপনাকে আসল কারণটি স্ক্রিনে বলে দেবে
                 showToast("ফাইলটি প্রসেস করতে সমস্যা হয়েছে!", "error");
             }
+            
+            // লোডার বন্ধ করা এবং ইনপুট রিসেট
             document.getElementById('loader').style.display = 'none';
-            e.target.value = ''; // পরেরবার আপলোডের জন্য ইনপুট রিসেট
+            e.target.value = ''; 
         };
+        
         reader.readAsArrayBuffer(file);
     }
     
     // ড্রপডাউনে CSV এর ডাটাগুলো অটোমেটিক যোগ করার ফাংশন
     function updateVarSelectDropdown(csvHeaders) {
         const select = document.getElementById('var-select');
+        if(!select) return; // সিকিউরিটি চেক
         
         // আগে যদি কোনো CSV গ্রুপ থাকে, তা রিমুভ করা
         let existingGroup = select.querySelector('optgroup[label="📊 আপলোড করা রেজাল্ট/CSV ডাটা"]');
@@ -3182,12 +3198,12 @@ function saveCampaignData(phonesArray, currentTemplate) {
             csvHeaders.forEach(header => {
                 let opt = document.createElement('option');
                 opt.value = `[CSV_${header}]`;
-                opt.textContent = header; // ড্রপডাউনে অরিজিনাল কলামের নামই দেখাবে
+                opt.textContent = header; 
                 optGroup.appendChild(opt);
             });
             select.appendChild(optGroup);
         }
-        lucide.createIcons();
+        if(window.lucide) lucide.createIcons();
     }
 
 // ==========================================      
