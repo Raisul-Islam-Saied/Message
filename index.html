@@ -344,7 +344,7 @@
         </div>
     </header>
     <main id="view-home" class="view-container active">
-        <div class="card" style="border-color: #bfdbfe; background: #eff6ff; display: none;">
+        <div class="card" style="border-color: #bfdbfe; background: #eff6ff; ">
             <h3 class="font-bold text-sm text-[#1e40af] mb-3 border-b border-blue-200 pb-2 flex items-center gap-2">
                 <i data-lucide="database" class="w-4 h-4"></i> শিক্ষার্থী নির্বাচন (API)
             </h3>
@@ -377,9 +377,19 @@
                     </select>
                 </div>
             </div>
-            <button id="btn-fetch" class="btn-primary w-full" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 10px rgba(37,99,235,0.3); padding: 12px;" onclick="fetchOnlineStudents()">
+            
+                        <button id="btn-fetch" class="btn-primary w-full" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 10px rgba(37,99,235,0.3); padding: 12px;" onclick="fetchOnlineStudents()">
                 <i data-lucide="cloud-download" class="w-5 h-5"></i> ডাটা লোড করুন
             </button>
+            
+            <div class="mt-3 border-t border-blue-200 pt-3">
+                <button id="btn-csv-upload" class="btn-primary w-full" onclick="document.getElementById('csv-upload-input').click()" style="background: linear-gradient(135deg, #9333ea, #7e22ce); box-shadow: 0 4px 10px rgba(147, 51, 234, 0.3); padding: 12px; font-size: 14px;">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5"></i> রেজাল্ট/CSV ডাটা মার্জ করুন
+                </button>
+                <input type="file" id="csv-upload-input" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event)">
+                <p class="text-[10px] text-blue-600 text-center mt-1 font-bold">API ডাটা লোড করার পর এটি আপলোড করবেন</p>
+            </div>
+
         </div>
         <div class="card" style="padding: 10px;">
             <h3 class="font-bold text-sm text-gray-800 mb-2 border-b pb-2 flex justify-between items-center px-2">
@@ -1114,6 +1124,15 @@ function replaceTagsWithData(template, st, forPreview = false) {
         '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
     };
 */
+        // --- NEW CSV DYNAMIC TAG ENGINE ---
+    const csvRegex = /\[CSV_([^\]]+)\]/gi;
+    msg = msg.replace(csvRegex, function(match, colName) {
+        if(forPreview && !st) return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+        let val = st ? st[`CSV_${colName}`] : '-';
+        return forPreview ? `<span class="tag-hl" data-tag="${match}" contenteditable="false">${val !== undefined ? val : '-'}</span>` : (val !== undefined ? val : '-');
+    });
+    // ----------------------------------
+
         const map = {
         '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), 
         '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), 
@@ -1166,6 +1185,11 @@ function wrapTagsWithoutData(text) {
     msg = msg.replace(/\[NUM:(SERIAL|RANDOM|RANDOM_NUM):([^\]]+)\]/gi, function(match) {
         return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
     });
+        // CSV ট্যাগের জন্য ডাইনামিক হাইলাইট
+    msg = msg.replace(/\[CSV_([^\]]+)\]/gi, function(match) {
+        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+    });
+
     return msg;
 }
 
@@ -3052,6 +3076,120 @@ function saveCampaignData(phonesArray, currentTemplate) {
     localStorage.setItem('ardm_campaign_msg', savedMsg);
     localStorage.setItem('ardm_campaign_list', JSON.stringify(savedList));
 }
+
+        // ==========================================      
+    // CSV & RESULT MERGE ENGINE      
+    // ==========================================  
+    async function handleCSVUpload(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        
+        // প্রথমে API ডাটা লোড করা থাকতে হবে
+        if(originalParsedStudents.length === 0) {
+            showToast("প্রথমে ওপরের বাটন থেকে API ডাটা লোড করুন!", "error");
+            e.target.value = '';
+            return;
+        }
+        
+        showToast("CSV ফাইল পড়া হচ্ছে...", "info");
+        document.getElementById('loader-msg').innerText = "ডাটা মার্জ হচ্ছে...";
+        document.getElementById('loader').style.display = 'flex';
+        
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheet = workbook.SheetNames[0];
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+                
+                if(jsonData.length === 0) {
+                    showToast("আপলোড করা ফাইলটি ফাঁকা!", "error");
+                    document.getElementById('loader').style.display = 'none';
+                    return;
+                }
+                
+                const headers = Object.keys(jsonData[0]);
+                
+                // ১. অটোমেটিক ID কলাম খোঁজার চেষ্টা (id, ID, আইডি ইত্যাদি)
+                let idCol = headers.find(h => /id|আইডি/i.test(h));
+                
+                // যদি অটোমেটিক না পায়, তবে ইউজারের কাছে নাম জানতে চাইবে
+                if(!idCol) {
+                    idCol = prompt("সিস্টেম 'Student ID' কলামটি নিজে খুঁজে পায়নি।\nআপনার ফাইলের কোন কলামে আইডি আছে, তার নাম হুবহু লিখুন:\n\nফাইলের কলামসমূহ:\n" + headers.join(", "));
+                }
+                
+                if(!idCol || !headers.includes(idCol)) {
+                    showToast("সঠিক ID কলামের নাম পাওয়া যায়নি। মার্জ বাতিল করা হলো!", "error");
+                    document.getElementById('loader').style.display = 'none';
+                    e.target.value = '';
+                    return;
+                }
+                
+                let mergedCount = 0;
+                let newParsed = [];
+                let newHeaders = headers.filter(h => h !== idCol); // ID ছাড়া বাকি সব কলাম
+                
+                // ২. API এর ডাটার সাথে CSV ডাটার ক্রস-ম্যাচিং (ID দিয়ে)
+                parsedStudents.forEach(st => {
+                    let csvRow = jsonData.find(row => String(row[idCol]).trim() === String(st.ID).trim());
+                    if(csvRow) {
+                        let mergedSt = { ...st }; // API এর ডাটা
+                        // CSV এর ডাটাগুলো যুক্ত করা হচ্ছে (নামের আগে CSV_ লাগিয়ে, যেন বুঝতে সুবিধা হয়)
+                        newHeaders.forEach(col => {
+                            mergedSt[`CSV_${col}`] = csvRow[col];
+                        });
+                        newParsed.push(mergedSt);
+                        mergedCount++;
+                    }
+                });
+                
+                // ৩. যদি ম্যাচ পাওয়া যায়, তবে সিস্টেম আপডেট করা
+                if(mergedCount > 0) {
+                    parsedStudents = newParsed;
+                    originalParsedStudents = [...newParsed]; // ফিল্টার করার জন্যও এটি সেভ রাখা হলো
+                    
+                    updateVarSelectDropdown(newHeaders); // ড্রপডাউনে মেনু যোগ করা
+                    updateFilterUIAfterApply(); // প্রিভিউ এবং কাউন্ট আপডেট করা
+                    
+                    showToast(`সফল! ${mergedCount} জন শিক্ষার্থীর সাথে CSV ডাটা মার্জ করা হয়েছে।`, "success", 4000);
+                } else {
+                    showToast("CSV এর কোনো আইডির সাথে API এর আইডির মিল পাওয়া যায়নি!", "error", 5000);
+                }
+                
+            } catch (err) {
+                console.error(err);
+                showToast("ফাইলটি প্রসেস করতে সমস্যা হয়েছে!", "error");
+            }
+            document.getElementById('loader').style.display = 'none';
+            e.target.value = ''; // পরেরবার আপলোডের জন্য ইনপুট রিসেট
+        };
+        reader.readAsArrayBuffer(file);
+    }
+    
+    // ড্রপডাউনে CSV এর ডাটাগুলো অটোমেটিক যোগ করার ফাংশন
+    function updateVarSelectDropdown(csvHeaders) {
+        const select = document.getElementById('var-select');
+        
+        // আগে যদি কোনো CSV গ্রুপ থাকে, তা রিমুভ করা
+        let existingGroup = select.querySelector('optgroup[label="📊 আপলোড করা রেজাল্ট/CSV ডাটা"]');
+        if(existingGroup) existingGroup.remove();
+        
+        if(csvHeaders.length > 0) {
+            let optGroup = document.createElement('optgroup');
+            optGroup.label = "📊 আপলোড করা রেজাল্ট/CSV ডাটা";
+            
+            csvHeaders.forEach(header => {
+                let opt = document.createElement('option');
+                opt.value = `[CSV_${header}]`;
+                opt.textContent = header; // ড্রপডাউনে অরিজিনাল কলামের নামই দেখাবে
+                optGroup.appendChild(opt);
+            });
+            select.appendChild(optGroup);
+        }
+        lucide.createIcons();
+    }
+
 // ==========================================      
 // PWA REGISTRATION (APP MODE)      
 // ==========================================
