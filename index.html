@@ -395,11 +395,13 @@ span[data-trans="title"] { text-transform: capitalize; }
             </div>
 
         </div>
-        <div class="card" style="padding: 10px;">
+        
+                    <div class="card" style="padding: 10px;">
             <h3 class="font-bold text-sm text-gray-800 mb-2 border-b pb-2 flex justify-between items-center px-2">
                 <span>মেসেজ তৈরি করুন</span>
                 <span class="text-[10px] text-green-600 font-bold bg-green-100 px-2 py-1 rounded">✅ Auto Saved</span>
             </h3>
+
             <div class="toolbar">
                 <div class="toolbar-row">
                     <div class="tool-group">
@@ -418,154 +420,154 @@ span[data-trans="title"] { text-transform: capitalize; }
                         <button class="tool-btn" onmousedown="event.preventDefault()" onclick="applyAlignment('justify', 'justifyFull')" title="Justify"><i data-lucide="align-justify" class="w-4 h-4"></i></button>
                     </div>
                 </div>
+
                 <div class="toolbar-row border-t border-gray-200 pt-1 mt-1">
                     <div class="tool-group">
-                            <div class="tool-select-wrapper" title="Font Style">
-                                <button class="tool-btn" onmousedown="event.preventDefault()"><i data-lucide="type" class="w-4 h-4"></i></button>
-                                <select id="font-select" onchange="applyFont()">
-                                    <option value="'Anek Bangla', sans-serif">Anek Bangla (আধুনিক)</option>
-                                    <option value="'Noto Serif Bengali', serif">Noto Serif (অফিসিয়াল)</option>
-                                    <option value="'Hind Siliguri', sans-serif">Hind Siliguri (ক্লিন)</option>
-                                    <option value="'Tiro Bangla', serif">Tiro Bangla (ট্র্যাডিশনাল)</option>
-                                    <option value="'Baloo Da 2', cursive">Baloo Da 2 (রাউন্ডেড)</option>
+                        <div class="tool-select-wrapper" title="Font Style">
+                            <button class="tool-btn" onmousedown="event.preventDefault()"><i data-lucide="type" class="w-4 h-4"></i></button>
+                            <select id="font-select" onchange="applyFont()">
+                                <option value="'Anek Bangla', sans-serif">Anek Bangla (আধুনিক)</option>
+                                <option value="'Noto Serif Bengali', serif">Noto Serif (অফিসিয়াল)</option>
+                                <option value="'Hind Siliguri', sans-serif">Hind Siliguri (ক্লিন)</option>
+                                <option value="'Tiro Bangla', serif">Tiro Bangla (ট্র্যাডিশনাল)</option>
+                                <option value="'Baloo Da 2', cursive">Baloo Da 2 (রাউন্ডেড)</option>
+                            </select>
+                        </div>
+                        <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openFontSizeModal()" title="Font Size"><i data-lucide="heading" class="w-4 h-4"></i></button>
+                        <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openSpacingModal()" title="Paragraph Spacing"><i data-lucide="expand" class="w-4 h-4"></i></button>
+                    </div>
+                    
+                    <div class="tool-group w-full justify-start border-none pr-0 mr-0">
+                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('upper')" title="সব বড় হাতের (UPPERCASE)">AB</button>
+                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('lower')" title="সব ছোট হাতের (lowercase)">ab</button>
+                        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('title')" title="প্রথম অক্ষর বড় (Title Case)">Aa</button>
+                        <div class="w-[1px] h-5 bg-gray-300 mx-1"></div>
+                        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-blue-50 text-blue-700 hover:bg-blue-100" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('bn')" title="বাংলা নম্বর (১২৩)">১২৩</button>
+                        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-green-50 text-green-700 hover:bg-green-100" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('en')" title="ইংরেজি নম্বর (123)">123</button>
+                    </div>
+                </div>
+
+                <div class="toolbar-row border-t border-gray-200 pt-1 mt-1">
+                    <div class="tool-group border-none pr-0 mr-0 flex gap-2 w-full justify-between">
+                        <div class="flex gap-2">
+                            <div class="tool-select-wrapper" title="Insert Data">
+                                <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="braces" class="w-4 h-4"></i></button>
+                                <select id="var-select" onchange="insertTagFromSelect()">
+                                    <option value="" disabled selected>ডাটা ইনসার্ট...</option>
+                                    <optgroup label="সাধারণ তথ্য (বাংলা)">
+                                        <option value="[StudentNameBn]">শিক্ষার্থীর নাম (বাংলা)</option>
+                                        <option value="[RollBn]">রোল নম্বর (বাংলা)</option>
+                                        <option value="[ClassBn]">শ্রেণি (বাংলা)</option>
+                                        <option value="[IDBn]">আইডি (বাংলা)</option>
+                                        <option value="[GenderBn]">লিঙ্গ (ছাত্র/ছাত্রী)</option>
+                                        <option value="[AgeBn]">বয়স (বাংলা)</option>
+                                    </optgroup>
+                                    <optgroup label="General Info (English)">
+                                        <option value="[StudentNameEn]">Student Name (Eng)</option>
+                                        <option value="[RollEn]">Roll (Eng)</option>
+                                        <option value="[ClassEn]">Class (Eng)</option>
+                                        <option value="[IDEn]">ID (Eng)</option>
+                                        <option value="[GenderEn]">Gender (Eng)</option>
+                                        <option value="[AgeEn]">Age (Eng)</option>
+                                    </optgroup>
+                                    <optgroup label="পারিবারিক তথ্য">
+                                        <option value="[FatherNameBn]">পিতার নাম (বাংলা)</option>
+                                        <option value="[FatherNameEn]">Father Name (Eng)</option>
+                                        <option value="[MotherNameBn]">মাতার নাম (বাংলা)</option>
+                                        <option value="[MotherNameEn]">Mother Name (Eng)</option>
+                                        <option value="[WhatsApp]">হোয়াটসঅ্যাপ নম্বর</option>
+                                        <option value="[EmergencyNo]">জরুরি নম্বর</option>
+                                    </optgroup>
+                                    <optgroup label="অন্যান্য ও ঠিকানা">
+                                        <option value="[DOB]">জন্ম তারিখ</option>
+                                        <option value="[BloodGroup]">রক্তের গ্রুপ</option>
+                                        <option value="[BRN]">জন্ম নিবন্ধন (BRN)</option>
+                                        <option value="[VillageBn]">গ্রাম (বাংলা)</option>
+                                        <option value="[VillageEn]">Village (Eng)</option>
+                                        <option value="[FullAddressBn]">সম্পূর্ণ ঠিকানা (বাংলা)</option>
+                                        <option value="[FullAddressEn]">Full Address (Eng)</option>
+                                    </optgroup>
                                 </select>
                             </div>
-                           <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openFontSizeModal()" title="Font Size">
-                           <i data-lucide="heading" class="w-4 h-4"></i>
-                           </button>
-                           
-                            <button class="tool-btn" onmousedown="event.preventDefault()" onclick="openSpacingModal()" title="Paragraph Spacing"><i data-lucide="expand" class="w-4 h-4"></i></button>
+                            
+                            <div class="tool-select-wrapper" title="Templates">
+                                <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="folder-open" class="w-4 h-4"></i></button>
+                                <select id="template-select" onchange="loadTemplate()">
+                                    <option value="" disabled selected>টেমপ্লেট নির্বাচন করুন...</option>
+                                    <optgroup label="সাধারণ নোটিশ">
+                                        <option value="holiday">🕌 পবিত্র রমজান ও ঈদের ছুটি</option>
+                                        <option value="absent">❌ অনুপস্থিতির সতর্কতা</option>
+                                        <option value="leave">🗓️ ছুটি মঞ্জুরের নোটিশ</option>
+                                        <option value="exam">📝 পরীক্ষা সংক্রান্ত নোটিশ</option>
+                                        <option value="fees">💰 বকেয়া ফি পরিশোধ</option>
+                                        <option value="meeting">👥 অভিভাবক সমাবেশ</option>
+                                        <option value="trip">🚌 শিক্ষা সফর (বান্দরবান)</option>
+                                    </optgroup>
+                                    <optgroup label="অফিসিয়াল ও দাপ্তরিক">
+                                        <option value="testimonial">📜 চারিত্রিক সনদপত্র / প্রত্যয়নপত্র</option>
+                                        <option value="admission">📄 ভর্তি ও সেশন নবায়ন</option>
+                                        <option value="warning">⚠️ শৃঙ্খলা ভঙ্গের সতর্কতা</option>
+                                        <option value="certificate">🎓 সনদ/প্রত্যয়ন উত্তোলন</option>
+                                        <option value="promotion">🏆 ফলাফল ও প্রমোশন</option>
+                                    </optgroup>
+                                    <optgroup label="English SMS (Short & Low Cost)">
+                                        <option value="id_card_en">🪪 ID Card Ready (Link)</option>
+                                        <option value="fee_paid_en">✅ Fee Paid Thanks</option>
+                                        <option value="fee_due_en">⚠️ Fee Due Reminder</option>
+                                        <option value="absent_en">❌ Absent Alert</option>
+                                        <option value="present_en">🏫 Campus Entry Update</option>
+                                        <option value="result_en">🏆 Result Published</option>
+                                        <option value="meeting_en">👥 Parents Meeting</option>
+                                        <option value="urgent_holiday_en">🚨 Urgent Holiday</option>
+                                    </optgroup>
+                                     <optgroup label="📊 পরীক্ষার ফলাফল (Result)">
+                                        <option value="result_short_bn">📝 রেজাল্ট: ছোট (বাংলা)</option>
+                                        <option value="result_full_bn">📄 রেজাল্ট: বিস্তারিত (বাংলা)</option>
+                                        <option value="result_en_short">📑 Result: Short (English)</option>
+                                    </optgroup>
+                                    <optgroup label="💰 বকেয়া ও ফি (Fees/Dues)">
+                                        <option value="due_short_bn">💸 বকেয়া বেতন: ছোট</option>
+                                        <option value="due_detailed_bn">🏦 বকেয়া বেতন: নোটিশ</option>
+                                        <option value="exam_due_bn">✍️ পরীক্ষার ফি বকেয়া</option>
+                                    </optgroup>
+                                    <optgroup label="অন্যান্য">
+                                        <option value="clear_format">✨ ফরম্যাট পরিষ্কার করুন</option>
+                                        <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>
+                                        <option value="factory_reset">⚠️ ফ্যাক্টরি রিসেট</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            
+                            <div class="tool-select-wrapper" title="Date & Time">
+                                <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="calendar-clock" class="w-4 h-4"></i></button>
+                               <select id="datetime-select" onchange="insertDateTime()">
+                                   <option value="" disabled selected>সময়/তারিখ...</option>
+                                   <optgroup label="বাংলা তারিখ ও সময়">
+                                       <option value="date_bn_short">ছোট তারিখ (১০/০১/২০২৬)</option>
+                                       <option value="date_bn">সাধারণ তারিখ (১০ জানুয়ারি ২০২৬)</option>
+                                       <option value="date_bn_full">বিস্তারিত (১০ জানুয়ারি ২০২৬ খ্রি...)</option>
+                                       <option value="time_bn">বর্তমান সময় (বাংলা)</option>
+                                   </optgroup>
+                                   <optgroup label="English Date & Time">
+                                       <option value="date_en_short">Short Date (10/01/2026)</option>
+                                       <option value="date_en">Standard Date (10 Jan 2026)</option>
+                                       <option value="date_en_full">Full Date (Saturday, 10 Jan...)</option>
+                                       <option value="time_en">Current Time (Eng)</option>
+                                   </optgroup>
+                               </select>
+                            </div>
                         </div>
-                      <div class="tool-group w-full justify-start">
-        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('upper')" title="সব বড় হাতের (UPPERCASE)">AB</button>
-        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('lower')" title="সব ছোট হাতের (lowercase)">ab</button>
-        <button class="tool-btn text-[11px] font-bold w-auto px-3 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-[#005A34]" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('title')" title="প্রথম অক্ষর বড় (Title Case)">Aa</button>
-        
-        <div class="w-[1px] h-5 bg-gray-300 mx-2"></div>
-        
-        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-blue-50 text-blue-700 hover:bg-blue-100" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('bn')" title="বাংলা নম্বর (১২৩)">১২৩</button>
-        <button class="tool-btn text-[12px] font-bold w-auto px-3 bg-green-50 text-green-700 hover:bg-green-100" onmousedown="event.preventDefault()" onclick="applyTransformWrapper('en')" title="ইংরেজি নম্বর (123)">123</button>
-    </div>
-                <div class="toolbar-row border-t border-gray-200 pt-1">
-                    <div class="flex gap-2">
                         
-                        <div class="tool-select-wrapper" title="Insert Data">
-                            <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="braces" class="w-4 h-4"></i></button>
-                            <select id="var-select" onchange="insertTagFromSelect()">
-                                <option value="" disabled selected>ডাটা ইনসার্ট...</option>
-                                <optgroup label="সাধারণ তথ্য (বাংলা)">
-                                    <option value="[StudentNameBn]">শিক্ষার্থীর নাম (বাংলা)</option>
-                                    <option value="[RollBn]">রোল নম্বর (বাংলা)</option>
-                                    <option value="[ClassBn]">শ্রেণি (বাংলা)</option>
-                                    <option value="[IDBn]">আইডি (বাংলা)</option>
-                                    <option value="[GenderBn]">লিঙ্গ (ছাত্র/ছাত্রী)</option>
-                                    <option value="[AgeBn]">বয়স (বাংলা)</option>
-                                </optgroup>
-                                <optgroup label="General Info (English)">
-                                    <option value="[StudentNameEn]">Student Name (Eng)</option>
-                                    <option value="[RollEn]">Roll (Eng)</option>
-                                    <option value="[ClassEn]">Class (Eng)</option>
-                                    <option value="[IDEn]">ID (Eng)</option>
-                                    <option value="[GenderEn]">Gender (Eng)</option>
-                                    <option value="[AgeEn]">Age (Eng)</option>
-                                </optgroup>
-                                <optgroup label="পারিবারিক তথ্য">
-                                    <option value="[FatherNameBn]">পিতার নাম (বাংলা)</option>
-                                    <option value="[FatherNameEn]">Father Name (Eng)</option>
-                                    <option value="[MotherNameBn]">মাতার নাম (বাংলা)</option>
-                                    <option value="[MotherNameEn]">Mother Name (Eng)</option>
-                                    <option value="[WhatsApp]">হোয়াটসঅ্যাপ নম্বর</option>
-                                    <option value="[EmergencyNo]">জরুরি নম্বর</option>
-                                </optgroup>
-                                <optgroup label="অন্যান্য ও ঠিকানা">
-                                    <option value="[DOB]">জন্ম তারিখ</option>
-                                    <option value="[BloodGroup]">রক্তের গ্রুপ</option>
-                                    <option value="[BRN]">জন্ম নিবন্ধন (BRN)</option>
-                                    <option value="[VillageBn]">গ্রাম (বাংলা)</option>
-                                    <option value="[VillageEn]">Village (Eng)</option>
-                                    <option value="[FullAddressBn]">সম্পূর্ণ ঠিকানা (বাংলা)</option>
-                                    <option value="[FullAddressEn]">Full Address (Eng)</option>
-                                </optgroup>
-                            </select>
+                        <div class="flex gap-2">
+                            <button class="tool-btn bg-gray-600 text-white hover:bg-gray-700" onmousedown="event.preventDefault()" onclick="openFilterModal()" title="ফিল্টার (Filter)"><i data-lucide="filter" class="w-4 h-4"></i></button>
+                            <button id="btn-toggle-preview" class="tool-btn bg-[#005A34] text-white hover:bg-[#004225]" onmousedown="event.preventDefault()" onclick="togglePreview()" title="কোড / এডিট (Code / Visual)"><i data-lucide="code" class="w-4 h-4"></i></button>
+                            <button class="tool-btn bg-purple-50 text-purple-800" onmousedown="event.preventDefault()" onclick="openLogicManager()" title="লজিক রুলস ম্যানেজার"><i data-lucide="git-merge" class="w-4 h-4"></i></button>
+                            <button class="tool-btn bg-orange-50 text-orange-800" onmousedown="event.preventDefault()" onclick="openNumberModal()" title="সিরিয়াল ও রেন্ডম নম্বর"><i data-lucide="hash" class="w-4 h-4"></i></button>
                         </div>
-                        <div class="tool-select-wrapper" title="Templates">
-                            <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="folder-open" class="w-4 h-4"></i></button>
-                            <select id="template-select" onchange="loadTemplate()">
-                                <option value="" disabled selected>টেমপ্লেট নির্বাচন করুন...</option>
-                                <optgroup label="সাধারণ নোটিশ">
-                                    <option value="holiday">🕌 পবিত্র রমজান ও ঈদের ছুটি</option>
-                                    <option value="absent">❌ অনুপস্থিতির সতর্কতা</option>
-                                    <option value="leave">🗓️ ছুটি মঞ্জুরের নোটিশ</option>
-                                    <option value="exam">📝 পরীক্ষা সংক্রান্ত নোটিশ</option>
-                                    <option value="fees">💰 বকেয়া ফি পরিশোধ</option>
-                                    <option value="meeting">👥 অভিভাবক সমাবেশ</option>
-                                    <option value="trip">🚌 শিক্ষা সফর (বান্দরবান)</option>
-                                </optgroup>
-                                <optgroup label="অফিসিয়াল ও দাপ্তরিক">
-                                    <option value="testimonial">📜 চারিত্রিক সনদপত্র / প্রত্যয়নপত্র</option>
-                                    <option value="admission">📄 ভর্তি ও সেশন নবায়ন</option>
-                                    <option value="warning">⚠️ শৃঙ্খলা ভঙ্গের সতর্কতা</option>
-                                    <option value="certificate">🎓 সনদ/প্রত্যয়ন উত্তোলন</option>
-                                    <option value="promotion">🏆 ফলাফল ও প্রমোশন</option>
-                                </optgroup>
-                                <optgroup label="English SMS (Short & Low Cost)">
-    <option value="id_card_en">🪪 ID Card Ready (Link)</option>
-    <option value="fee_paid_en">✅ Fee Paid Thanks</option>
-    <option value="fee_due_en">⚠️ Fee Due Reminder</option>
-    <option value="absent_en">❌ Absent Alert</option>
-    <option value="present_en">🏫 Campus Entry Update</option>
-    <option value="result_en">🏆 Result Published</option>
-    <option value="meeting_en">👥 Parents Meeting</option>
-    <option value="urgent_holiday_en">🚨 Urgent Holiday</option>
-</optgroup>
- <optgroup label="📊 পরীক্ষার ফলাফল (Result)">
-        <option value="result_short_bn">📝 রেজাল্ট: ছোট (বাংলা)</option>
-        <option value="result_full_bn">📄 রেজাল্ট: বিস্তারিত (বাংলা)</option>
-        <option value="result_en_short">📑 Result: Short (English)</option>
-    </optgroup>
-
-    <optgroup label="💰 বকেয়া ও ফি (Fees/Dues)">
-        <option value="due_short_bn">💸 বকেয়া বেতন: ছোট</option>
-        <option value="due_detailed_bn">🏦 বকেয়া বেতন: নোটিশ</option>
-        <option value="exam_due_bn">✍️ পরীক্ষার ফি বকেয়া</option>
-    </optgroup>
-                                <optgroup label="অন্যান্য">
-                                <option value="clear_format">✨ ফরম্যাট পরিষ্কার করুন</option>
-                                <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>
-                                <option value="factory_reset">⚠️ ফ্যাক্টরি রিসেট</option>
-                                </optgroup>
-                            </select>
-                        </div>
-                        <div class="tool-select-wrapper" title="Date & Time">
-                            <button class="tool-btn bg-blue-50 text-blue-800" onmousedown="event.preventDefault()"><i data-lucide="calendar-clock" class="w-4 h-4"></i></button>
-                           <select id="datetime-select" onchange="insertDateTime()">
-                               <option value="" disabled selected>সময়/তারিখ...</option>
-                               <optgroup label="বাংলা তারিখ ও সময়">
-                                   <option value="date_bn_short">ছোট তারিখ (১০/০১/২০২৬)</option>
-                                   <option value="date_bn">সাধারণ তারিখ (১০ জানুয়ারি ২০২৬)</option>
-                                   <option value="date_bn_full">বিস্তারিত (১০ জানুয়ারি ২০২৬ খ্রি., রোজ...)</option>
-                                   <option value="time_bn">বর্তমান সময় (বাংলা)</option>
-                               </optgroup>
-                               <optgroup label="English Date & Time">
-                                   <option value="date_en_short">Short Date (10/01/2026)</option>
-                                   <option value="date_en">Standard Date (10 Jan 2026)</option>
-                                   <option value="date_en_full">Full Date (Saturday, 10 Jan...)</option>
-                                   <option value="time_en">Current Time (Eng)</option>
-                               </optgroup>
-                           </select>
-                           
-                        </div>
-                    </div>
-                    <div class="flex gap-2 ml-3">
-                        <button class="tool-btn bg-gray-600 text-white hover:bg-gray-700" onmousedown="event.preventDefault()" onclick="openFilterModal()" title="ফিল্টার (Filter)"><i data-lucide="filter" class="w-4 h-4"></i></button>
-                        <button id="btn-toggle-preview" class="tool-btn bg-[#005A34] text-white hover:bg-[#004225]" onmousedown="event.preventDefault()" onclick="togglePreview()" title="কোড / এডিট (Code / Visual)"><i data-lucide="code" class="w-4 h-4"></i></button>
-                        <button class="tool-btn bg-purple-50 text-purple-800" onmousedown="event.preventDefault()" onclick="openLogicManager()" title="লজিক রুলস ম্যানেজার"><i data-lucide="git-merge" class="w-4 h-4"></i></button>
-                        <button class="tool-btn bg-orange-50 text-orange-800" onmousedown="event.preventDefault()" onclick="openNumberModal()" title="সিরিয়াল ও রেন্ডম নম্বর"><i data-lucide="hash" class="w-4 h-4"></i></button>
-                        
                     </div>
                 </div>
             </div>
-
+            
             <div class="relative">
                 <!-- Code Mode (Textarea) -->
                 <textarea id="msg-template" class="input-field hidden" style="border-radius: 4px;" placeholder="এখানে মেসেজ লিখুন..." oninput="syncCodeToVisual()"></textarea>
