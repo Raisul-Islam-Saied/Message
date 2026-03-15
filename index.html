@@ -97,8 +97,12 @@
         .preview-index-input { width: 45px; text-align: center; border: 1px solid #93c5fd; border-radius: 4px; font-weight: bold; font-size: 13px; padding: 2px; color: #1e40af;}
         #msg-preview-box { padding: 15px; font-size: 14px; line-height: 1.6; color: #111; min-height: 160px; outline: none; word-wrap: break-word;}
 
-        /* NEW TAG HIGHLIGHT: contenteditable=false safe block */
-        .tag-hl { background: #dbeafe; color: #1e40af; padding: 0 4px; margin: 0 2px; border-radius: 3px; font-weight: bold; display: inline-block; border: 1px solid #bfdbfe;}
+                /* NEW TAG HIGHLIGHT: contenteditable=false safe block */
+        .tag-hl { 
+            background: #dbeafe; color: #1e40af; padding: 0 4px; margin: 0 2px; 
+            border-radius: 3px; font-weight: bold; display: inline-block; border: 1px solid #bfdbfe;
+            user-select: all; -webkit-user-select: all; /* 🚀 ম্যাজিক: এক ক্লিকে পুরো ট্যাগ সিলেক্ট হবে */
+        }
 
         /* =========================================================      
    NEXT LEVEL TOAST ANIMATIONS      
@@ -922,6 +926,29 @@ CustomUI.init();
         bx.addEventListener('keyup', saveSelectionState);
         bx.addEventListener('mouseup', saveSelectionState);
         bx.addEventListener('mouseleave', saveSelectionState);
+    window.onload = () => {
+        const tx = document.getElementById('msg-template');
+        tx.addEventListener('keyup', saveSelectionState);
+        tx.addEventListener('mouseup', saveSelectionState);
+        tx.addEventListener('mouseleave', saveSelectionState);
+
+        const bx = document.getElementById('msg-preview-box');
+        bx.addEventListener('keyup', saveSelectionState);
+        bx.addEventListener('mouseup', saveSelectionState);
+        bx.addEventListener('mouseleave', saveSelectionState);
+
+        // 🚀 ফিক্স: ট্যাগের ওপর ক্লিক করলেই পুরো ট্যাগ সিলেক্ট হবে, ফলে ব্যাকস্পেস চাপলে কীবোর্ড হাইড হবে না
+        bx.addEventListener('click', function(e) {
+            if (e.target.classList.contains('tag-hl')) {
+                const sel = window.getSelection();
+                const range = document.createRange();
+                range.selectNode(e.target);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        });
+
+        // ... (বাকি কোড আগের মতোই থাকবে) ...
 
         const savedMsg = localStorage.getItem('ardm_notice_msg');
         if (savedMsg) {
@@ -1164,6 +1191,10 @@ function convertToRaw(htmlContent) {
 
     // তিন বা ততোধিক লাইন ব্রেক থাকলে তা কমিয়ে সুন্দর দুটি লাইনে নিয়ে আসা
     raw = raw.replace(/\n{3,}/g, '\n\n'); 
+
+        // 🚀 ফিক্স: অদৃশ্য স্পেসগুলো ক্লিন করা, যাতে মেসেজে না যায়
+    raw = raw.replace(/\u200B/g, ''); 
+    
     return raw.trim();
 }
 
@@ -1194,59 +1225,50 @@ function replaceTagsWithData(template, st, forPreview = false) {
     // --- NEW NUMBER GENERATOR ENGINE START ---
     const numRegex = /\[NUM:(SERIAL|RANDOM|RANDOM_NUM):([^\]]+)\]/gi;
     msg = msg.replace(numRegex, function(match, type, params) {
-        if(forPreview && !st) return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+        if(forPreview && !st) return `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>&#8203;`;
         
         let p = params.split('|'); 
         let output = match;
         
         if (st) {
             let lang = p[0]; 
-            
             if (type.toUpperCase() === 'SERIAL') {
                 let start = parseInt(p[1]) || 1;
                 let len = parseInt(p[2]) || 1;
                 let pref = p[3] || '';
                 let suff = p[4] || '';
-                
                 let idx = parsedStudents.indexOf(st);
                 if (idx === -1) idx = 0;
-                
                 let currentNum = start + idx;
                 let numStr = currentNum.toString().padStart(len, '0');
                 if(lang === 'bn') numStr = toBn(numStr); 
-                
                 output = pref + numStr + suff;
             } 
             else if (type.toUpperCase() === 'RANDOM' || type.toUpperCase() === 'RANDOM_NUM') {
                 let len = parseInt(p[1]) || 6;
                 let pref = p[2] || '';
                 let suff = p[3] || '';
-                
                 let cacheKey = `_rand_${match}`;
                 if (!st[cacheKey]) {
                     let r = "";
-                    // যদি RANDOM_NUM হয় তাহলে শুধু সংখ্যা, না হলে অক্ষর ও সংখ্যা মিক্স
                     const chars = type.toUpperCase() === 'RANDOM_NUM' ? "0123456789" : "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
                     for(let i=0; i<len; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
                     st[cacheKey] = r;
                 }
-                
                 let numStr = st[cacheKey];
                 if(lang === 'bn') numStr = toBn(numStr);
-                
                 output = pref + numStr + suff;
             }
         }
-        return forPreview ? `<span class="tag-hl" data-tag="${match}" contenteditable="false">${output}</span>` : output;
+        return forPreview ? `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${output}</span>&#8203;` : output;
     });
-    // --- NEW NUMBER GENERATOR ENGINE END ---
 
     // --- NEW LOGIC RULE ENGINE START ---
     const classOrderMap = { "প্লে": 1, "নার্সারি": 2, "কেজি": 3, "১ম": 4, "২য়": 5, "৩য়": 6, "৪র্থ": 7, "৫ম": 8, "৬ষ্ঠ": 9, "৭ম": 10, "৮ম": 11, "৯ম": 12, "১০ম": 13 };
 
     const logicRegex = /\[LOGIC:([^\]]+)\]/gi;
     msg = msg.replace(logicRegex, function(match, ruleName) {
-        if(forPreview && !st) return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+        if(forPreview && !st) return `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>&#8203;`;
         
         let rule = customLogicRules.find(r => r.name === ruleName);
         let finalOutput = match; 
@@ -1303,74 +1325,57 @@ function replaceTagsWithData(template, st, forPreview = false) {
                         case 'not_contains': conditionMet = !String(val1).includes(String(val2)); break;
                     }
                 }
-
                 if(conditionMet) { finalOutput = cond.output; break; }
             }
         }
-        return forPreview ? `<span class="tag-hl" data-tag="${match}" contenteditable="false">${finalOutput}</span>` : finalOutput;
+        return forPreview ? `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${finalOutput}</span>&#8203;` : finalOutput;
     });
-    // --- NEW LOGIC RULE ENGINE END ---
 
-    const wrap = (tag, val) => forPreview ? `<span class="tag-hl" data-tag="${tag}" contenteditable="false">${val || '-'}</span>` : (val || '-');
+    const wrap = (tag, val) => forPreview ? `&#8203;<span class="tag-hl" data-tag="${tag}" contenteditable="false">${val || '-'}</span>&#8203;` : (val || '-');
 
-   /* const map = {
+    // --- NEW CSV DYNAMIC TAG ENGINE ---
+    const csvRegex = /\[CSV:([^\]]+)\]/gi;
+    msg = msg.replace(csvRegex, function(match, colName) {
+        if(forPreview && !st) return `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>&#8203;`;
+        let val = st ? st[`CSV:${colName}`] : '-';
+        return forPreview ? `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${val !== undefined ? val : '-'}</span>&#8203;` : (val !== undefined ? val : '-');
+    });
+
+    const map = {
         '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
         '[IDBn]': wrap('[IDBn]', toBn(st.ID)), '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
-        '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn), '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
+        '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn ? st.StudentNameEn.toUpperCase() : ''), '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
         '[IDEn]': wrap('[IDEn]', st.ID), '[GenderEn]': wrap('[GenderEn]', st.Gender), '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
-        '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn),
-        '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn),
+        '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn ? st.FatherNameEn.toUpperCase() : ''),
+        '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn ? st.MotherNameEn.toUpperCase() : ''),
         '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
         '[DOB]': wrap('[DOB]', formatDate(st.DOB)), '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), '[BRN]': wrap('[BRN]', st.BRN),
         '[VillageBn]': wrap('[VillageBn]', st.VillageBn), '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
         '[VillageEn]': wrap('[VillageEn]', st.VillageEn), '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
     };
-*/
-          // --- NEW CSV DYNAMIC TAG ENGINE ---
-    const csvRegex = /\[CSV:([^\]]+)\]/gi;
-    msg = msg.replace(csvRegex, function(match, colName) {
-        if(forPreview && !st) return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
-        let val = st ? st[`CSV:${colName}`] : '-';
-        return forPreview ? `<span class="tag-hl" data-tag="${match}" contenteditable="false">${val !== undefined ? val : '-'}</span>` : (val !== undefined ? val : '-');
-    });
-    // ----------------------------------
-
-        const map = {
-        '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), 
-        '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), 
-        '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
-        '[IDBn]': wrap('[IDBn]', toBn(st.ID)), 
-        '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), 
-        '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
-        
-        // এখানে ইংরেজি নামগুলো সব বড় হাতের (Uppercase) করে দেওয়া হয়েছে
-        '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn ? st.StudentNameEn.toUpperCase() : ''), 
-        '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), 
-        '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
-        '[IDEn]': wrap('[IDEn]', st.ID), 
-        '[GenderEn]': wrap('[GenderEn]', st.Gender), 
-        '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
-        
-        '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), 
-        // পিতার ইংরেজি নাম বড় হাতের
-        '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn ? st.FatherNameEn.toUpperCase() : ''),
-        
-        '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), 
-        // মাতার ইংরেজি নাম বড় হাতের
-        '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn ? st.MotherNameEn.toUpperCase() : ''),
-        
-        '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), 
-        '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
-        '[DOB]': wrap('[DOB]', formatDate(st.DOB)), 
-        '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), 
-        '[BRN]': wrap('[BRN]', st.BRN),
-        '[VillageBn]': wrap('[VillageBn]', st.VillageBn), 
-        '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
-        '[VillageEn]': wrap('[VillageEn]', st.VillageEn), 
-        '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
-    };
 
     for (const [key, val] of Object.entries(map)) { msg = msg.split(key).join(val); }
+
+    let prevMsg;
+    do {
+        prevMsg = msg;
+        msg = msg.replace(/\[transform=([^\]]+)\]([\s\S]*?)\[\/transform\]/gi, function(match, type, content) {
+            if (forPreview && !st) return match; 
+            return content.replace(/(<[^>]+>)|([^<]+)/g, function(m, htmlTag, plainText) {
+                if (htmlTag) return htmlTag;
+                if (type === 'upper') return plainText.toUpperCase();
+                if (type === 'lower') return plainText.toLowerCase();
+                if (type === 'title') return plainText.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+                if (type === 'bn') return plainText.replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+                if (type === 'en') {
+                    const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+                    return plainText.replace(/[০-৯]/g, d => bnToEn[d] || d);
+                }
+                return plainText;
+            });
+        });
+    } while (msg !== prevMsg);
+
     return msg;
 }
 
@@ -1378,25 +1383,40 @@ function wrapTagsWithoutData(text) {
     const tags = ['[StudentNameBn]', '[RollBn]', '[ClassBn]', '[IDBn]', '[GenderBn]', '[AgeBn]', '[StudentNameEn]', '[RollEn]', '[ClassEn]', '[IDEn]', '[GenderEn]', '[AgeEn]', '[FatherNameBn]', '[FatherNameEn]', '[MotherNameBn]', '[MotherNameEn]', '[WhatsApp]', '[EmergencyNo]', '[DOB]', '[BloodGroup]', '[BRN]', '[VillageBn]', '[FullAddressBn]', '[VillageEn]', '[FullAddressEn]'];
     let msg = text;
     tags.forEach(tag => {
-        msg = msg.split(tag).join(`<span class="tag-hl" data-tag="${tag}" contenteditable="false">${tag}</span>`);
+        msg = msg.split(tag).join(`&#8203;<span class="tag-hl" data-tag="${tag}" contenteditable="false">${tag}</span>&#8203;`);
     });
     msg = msg.replace(/\[LOGIC:([^\]]+)\]/gi, function(match) {
-        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+        return `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>&#8203;`;
     });
-    // রেন্ডম এবং সিরিয়াল ট্যাগের জন্য হাইলাইট (RANDOM_NUM যোগ করা হলো)
     msg = msg.replace(/\[NUM:(SERIAL|RANDOM|RANDOM_NUM):([^\]]+)\]/gi, function(match) {
-        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+        return `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>&#8203;`;
     });
-           // CSV ট্যাগের জন্য ডাইনামিক হাইলাইট
     msg = msg.replace(/\[CSV:([^\]]+)\]/gi, function(match) {
-        return `<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>`;
+        return `&#8203;<span class="tag-hl" data-tag="${match}" contenteditable="false">${match}</span>&#8203;`;
     });
-
+    // --- ডাইনামিক ডাটা ট্রান্সফর্ম ইঞ্জিন ---
+    let prevMsg;
+    do {
+        prevMsg = msg;
+        msg = msg.replace(/\[transform=([^\]]+)\]([\s\S]*?)\[\/transform\]/gi, function(match, type, content) {
+            if (forPreview) return match; 
+            return content.replace(/(<[^>]+>)|([^<]+)/g, function(m, htmlTag, plainText) {
+                if (htmlTag) return htmlTag;
+                if (type === 'upper') return plainText.toUpperCase();
+                if (type === 'lower') return plainText.toLowerCase();
+                if (type === 'title') return plainText.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+                if (type === 'bn') return plainText.replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+                if (type === 'en') {
+                    const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+                    return plainText.replace(/[০-৯]/g, d => bnToEn[d] || d);
+                }
+                return plainText;
+            });
+        });
+    } while (msg !== prevMsg);
 
     return msg;
 }
-
-  
     // ==========================================      
     // EDITOR BUTTONS      
     // ==========================================      
