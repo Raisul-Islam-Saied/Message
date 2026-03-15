@@ -503,7 +503,17 @@
     <option value="meeting_en">👥 Parents Meeting</option>
     <option value="urgent_holiday_en">🚨 Urgent Holiday</option>
 </optgroup>
+ <optgroup label="📊 পরীক্ষার ফলাফল (Result)">
+        <option value="result_short_bn">📝 রেজাল্ট: ছোট (বাংলা)</option>
+        <option value="result_full_bn">📄 রেজাল্ট: বিস্তারিত (বাংলা)</option>
+        <option value="result_en_short">📑 Result: Short (English)</option>
+    </optgroup>
 
+    <optgroup label="💰 বকেয়া ও ফি (Fees/Dues)">
+        <option value="due_short_bn">💸 বকেয়া বেতন: ছোট</option>
+        <option value="due_detailed_bn">🏦 বকেয়া বেতন: নোটিশ</option>
+        <option value="exam_due_bn">✍️ পরীক্ষার ফি বকেয়া</option>
+    </optgroup>
                                 <optgroup label="অন্যান্য">
                                 <option value="clear_format">✨ ফরম্যাট পরিষ্কার করুন</option>
                                 <option value="clear">🧹 এডিটর পরিষ্কার করুন</option>
@@ -706,6 +716,22 @@ const SMS_BULK_PASS = "saied783";
         meeting_en: "Dear Parent, a Parents-Teachers Meeting is scheduled on [Date]. Your presence is highly requested to discuss [StudentNameEn]'s progress. - ARDM",
         
         urgent_holiday_en: "Urgent Notice: Due to unavoidable circumstances, all classes will remain suspended tomorrow. Please stay safe. - ARDM",
+
+    // --- ফলাফল সংক্রান্ত (Results) ---
+    result_short_bn: "সাফল্যের সংবাদ: [StudentNameBn]\n-----------------------\nরোল: [RollBn] | শ্রেণি: [ClassBn]\nGPA: [CSV_GPA] (Grade: [CSV_Grade])\nমেধাক্রম: [CSV_MeritPosition]তম\n- আবদুর রাজ্জাক দাখিল মাদ্রাসা",
+    
+    result_full_bn: "[align=center][size=18]*পরীক্ষার ফলাফল নোটিশ*[/size][/align]\n[space=10,0,10,0]সম্মানিত অভিভাবক,\nআসসালামু আলাইকুম। আপনার সন্তান *[StudentNameBn]* (রোল: [RollBn], শ্রেণি: [ClassBn])-এর সাময়িক পরীক্ষার ফলাফল প্রকাশিত হয়েছে।\n\n📊 *ফলাফল বিবরণী:*\n🔹 মোট নম্বর: [CSV_TotalMarks]\n🔹 জিপিএ (GPA): [CSV_GPA]\n🔹 গ্রেড: [CSV_Grade]\n🔹 মেধাক্রম: [CSV_MeritPosition]\n\nসন্তানের নিয়মিত পড়াশোনার বিষয়ে আপনাদের বিশেষ নজর কাম্য।\n[align=right]ধন্যবাদান্তে,\nসুপারিনটেনডেন্ট\nআবদুর রাজ্জাক দাখিল মাদ্রাসা[/align][/space]",
+
+    result_en_short: "Exam Result: [StudentNameEn]\n-----------------------\nGPA: [CSV_GPA] | Grade: [CSV_Grade]\nPosition: [CSV_MeritPosition] | [CSV_Status]\nKindly collect the mark sheet.\n- ARDM",
+
+    // --- ফি ও বকেয়া সংক্রান্ত (Fees & Dues) ---
+    due_short_bn: "বেতন তাগাদা: [StudentNameBn]\n-----------------------\nশ্রেণি: [ClassBn] | রোল: [RollBn]\nমোট বকেয়া: [CSV_Due]/- টাকা।\nঅনুগ্রহ করে দ্রুত দপ্তরে যোগাযোগ করুন।\n- এ.আর.ডি. মাদ্রাসা",
+
+    due_detailed_bn: "[align=center][size=18]*বকেয়া বেতন পরিশোধের নোটিশ*[/size][/align]\n[space=10,0,10,0]সম্মানিত অভিভাবক,\nআসসালামু আলাইকুম। আপনার সন্তান *[StudentNameBn]*-এর মাসিক বেতন ও অন্যান্য ফি বাবদ সর্বমোট *[CSV_Due]/-* টাকা বকেয়া রয়েছে।\n\nমাদ্রাসার প্রশাসনিক ও শিক্ষা কার্যক্রম সুষ্ঠুভাবে পরিচালনার জন্য উক্ত বকেয়া টাকা দ্রুত পরিশোধের জন্য বিনীত অনুরোধ করা হলো।\n[align=right]আদেশক্রমে,\nহিসাব শাখা\nআবদুর রাজ্জাক দাখিল মাদ্রাসা[/align][/space]",
+
+    exam_due_bn: "পরীক্ষার ফি নোটিশ: [StudentNameBn]\n-----------------------\nশ্রেণি: [ClassBn] | বকেয়া: [CSV_ExamDue]/-\nপরীক্ষা শুরুর আগেই বকেয়া পরিশোধ করে অফিস থেকে এডমিট কার্ড সংগ্রহ করুন।\n- এ.আর.ডি. মাদ্রাসা",
+
+    
 
         clear: "🧹 এডিটর পরিষ্কার করুন"
     };
