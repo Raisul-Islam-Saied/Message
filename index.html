@@ -2786,8 +2786,8 @@ document.getElementById('btn-generate').addEventListener('click', async function
         
         if(isPreviewMode) renderPreview();
     }
-             // ==========================================      
-    // EXCEL (CSV) DOWNLOAD LOGIC (ENCODING & DYNAMIC COLUMN FIXED)
+        // ==========================================      
+    // EXCEL (CSV) DOWNLOAD LOGIC (BUG FIXED)
     // ==========================================  
     async function downloadExcel() {
         if(parsedStudents.length === 0) {
@@ -2801,6 +2801,7 @@ document.getElementById('btn-generate').addEventListener('click', async function
             return; 
         }
     
+        // ফাইলের নাম নির্ধারণ
         const cls = document.getElementById('api-class').value;
         const yr = document.getElementById('api-year').value;
         const defaultFileName = `SMS_List_${cls}_${yr}`;
@@ -2811,43 +2812,55 @@ document.getElementById('btn-generate').addEventListener('click', async function
         let finalFileName = userInputName.trim() === "" ? defaultFileName : userInputName.trim();
         if (!finalFileName.toLowerCase().endsWith('.csv')) finalFileName += '.csv';
 
-        // ট্যাগ ফরম্যাট: {{ColumnName}{Value}}
+        // ট্যাগ ফরম্যাট: {{ColumnName}{Value}} (যেমন: {{Id}{[IDBn]}})
         let dynamicHeaders = [];
-        const headerRegex = /\{\{(.*?)\}\{(.*?)\}\}/g;
+        
+        // আরও নিরাপদ রেগুলার এক্সপ্রেশন ব্যবহার করা হলো
+        const headerRegex = /\{\{([^}]+)\}\{([^}]+)\}\}/g;
         let headerMatch;
         while ((headerMatch = headerRegex.exec(rawTemplate)) !== null) {
             let headerName = headerMatch[1].trim(); 
-            if(!dynamicHeaders.includes(headerName)) dynamicHeaders.push(headerName);
+            if(!dynamicHeaders.includes(headerName)) {
+                dynamicHeaders.push(headerName);
+            }
         }
         
         let hasDynamicColumns = dynamicHeaders.length > 0;
     
-        // ডাটা প্রসেসিং শুরু
-        let rows = [];
+        // 🚀 সুপার ফিক্স: \uFEFF যোগ করা হলো যেন এক্সেল বাংলা একদম ঠিকভাবে চেনে 
+        let csvContent = "\uFEFF"; 
         
         // হেডার রো তৈরি
         let headerRow = ["Mobile Number"];
         if (hasDynamicColumns) {
-            dynamicHeaders.forEach(h => headerRow.push(h));
+            dynamicHeaders.forEach(h => headerRow.push(`"${h.replace(/"/g, '""')}"`));
         } else {
             headerRow.push("Message");
         }
-        rows.push(headerRow.join(","));
-
+        csvContent += headerRow.join(",") + "\n";
+    
         parsedStudents.forEach(student => {
+            // শিক্ষার্থীর আসল ডাটা দিয়ে রিপ্লেস
             let msgRaw = replaceTagsWithData(rawTemplate, student, false);
+            
+            // ডিজাইনের ফরম্যাটিং মুছে ফেলা
             let cleanMsg = msgRaw
                 .replace(/\[\/?(?:size|align|space|LOGIC|NUM)[^\]]*\]/gi, '') 
                 .replace(/[*_~]/g, ''); 
     
+            // মেসেজ থেকে ডাইনামিক ভ্যালু এক্সট্রাক্ট করা
             let rowDynamicValues = {};
-            cleanMsg = cleanMsg.replace(/\{\{(.*?)\}\{(.*?)\}\}/g, function(match, header, val) {
-                rowDynamicValues[header.trim()] = val.trim();
-                return ""; 
-            });
+            if (hasDynamicColumns) {
+                cleanMsg = cleanMsg.replace(/\{\{([^}]+)\}\{([^}]+)\}\}/g, function(match, header, val) {
+                    rowDynamicValues[header.trim()] = val.trim();
+                    return ""; 
+                });
+            }
 
+            // অতিরিক্ত ফাঁকা লাইন সরানো
             cleanMsg = cleanMsg.replace(/\n{3,}/g, '\n\n').trim();
     
+            // মোবাইল নম্বর ফরম্যাটিং
             let phone = String(student.WhatsApp || student.EmergencyNo).replace(/[^0-9]/g, '');
             if (phone.length === 11 && phone.startsWith('0')) phone = '88' + phone;
             else if (phone.length === 10) phone = '880' + phone;
@@ -2855,23 +2868,21 @@ document.getElementById('btn-generate').addEventListener('click', async function
             let rowData = [phone];
             
             if (hasDynamicColumns) {
+                // ডাইনামিক কলাম থাকলে ডাটা বসবে
                 dynamicHeaders.forEach(h => {
                     let cellVal = rowDynamicValues[h] || "";
-                    // কমা বা কোটেশন হ্যান্ডেল করা
                     rowData.push(`"${cellVal.replace(/"/g, '""')}"`);
                 });
             } else {
+                // সাধারণ মেসেজ থাকলে মেসেজ কলামে বসবে
                 rowData.push(`"${cleanMsg.replace(/"/g, '""')}"`);
             }
-            rows.push(rowData.join(","));
+    
+            csvContent += rowData.join(",") + "\n";
         });
-
-        // 🚀 সুপার ফিক্স: UTF-8 BOM (Byte Order Mark) নিশ্চিত করা
-        const csvString = rows.join("\n");
-        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvString], { 
-            type: 'text/csv;charset=utf-8;' 
-        });
-
+    
+        // ফাইল তৈরি এবং অটোমেটিক ডাউনলোড
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
