@@ -142,15 +142,15 @@
             .notice-page-container { width: 100%; padding: 0; margin: 0; background: white; display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: max-content; gap: 0; }
             .notice-wrapper { padding: 5mm; box-sizing: border-box; border-right: 1px dashed #888; border-bottom: 1px dashed #888; page-break-inside: avoid; display: flex; flex-direction: column; }
             .notice-wrapper:nth-child(even) { border-right: none; }
-            .notice-card { height: 100%; border: 1.5px solid #111; padding: 12px; box-sizing: border-box; background: white; color: #000; font-size: 14px; line-height: 1.6; display: flex; flex-direction: column; }
-            .notice-header { text-align: center; border-bottom: 1.5px solid #111; padding-bottom: 5px; margin-bottom: 10px; font-family: 'Anek Bangla', sans-serif !important;}
-            .notice-header h2 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1;}
-            .notice-header p { font-size: 11px; margin: 2px 0 0 0; font-weight: bold;}
+            .notice-card { height: 100%; border: 1.5px solid #111; padding: 12px; box-sizing: border-box; background: white; color: #000; font-size: 16px; line-height: 1.6; display: flex; flex-direction: column; }
+            .notice-header { text-align: center; border-bottom: 1.5px solid #111; padding-bottom: 5px; margin-bottom: 10px; font-family: 'Noto Serif Bengali','Anek Bangla', sans-serif !important;}
+            .notice-header h2 { font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1;}
+            .notice-header p { font-size: 13px; margin: 2px 0 0 0; font-weight: bold;}
             .notice-body { flex-grow: 1; white-space: pre-wrap;}
             .notice-body strong { font-weight: 800;}
             .notice-body i { font-style: italic; }
             .notice-body del { text-decoration: line-through; color: #555;}
-            .notice-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 12px; font-weight: 800; font-family: 'Anek Bangla', sans-serif !important; }
+            .notice-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 12px; font-weight: 800; font-family:'Noto Serif Bengali', 'Anek Bangla', sans-serif !important; }
             .sign-box { text-align: center; border-top: 1px solid #000; padding-top: 3px; width: 80px;}
         }
 
@@ -422,7 +422,7 @@
                                 <button class="tool-btn" onmousedown="event.preventDefault()"><i data-lucide="type" class="w-4 h-4"></i></button>
                                 <select id="font-select" onchange="applyFont()">
                                     <option value="'Anek Bangla', sans-serif">Anek Bangla (আধুনিক)</option>
-                                    <option value="'Noto Serif Bengali', serif">Noto Serif (অফিসিয়াল)</option>
+                                    <option selected value="'Noto Serif Bengali', serif">Noto Serif (অফিসিয়াল)</option>
                                     <option value="'Hind Siliguri', sans-serif">Hind Siliguri (ক্লিন)</option>
                                     <option value="'Tiro Bangla', serif">Tiro Bangla (ট্র্যাডিশনাল)</option>
                                     <option value="'Baloo Da 2', cursive">Baloo Da 2 (রাউন্ডেড)</option>
