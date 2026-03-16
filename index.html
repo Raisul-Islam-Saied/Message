@@ -143,7 +143,7 @@
             .notice-wrapper { padding: 5mm; box-sizing: border-box; border-right: 1px dashed #888; border-bottom: 1px dashed #888; page-break-inside: avoid; display: flex; flex-direction: column; }
             .notice-wrapper:nth-child(even) { border-right: none; }
             .notice-card { height: 100%; border: 1.5px solid #111; padding: 12px; box-sizing: border-box; background: white; color: #000; font-size: 16px; line-height: 1.6; display: flex; flex-direction: column; }
-            .notice-header { text-align: center; border-bottom: 1.5px solid #111; padding-bottom: 5px; margin-bottom: 10px; font-family: 'Noto Serif Bengali','Anek Bangla', sans-serif !important;}
+            .notice-header { text-align: center; border-bottom: 1.5px solid #111; padding-bottom: 5px; margin-bottom: 10px; font-family: 'Anek Bangla', sans-serif !important;}
             .notice-header h2 { font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1;}
             .notice-header p { font-size: 13px; margin: 2px 0 0 0; font-weight: bold;}
             .notice-body { flex-grow: 1; white-space: pre-wrap;}
@@ -932,9 +932,9 @@ CustomUI.init();
         const savedFont = localStorage.getItem('ardm_notice_font');
         if (savedFont) {
             document.getElementById('font-select').value = savedFont;
-            applyFont();
+            
         }
-
+applyFont();
         syncCodeToVisual();
         if(!isPreviewMode) togglePreview();
         document.getElementById('msg-preview-container').style.display = 'block';
