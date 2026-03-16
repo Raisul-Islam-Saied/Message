@@ -2789,6 +2789,9 @@ document.getElementById('btn-generate').addEventListener('click', async function
         // ==========================================      
     // EXCEL (CSV) DOWNLOAD LOGIC      
     // ==========================================  
+      // ==========================================      
+    // EXCEL (CSV) DOWNLOAD LOGIC (UPDATED WITH DYNAMIC COLUMNS)
+    // ==========================================  
     async function downloadExcel() {
         if(parsedStudents.length === 0) {
             showToast("কোনো ডাটা নেই!", "warning");
@@ -2804,27 +2807,40 @@ document.getElementById('btn-generate').addEventListener('click', async function
         // সিলেক্ট করা ক্লাস এবং সাল বের করে আনা
         const cls = document.getElementById('api-class').value;
         const yr = document.getElementById('api-year').value;
-        
-        // ডিফল্ট ফাইলের নাম তৈরি করা (CustomUI prompt-এ দেখানোর জন্য)
         const defaultFileName = `SMS_List_${cls}_${yr}`;
 
         // ইউজারের কাছে ফাইলের নাম জানতে চাওয়া
         let userInputName = await CustomUI.prompt("ফাইলের নাম দিন", "ডাউনলোড করার আগে ফাইলের একটি নাম নির্ধারণ করুন:", "text", defaultFileName);
-        
-        // ইউজার যদি 'বাতিল' বাটনে ক্লিক করে
         if (userInputName === null) return;
 
-        // ইউজার যদি পুরো নাম মুছে দিয়ে ফাঁকা সাবমিট করে, তাহলে ডিফল্ট নাম বসবে
         let finalFileName = userInputName.trim() === "" ? defaultFileName : userInputName.trim();
-        
-        // নামের শেষে .csv না থাকলে অটোমেটিক যুক্ত করে দেওয়া
         if (!finalFileName.toLowerCase().endsWith('.csv')) {
             finalFileName += '.csv';
+        }
+
+        // --- নতুন লজিক: টেমপ্লেট থেকে ডাইনামিক হেডার (কলামের নাম) খুঁজে বের করা ---
+        let dynamicHeaders = [];
+        const headerRegex = /<<([^>]+)><([\s\S]*?)>>/g;
+        let headerMatch;
+        
+        while ((headerMatch = headerRegex.exec(rawTemplate)) !== null) {
+            let headerName = headerMatch[1].trim(); // যেমন: id
+            if(!dynamicHeaders.includes(headerName)) {
+                dynamicHeaders.push(headerName);
+            }
         }
     
         // UTF-8 BOM যুক্ত করছি যেন এক্সেলে বাংলা ফন্ট একদম ঠিক থাকে
         let csvContent = "\uFEFF"; 
-        csvContent += "Mobile Number,Message\n";
+        
+        // --- নতুন লজিক: হেডারের রো তৈরি করা ---
+        let csvHeaderRow = "Mobile Number,Message";
+        if (dynamicHeaders.length > 0) {
+            dynamicHeaders.forEach(h => {
+                csvHeaderRow += `,"${h.replace(/"/g, '""')}"`; // নতুন কলাম হেডারে যোগ করা
+            });
+        }
+        csvContent += csvHeaderRow + "\n";
     
         parsedStudents.forEach(student => {
             // শিক্ষার্থীর ডাটা দিয়ে মেসেজ রিপ্লেস করা
@@ -2835,6 +2851,14 @@ document.getElementById('btn-generate').addEventListener('click', async function
                 .replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '') 
                 .replace(/[*_~]/g, ''); 
     
+
+            // --- নতুন লজিক: মেসেজ থেকে ডাইনামিক ভ্যালু এক্সট্রাক্ট করা এবং ট্যাগ মুছে ফেলা ---
+            let rowDynamicValues = {};
+            cleanMsg = cleanMsg.replace(/<<([^>]+)><([\s\S]*?)>>/g, function(match, header, val) {
+                rowDynamicValues[header.trim()] = val.trim();
+                return ""; // মেসেজের মূল বডি থেকে ট্যাগটি রিমুভ করে দেওয়া হলো
+            });
+
             // অতিরিক্ত ফাঁকা লাইনগুলো ক্লিন করে সুন্দর করা
             cleanMsg = cleanMsg.replace(/\n{3,}/g, '\n\n').trim();
     
@@ -2845,9 +2869,18 @@ document.getElementById('btn-generate').addEventListener('click', async function
     
             // এক্সেলে কমা (,) বা লাইন ব্রেক (Enter) থাকলে তা ডাবল কোটেশনে ("") রাখতে হয়
             let safeMsg = '"' + cleanMsg.replace(/"/g, '""') + '"';
+            let rowString = `${phone},${safeMsg}`;
+            
+            // --- নতুন লজিক: ডাইনামিক কলামের ডাটাগুলো ডানপাশে সিরিয়াল অনুযায়ী বসানো ---
+            if (dynamicHeaders.length > 0) {
+                dynamicHeaders.forEach(h => {
+                    let cellVal = rowDynamicValues[h] || "";
+                    rowString += `,"${cellVal.replace(/"/g, '""')}"`;
+                });
+            }
     
             // ফাইলে একটি করে নতুন লাইন যুক্ত করা
-            csvContent += `${phone},${safeMsg}\n`;
+            csvContent += rowString + "\n";
         });
     
         // ফাইল তৈরি এবং অটোমেটিক ডাউনলোড
@@ -2855,7 +2888,7 @@ document.getElementById('btn-generate').addEventListener('click', async function
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
-        link.setAttribute("download", finalFileName); // ইউজারের দেওয়া নাম এখানে বসানো হয়েছে
+        link.setAttribute("download", finalFileName);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
