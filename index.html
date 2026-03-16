@@ -2786,11 +2786,8 @@ document.getElementById('btn-generate').addEventListener('click', async function
         
         if(isPreviewMode) renderPreview();
     }
-        // ==========================================      
-    // EXCEL (CSV) DOWNLOAD LOGIC      
-    // ==========================================  
-      // ==========================================      
-    // EXCEL (CSV) DOWNLOAD LOGIC (UPDATED WITH DYNAMIC COLUMNS)
+         // ==========================================      
+    // EXCEL (CSV) DOWNLOAD LOGIC (UPDATED WITH {{Key}{Value}} & NO MESSAGE COLUMN)
     // ==========================================  
     async function downloadExcel() {
         if(parsedStudents.length === 0) {
@@ -2819,26 +2816,34 @@ document.getElementById('btn-generate').addEventListener('click', async function
         }
 
         // --- নতুন লজিক: টেমপ্লেট থেকে ডাইনামিক হেডার (কলামের নাম) খুঁজে বের করা ---
+        // ট্যাগ ফরম্যাট: {{ColumnName}{Value}}
         let dynamicHeaders = [];
-        const headerRegex = /<<([^>]+)><([\s\S]*?)>>/g;
+        const headerRegex = /\{\{(.*?)\}\{(.*?)\}\}/g;
         let headerMatch;
         
         while ((headerMatch = headerRegex.exec(rawTemplate)) !== null) {
-            let headerName = headerMatch[1].trim(); // যেমন: id
+            let headerName = headerMatch[1].trim(); 
             if(!dynamicHeaders.includes(headerName)) {
                 dynamicHeaders.push(headerName);
             }
         }
+        
+        // চেক করছি ডাইনামিক কলাম আছে কি না
+        let hasDynamicColumns = dynamicHeaders.length > 0;
     
         // UTF-8 BOM যুক্ত করছি যেন এক্সেলে বাংলা ফন্ট একদম ঠিক থাকে
         let csvContent = "\uFEFF"; 
         
-        // --- নতুন লজিক: হেডারের রো তৈরি করা ---
-        let csvHeaderRow = "Mobile Number,Message";
-        if (dynamicHeaders.length > 0) {
+        // --- হেডারের রো তৈরি করা ---
+        let csvHeaderRow = "Mobile Number";
+        if (hasDynamicColumns) {
+            // ডাইনামিক কলাম থাকলে শুধু সেগুলোই হেডারে বসবে (Message কলাম থাকবে না)
             dynamicHeaders.forEach(h => {
-                csvHeaderRow += `,"${h.replace(/"/g, '""')}"`; // নতুন কলাম হেডারে যোগ করা
+                csvHeaderRow += `,"${h.replace(/"/g, '""')}"`; 
             });
+        } else {
+            // ডাইনামিক কলাম না থাকলে আগের মতো Message কলাম থাকবে
+            csvHeaderRow += ',"Message"';
         }
         csvContent += csvHeaderRow + "\n";
     
@@ -2846,37 +2851,39 @@ document.getElementById('btn-generate').addEventListener('click', async function
             // শিক্ষার্থীর ডাটা দিয়ে মেসেজ রিপ্লেস করা
             let msgRaw = replaceTagsWithData(rawTemplate, student, false);
             
-            // এক্সেলে/এসএমএসে কোনো ধরনের ফরম্যাটিং যেন না থাকে, তাই সব মুছে ফেলা হচ্ছে
+            // ফরম্যাটিং মুছে ফেলা
             let cleanMsg = msgRaw
                 .replace(/\[\/?(?:size|align|space)[^\]]*\]/gi, '') 
                 .replace(/[*_~]/g, ''); 
     
-
-            // --- নতুন লজিক: মেসেজ থেকে ডাইনামিক ভ্যালু এক্সট্রাক্ট করা এবং ট্যাগ মুছে ফেলা ---
+            // --- মেসেজ থেকে ডাইনামিক ভ্যালু এক্সট্রাক্ট করা এবং ট্যাগ মুছে ফেলা ---
             let rowDynamicValues = {};
-            cleanMsg = cleanMsg.replace(/<<([^>]+)><([\s\S]*?)>>/g, function(match, header, val) {
+            cleanMsg = cleanMsg.replace(/\{\{(.*?)\}\{(.*?)\}\}/g, function(match, header, val) {
                 rowDynamicValues[header.trim()] = val.trim();
                 return ""; // মেসেজের মূল বডি থেকে ট্যাগটি রিমুভ করে দেওয়া হলো
             });
 
-            // অতিরিক্ত ফাঁকা লাইনগুলো ক্লিন করে সুন্দর করা
+            // অতিরিক্ত ফাঁকা লাইন ক্লিন করা
             cleanMsg = cleanMsg.replace(/\n{3,}/g, '\n\n').trim();
     
             // মোবাইল নম্বর সংগ্রহ ও ফরম্যাট (শুরুতে 88 যুক্ত করা)
             let phone = String(student.WhatsApp || student.EmergencyNo).replace(/[^0-9]/g, '');
             if (phone.length === 11 && phone.startsWith('0')) phone = '88' + phone;
             else if (phone.length === 10) phone = '880' + phone;
-    
-            // এক্সেলে কমা (,) বা লাইন ব্রেক (Enter) থাকলে তা ডাবল কোটেশনে ("") রাখতে হয়
-            let safeMsg = '"' + cleanMsg.replace(/"/g, '""') + '"';
-            let rowString = `${phone},${safeMsg}`;
             
-            // --- নতুন লজিক: ডাইনামিক কলামের ডাটাগুলো ডানপাশে সিরিয়াল অনুযায়ী বসানো ---
-            if (dynamicHeaders.length > 0) {
+            let rowString = `${phone}`;
+            
+            // --- ডাটা বসানোর লজিক ---
+            if (hasDynamicColumns) {
+                // ডাইনামিক ট্যাগ থাকলে ডানপাশে সিরিয়াল অনুযায়ী ডাটা বসবে
                 dynamicHeaders.forEach(h => {
                     let cellVal = rowDynamicValues[h] || "";
                     rowString += `,"${cellVal.replace(/"/g, '""')}"`;
                 });
+            } else {
+                // ডাইনামিক ট্যাগ না থাকলে শুধু মেসেজ কলামে ফুল মেসেজ বসবে
+                let safeMsg = '"' + cleanMsg.replace(/"/g, '""') + '"';
+                rowString += `,${safeMsg}`;
             }
     
             // ফাইলে একটি করে নতুন লাইন যুক্ত করা
