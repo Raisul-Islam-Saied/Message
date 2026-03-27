@@ -455,22 +455,28 @@
                                     <option value="[AgeEn]">Age (Eng)</option>
                                 </optgroup>
                                 <optgroup label="পারিবারিক তথ্য">
-                                    <option value="[FatherNameBn]">পিতার নাম (বাংলা)</option>
-                                    <option value="[FatherNameEn]">Father Name (Eng)</option>
-                                    <option value="[MotherNameBn]">মাতার নাম (বাংলা)</option>
-                                    <option value="[MotherNameEn]">Mother Name (Eng)</option>
-                                    <option value="[WhatsApp]">হোয়াটসঅ্যাপ নম্বর</option>
-                                    <option value="[EmergencyNo]">জরুরি নম্বর</option>
-                                </optgroup>
-                                <optgroup label="অন্যান্য ও ঠিকানা">
-                                    <option value="[DOB]">জন্ম তারিখ</option>
-                                    <option value="[BloodGroup]">রক্তের গ্রুপ</option>
-                                    <option value="[BRN]">জন্ম নিবন্ধন (BRN)</option>
-                                    <option value="[VillageBn]">গ্রাম (বাংলা)</option>
-                                    <option value="[VillageEn]">Village (Eng)</option>
-                                    <option value="[FullAddressBn]">সম্পূর্ণ ঠিকানা (বাংলা)</option>
-                                    <option value="[FullAddressEn]">Full Address (Eng)</option>
-                                </optgroup>
+    <option value="[FatherNameBn]">পিতার নাম (বাংলা)</option>
+    <option value="[FatherNameEn]">Father Name (Eng)</option>
+    <option value="[MotherNameBn]">মাতার নাম (বাংলা)</option>
+    <option value="[MotherNameEn]">Mother Name (Eng)</option>
+    <option value="[WhatsAppBn]">হোয়াটসঅ্যাপ (বাংলা)</option>
+    <option value="[WhatsAppEn]">WhatsApp (Eng)</option>
+    <option value="[EmergencyNoBn]">জরুরি নম্বর (বাংলা)</option>
+    <option value="[EmergencyNoEn]">Emergency No (Eng)</option>
+</optgroup>
+<optgroup label="অন্যান্য ও ঠিকানা">
+    <option value="[DOBBn]">জন্ম তারিখ (বাংলা)</option>
+    <option value="[DOBEn]">Date of Birth (Eng)</option>
+    <option value="[BloodGroupBn]">রক্তের গ্রুপ (বাংলা)</option>
+    <option value="[BloodGroupEn]">Blood Group (Eng)</option>
+    <option value="[BRNBn]">জন্ম নিবন্ধন (বাংলা)</option>
+    <option value="[BRNEn]">BRN (Eng)</option>
+    <option value="[VillageBn]">গ্রাম (বাংলা)</option>
+    <option value="[VillageEn]">Village (Eng)</option>
+    <option value="[FullAddressBn]">সম্পূর্ণ ঠিকানা (বাংলা)</option>
+    <option value="[FullAddressEn]">Full Address (Eng)</option>
+</optgroup>
+
                             </select>
                         </div>
                         <div class="tool-select-wrapper" title="Templates">
@@ -676,12 +682,19 @@
         const bnToEn = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
         return String(n).replace(/[০-৯]/g, d => bnToEn[d] || d);
     };
-    const formatDate = (dateStr) => {
-        if (!dateStr) return 'N/A';
-        const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return dateStr;
-        return d.toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
-    };
+   const formatDateBn = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
+};
+const formatDateEn = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+};
+
     const API_URL = "https://script.google.com/macros/s/AKfycbzlG01v-naEr4WZR__n4ZX9fPkQR9pE01A0n8W9fOMUfw5x3RIDNPD_ZyaDwsVz9fphFw/exec";
 const SMS_API_KEY = "MH9rEHMsOE7AQogZWrL2";
 const SMS_SENDER_ID = "8809617613401";
@@ -1336,47 +1349,62 @@ function replaceTagsWithData(template, st, forPreview = false) {
     // ----------------------------------
 
         const map = {
-        '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), 
-        '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), 
-        '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
-        '[IDBn]': wrap('[IDBn]', toBn(st.ID)), 
-        '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), 
-        '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
-        
-        // এখানে ইংরেজি নামগুলো সব বড় হাতের (Uppercase) করে দেওয়া হয়েছে
-        '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn ? st.StudentNameEn.toUpperCase() : ''), 
-        '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), 
-        '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
-        '[IDEn]': wrap('[IDEn]', st.ID), 
-        '[GenderEn]': wrap('[GenderEn]', st.Gender), 
-        '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
-        
-        '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), 
-        // পিতার ইংরেজি নাম বড় হাতের
-        '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn ? st.FatherNameEn.toUpperCase() : ''),
-        
-        '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), 
-        // মাতার ইংরেজি নাম বড় হাতের
-        '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn ? st.MotherNameEn.toUpperCase() : ''),
-        
-        '[WhatsApp]': wrap('[WhatsApp]', st.WhatsApp), 
-        '[EmergencyNo]': wrap('[EmergencyNo]', st.EmergencyNo),
-        '[DOB]': wrap('[DOB]', formatDate(st.DOB)), 
-        '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), 
-        '[BRN]': wrap('[BRN]', st.BRN),
-        '[VillageBn]': wrap('[VillageBn]', st.VillageBn), 
-        '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
-        '[VillageEn]': wrap('[VillageEn]', st.VillageEn), 
-        '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
-    };
+    '[StudentNameBn]': wrap('[StudentNameBn]', st.StudentNameBn), 
+    '[RollBn]': wrap('[RollBn]', toBn(st.Roll)), 
+    '[ClassBn]': wrap('[ClassBn]', st.ClassBn),
+    '[IDBn]': wrap('[IDBn]', toBn(st.ID)), 
+    '[GenderBn]': wrap('[GenderBn]', st.Gender === 'Male' ? 'ছাত্র' : 'ছাত্রী'), 
+    '[AgeBn]': wrap('[AgeBn]', st.Age ? toBn(st.Age) + ' বছর' : ''),
+    
+    '[StudentNameEn]': wrap('[StudentNameEn]', st.StudentNameEn ? st.StudentNameEn.toUpperCase() : ''), 
+    '[RollEn]': wrap('[RollEn]', toEn(st.Roll)), 
+    '[ClassEn]': wrap('[ClassEn]', st.ClassEn),
+    '[IDEn]': wrap('[IDEn]', st.ID), 
+    '[GenderEn]': wrap('[GenderEn]', st.Gender), 
+    '[AgeEn]': wrap('[AgeEn]', st.Age ? st.Age + ' Yrs' : ''),
+    
+    '[FatherNameBn]': wrap('[FatherNameBn]', st.FatherNameBn), 
+    '[FatherNameEn]': wrap('[FatherNameEn]', st.FatherNameEn ? st.FatherNameEn.toUpperCase() : ''),
+    
+    '[MotherNameBn]': wrap('[MotherNameBn]', st.MotherNameBn), 
+    '[MotherNameEn]': wrap('[MotherNameEn]', st.MotherNameEn ? st.MotherNameEn.toUpperCase() : ''),
+    
+    // --- নতুন ও পুরাতন (Legacy) ট্যাগ মিক্সড ---
+    '[WhatsApp]': wrap('[WhatsApp]', toEn(st.WhatsApp)), // Legacy
+    '[WhatsAppBn]': wrap('[WhatsAppBn]', toBn(st.WhatsApp)), 
+    '[WhatsAppEn]': wrap('[WhatsAppEn]', toEn(st.WhatsApp)), 
+    
+    '[EmergencyNo]': wrap('[EmergencyNo]', toEn(st.EmergencyNo)), // Legacy
+    '[EmergencyNoBn]': wrap('[EmergencyNoBn]', toBn(st.EmergencyNo)),
+    '[EmergencyNoEn]': wrap('[EmergencyNoEn]', toEn(st.EmergencyNo)),
+
+    '[DOB]': wrap('[DOB]', formatDateBn(st.DOB)), // Legacy
+    '[DOBBn]': wrap('[DOBBn]', formatDateBn(st.DOB)), 
+    '[DOBEn]': wrap('[DOBEn]', formatDateEn(st.DOB)), 
+
+    '[BloodGroup]': wrap('[BloodGroup]', st.BloodGroup), // Legacy
+    '[BloodGroupBn]': wrap('[BloodGroupBn]', st.BloodGroup), 
+    '[BloodGroupEn]': wrap('[BloodGroupEn]', st.BloodGroup), 
+
+    '[BRN]': wrap('[BRN]', toEn(st.BRN)), // Legacy
+    '[BRNBn]': wrap('[BRNBn]', toBn(st.BRN)),
+    '[BRNEn]': wrap('[BRNEn]', toEn(st.BRN)),
+    // ----------------------------------------
+    
+    '[VillageBn]': wrap('[VillageBn]', st.VillageBn), 
+    '[FullAddressBn]': wrap('[FullAddressBn]', `বাড়ি: ${st.HouseNameBn||'-'}, গ্রাম: ${st.VillageBn||'-'}, ডাক: ${st.UnionBn||'-'}, উপজেলা: ${st.UpazilaBn||'-'}, জেলা: ${st.DistrictBn||'-'}`),
+    '[VillageEn]': wrap('[VillageEn]', st.VillageEn), 
+    '[FullAddressEn]': wrap('[FullAddressEn]', `House: ${st.HouseNameEn||'-'}, Village: ${st.VillageEn||'-'}, PO: ${st.UnionEn||'-'}, Upazila: ${st.UpazilaEn||'-'}, Dist: ${st.DistrictEn||'-'}`)
+};
+
 
     for (const [key, val] of Object.entries(map)) { msg = msg.split(key).join(val); }
     return msg;
 }
 
 function wrapTagsWithoutData(text) {
-    const tags = ['[StudentNameBn]', '[RollBn]', '[ClassBn]', '[IDBn]', '[GenderBn]', '[AgeBn]', '[StudentNameEn]', '[RollEn]', '[ClassEn]', '[IDEn]', '[GenderEn]', '[AgeEn]', '[FatherNameBn]', '[FatherNameEn]', '[MotherNameBn]', '[MotherNameEn]', '[WhatsApp]', '[EmergencyNo]', '[DOB]', '[BloodGroup]', '[BRN]', '[VillageBn]', '[FullAddressBn]', '[VillageEn]', '[FullAddressEn]'];
-    let msg = text;
+    const tags = ['[StudentNameBn]', '[RollBn]', '[ClassBn]', '[IDBn]', '[GenderBn]', '[AgeBn]', '[StudentNameEn]', '[RollEn]', '[ClassEn]', '[IDEn]', '[GenderEn]', '[AgeEn]', '[FatherNameBn]', '[FatherNameEn]', '[MotherNameBn]', '[MotherNameEn]', '[VillageBn]', '[FullAddressBn]', '[VillageEn]', '[FullAddressEn]', '[WhatsApp]', '[WhatsAppBn]', '[WhatsAppEn]', '[EmergencyNo]', '[EmergencyNoBn]', '[EmergencyNoEn]', '[DOB]', '[DOBBn]', '[DOBEn]', '[BloodGroup]', '[BloodGroupBn]', '[BloodGroupEn]', '[BRN]', '[BRNBn]', '[BRNEn]'];
+ let msg = text;
     tags.forEach(tag => {
         msg = msg.split(tag).join(`<span class="tag-hl" data-tag="${tag}" contenteditable="false">${tag}</span>`);
     });
