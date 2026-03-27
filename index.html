@@ -891,8 +891,7 @@ CustomUI.init();
         promotion: "[align=center][size=16]*বার্ষিক ফলাফল ও প্রমোশন*[/size][/align]\n[space=10,0,10,0]তারিখ: [তারিখ]\n\nবরাবর,\n[FatherNameBn] / [MotherNameBn]\n\nবিষয়: বার্ষিক পরীক্ষার ফলাফল ও পরবর্তী শ্রেণিতে উত্তীর্ণ হওয়া প্রসঙ্গে।\n\nসম্মানিত অভিভাবক,\nআপনাকে আনন্দের সাথে জানানো যাচ্ছে যে, আপনার সন্তান *[StudentNameBn]* (বর্তমান রোল: [RollBn]) বার্ষিক পরীক্ষায় সফলতার সাথে উত্তীর্ণ হয়ে পরবর্তী শ্রেণিতে প্রমোশন পেয়েছে। তার এই সফলতায় আমরা আনন্দিত।\n\nনতুন শ্রেণির পাঠ্যবই সংগ্রহ ও ক্লাস রুটিন জানার জন্য মাদ্রাসার নোটিশ বোর্ড বা ওয়েবসাইটে চোখ রাখার অনুরোধ করা হলো।\n\nআন্তরিক শুভকামনায়,\nশ্রেণি শিক্ষক ও পরীক্ষা নিয়ন্ত্রক[/space]",
                 // --- নতুন ইংরেজি শর্ট টেমপ্লেট ---
         id_card_en: "Congratulations [StudentNameEn]! Your Smart ID Card is ready.\nStudent ID: [IDEn]\n\nPlease collect it from the Madrasah office soon.\nProfile: https://ardm.netlify.app/[IDEn]\n- ARDM",
-        
-        fee_paid_en: "Dear Parent, we have successfully received the tuition fee for [StudentNameEn] (Class: [ClassEn]). Thank you for your timely payment! - ARDM",
+          fee_paid_en: "Dear Parent, we have successfully received the tuition fee for [StudentNameEn] (Class: [ClassEn]). Thank you for your timely payment! - ARDM",
         
         fee_due_en: "Reminder: Dear Parent, the monthly fee for [StudentNameEn] (Roll: [RollEn]) is currently due. Kindly clear the payment at your earliest convenience. - ARDM",
         
@@ -2814,7 +2813,7 @@ document.getElementById('btn-generate').addEventListener('click', async function
         
         if(isPreviewMode) renderPreview();
     }
-           // ==========================================      
+              // ==========================================      
     // EXCEL (CSV) DOWNLOAD LOGIC (WHATSAPP & SMS IN SAME MODAL)
     // ==========================================  
     async function downloadExcel() {
@@ -2846,14 +2845,14 @@ document.getElementById('btn-generate').addEventListener('click', async function
             </label>
             <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-gray-700">
                 <input type="radio" name="export_type" value="whatsapp" class="w-4 h-4 accent-[#10b981]"> 
-                <span>WhatsApp <small class="font-normal text-xs text-gray-500">(Emoji)</small></span>
+                <span>WhatsApp <small class="font-normal text-xs text-gray-500">(Format)</small></span>
             </label>
         `;
         // ইনপুট বক্সের ঠিক নিচে অপশনগুলো বসানো হচ্ছে
         promptInput.parentNode.insertBefore(radioContainer, promptInput.nextSibling);
 
         // মডাল ওপেন করা
-        let userInputName = await CustomUI.prompt("ডাউনলোড সেটিং", "ফাইলের নাম এবং কোন প্ল্যাটফর্মে পাঠাবেন তা নির্বাচন করুন:", "text", defaultFileName);
+        let userInputName = await CustomUI.prompt("ডাউনলোড সেটিং", "ফাইলের নাম এবং কোন প্ল্যাটফর্মে পাঠাবেন তা নির্বাচন করুন:\n\n✅ WhatsApp: বোল্ড (*), ইটালিক (_) থাকবে, ইমোজি ক্লিন হবে।\n✅ SMS: সবকিছু ক্লিন হয়ে প্লেইন টেক্সট হবে।", "text", defaultFileName);
         
         // মডাল ক্লোজ হওয়ার সাথে সাথে ইউজার কোনটা সিলেক্ট করেছে তা পড়ে নেওয়া
         const exportTypeRadio = document.querySelector('input[name="export_type"]:checked');
@@ -2899,10 +2898,13 @@ document.getElementById('btn-generate').addEventListener('click', async function
 
             // ২. কন্ডিশনাল ক্লিনিং (WhatsApp vs SMS)
             if (isWhatsApp) {
-                // WhatsApp এর জন্য: বোল্ড, ইটালিক ও ইমোজি থাকবে। শুধু অদৃশ্য স্পেস রিমুভ করা হবে।
+                // WhatsApp এর জন্য: বোল্ড, ইটালিক (* _ ~) থাকবে। কিন্তু ইমোজি, বুলেট ও স্পেস রিমুভ হবে।
                 cleanMsg = cleanMsg
                     .replace(/[\u200B-\u200D]/g, '') 
-                    .replace(/\u00A0/g, ' '); 
+                    .replace(/\u00A0/g, ' ')
+                    .replace(/•/g, '-') 
+                    .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '') 
+                    .replace(/[\u2600-\u27BF]/g, ''); 
             } else {
                 // SMS এর জন্য: ফরম্যাটিং, ইমোজি ও স্পেশাল ক্যারেক্টার সব রিমুভ করা হবে
                 cleanMsg = cleanMsg
