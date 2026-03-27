@@ -2814,7 +2814,7 @@ document.getElementById('btn-generate').addEventListener('click', async function
         
         if(isPreviewMode) renderPreview();
     }
-        // ==========================================      
+          // ==========================================      
     // EXCEL (CSV) DOWNLOAD LOGIC (BUG FIXED)
     // ==========================================  
     async function downloadExcel() {
@@ -2855,8 +2855,8 @@ document.getElementById('btn-generate').addEventListener('click', async function
         
         let hasDynamicColumns = dynamicHeaders.length > 0;
     
-        // 🚀 সুপার ফিক্স: \uFEFF যোগ করা হলো যেন এক্সেল বাংলা একদম ঠিকভাবে চেনে 
-        let csvContent = "\uFEFF"; 
+        // 🚀 ফিক্স: ডাবল BOM সমস্যা এড়াতে এখান থেকে \uFEFF মুছে শুধু ফাঁকা স্ট্রিং রাখা হলো
+        let csvContent = ""; 
         
         // হেডার রো তৈরি
         let headerRow = ["Mobile Number"];
@@ -2871,12 +2871,12 @@ document.getElementById('btn-generate').addEventListener('click', async function
             // শিক্ষার্থীর আসল ডাটা দিয়ে রিপ্লেস
             let msgRaw = replaceTagsWithData(rawTemplate, student, false);
             
-            // ডিজাইনের ফরম্যাটিং মুছে ফেলা (এবং শুধু অদৃশ্য স্পেসগুলো সরানো হলো, ইমোজি হুবহু থাকবে)
+            // ডিজাইনের ফরম্যাটিং মুছে ফেলা এবং অদৃশ্য ক্যারেক্টার ক্লিন করা
             let cleanMsg = msgRaw
                 .replace(/\[\/?(?:size|align|space|LOGIC|NUM)[^\]]*\]/gi, '') 
                 .replace(/[*_~]/g, '')
-                .replace(/[\u200B-\u200D]/g, '') // অদৃশ্য স্পেস (â€‹) রিমুভ করবে
-                .replace(/\u00A0/g, ' '); // নন-ব্রেকিং স্পেসকে (Â) সাধারণ স্পেসে রূপান্তর করবে
+                .replace(/[\u200B-\u200D]/g, '') // অদৃশ্য স্পেসগুলো (zero-width spaces) মুছে ফেলবে
+                .replace(/\u00A0/g, ' '); // নন-ব্রেকিং স্পেসকে সাধারণ স্পেসে রূপান্তর করবে
     
             // মেসেজ থেকে ডাইনামিক ভ্যালু এক্সট্রাক্ট করা
             let rowDynamicValues = {};
@@ -2911,9 +2911,10 @@ document.getElementById('btn-generate').addEventListener('click', async function
             csvContent += rowData.join(",") + "\n";
         });
     
-        // ফাইল তৈরি এবং অটোমেটিক ডাউনলোড
-        // Blob অংশে Uint8Array যুক্ত করা হলো যেন সব ভার্সনের এক্সেল ফাইলটিকে 100% UTF-8 হিসেবে রিড করে
-        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent.replace(/^\uFEFF/, '')], { type: 'text/csv;charset=utf-8;' });
+        // 🚀 সুপার ফিক্স: ফাইল তৈরির সময় 100% সঠিক UTF-8 BOM বাইট যুক্ত করা হলো
+        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+        
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
