@@ -2814,8 +2814,8 @@ document.getElementById('btn-generate').addEventListener('click', async function
         
         if(isPreviewMode) renderPreview();
     }
-        // ==========================================      
-    // EXCEL (CSV) DOWNLOAD LOGIC (BUG FIXED)
+           // ==========================================      
+    // EXCEL (CSV) DOWNLOAD LOGIC (WHATSAPP & SMS IN SAME MODAL)
     // ==========================================  
     async function downloadExcel() {
         if(parsedStudents.length === 0) {
@@ -2834,16 +2834,42 @@ document.getElementById('btn-generate').addEventListener('click', async function
         const yr = document.getElementById('api-year').value;
         const defaultFileName = `SMS_List_${cls}_${yr}`;
 
-        let userInputName = await CustomUI.prompt("ফাইলের নাম দিন", "ডাউনলোড করার আগে ফাইলের একটি নাম নির্ধারণ করুন:", "text", defaultFileName);
+        // 🚀 ম্যাজিক: পপ-আপ মডালের ভেতরে ডাইনামিক্যালি রেডিও বাটন ঢুকিয়ে দেওয়া হচ্ছে
+        const promptInput = document.getElementById('prompt-input');
+        const radioContainer = document.createElement('div');
+        radioContainer.id = 'temp-export-type';
+        radioContainer.className = 'flex justify-center gap-4 mb-5 p-3 bg-gray-50 rounded-xl border border-gray-200';
+        radioContainer.innerHTML = `
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-gray-700">
+                <input type="radio" name="export_type" value="sms" checked class="w-4 h-4 accent-[#005A34]"> 
+                <span>SMS <small class="font-normal text-xs text-gray-500">(Clean)</small></span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-gray-700">
+                <input type="radio" name="export_type" value="whatsapp" class="w-4 h-4 accent-[#10b981]"> 
+                <span>WhatsApp <small class="font-normal text-xs text-gray-500">(Emoji)</small></span>
+            </label>
+        `;
+        // ইনপুট বক্সের ঠিক নিচে অপশনগুলো বসানো হচ্ছে
+        promptInput.parentNode.insertBefore(radioContainer, promptInput.nextSibling);
+
+        // মডাল ওপেন করা
+        let userInputName = await CustomUI.prompt("ডাউনলোড সেটিং", "ফাইলের নাম এবং কোন প্ল্যাটফর্মে পাঠাবেন তা নির্বাচন করুন:", "text", defaultFileName);
+        
+        // মডাল ক্লোজ হওয়ার সাথে সাথে ইউজার কোনটা সিলেক্ট করেছে তা পড়ে নেওয়া
+        const exportTypeRadio = document.querySelector('input[name="export_type"]:checked');
+        const isWhatsApp = exportTypeRadio ? (exportTypeRadio.value === 'whatsapp') : false;
+        
+        // ডাইনামিক্যালি যুক্ত করা অপশনগুলো আবার মুছে ফেলা (যাতে অন্য কাজে মডালটি স্বাভাবিক থাকে)
+        radioContainer.remove();
+
+        // যদি ইউজার 'বাতিল' এ ক্লিক করে
         if (userInputName === null) return;
 
         let finalFileName = userInputName.trim() === "" ? defaultFileName : userInputName.trim();
         if (!finalFileName.toLowerCase().endsWith('.csv')) finalFileName += '.csv';
 
-        // ট্যাগ ফরম্যাট: {{ColumnName}{Value}} (যেমন: {{Id}{[IDBn]}})
+        // ট্যাগ ফরম্যাট: {{ColumnName}{Value}}
         let dynamicHeaders = [];
-        
-        // আরও নিরাপদ রেগুলার এক্সপ্রেশন ব্যবহার করা হলো
         const headerRegex = /\{\{([^}]+)\}\{([^}]+)\}\}/g;
         let headerMatch;
         while ((headerMatch = headerRegex.exec(rawTemplate)) !== null) {
@@ -2854,8 +2880,6 @@ document.getElementById('btn-generate').addEventListener('click', async function
         }
         
         let hasDynamicColumns = dynamicHeaders.length > 0;
-    
-        // 🚀 ফিক্স: ডাবল BOM সমস্যা এড়াতে এখান থেকে \uFEFF মুছে শুধু ফাঁকা স্ট্রিং রাখা হলো
         let csvContent = ""; 
         
         // হেডার রো তৈরি
@@ -2868,18 +2892,27 @@ document.getElementById('btn-generate').addEventListener('click', async function
         csvContent += headerRow.join(",") + "\n";
     
         parsedStudents.forEach(student => {
-            // শিক্ষার্থীর আসল ডাটা দিয়ে রিপ্লেস
             let msgRaw = replaceTagsWithData(rawTemplate, student, false);
             
-            // 🚀 ম্যাজিক ফিক্স: ডিজাইনের ফরম্যাটিং মুছে ফেলা, ইমোজি ক্লিন করা এবং বুলেট পয়েন্ট ফিক্স করা
-            let cleanMsg = msgRaw
-                .replace(/\[\/?(?:size|align|space|LOGIC|NUM)[^\]]*\]/gi, '') 
-                .replace(/[*_~]/g, '')
-                .replace(/[\u200B-\u200D]/g, '') // অদৃশ্য স্পেসগুলো (zero-width spaces) মুছে ফেলবে
-                .replace(/\u00A0/g, ' ') // নন-ব্রেকিং স্পেসকে সাধারণ স্পেসে রূপান্তর করবে
-                .replace(/•/g, '-') // বুলেট পয়েন্ট (•) কে সাধারণ হাইফেন (-) এ রূপান্তর করবে
-                .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '') // সব ধরনের ইমোজি (🔗 সহ) চিরতরে মুছে ফেলবে
-                .replace(/[\u2600-\u27BF]/g, ''); // অন্যান্য সিম্বল ও ইমোজি মুছে ফেলবে
+            // ১. সিস্টেমের ডিজাইন ট্যাগগুলো সবসময় রিমুভ হবে
+            let cleanMsg = msgRaw.replace(/\[\/?(?:size|align|space|LOGIC|NUM)[^\]]*\]/gi, '');
+
+            // ২. কন্ডিশনাল ক্লিনিং (WhatsApp vs SMS)
+            if (isWhatsApp) {
+                // WhatsApp এর জন্য: বোল্ড, ইটালিক ও ইমোজি থাকবে। শুধু অদৃশ্য স্পেস রিমুভ করা হবে।
+                cleanMsg = cleanMsg
+                    .replace(/[\u200B-\u200D]/g, '') 
+                    .replace(/\u00A0/g, ' '); 
+            } else {
+                // SMS এর জন্য: ফরম্যাটিং, ইমোজি ও স্পেশাল ক্যারেক্টার সব রিমুভ করা হবে
+                cleanMsg = cleanMsg
+                    .replace(/[*_~]/g, '')
+                    .replace(/[\u200B-\u200D]/g, '') 
+                    .replace(/\u00A0/g, ' ') 
+                    .replace(/•/g, '-') 
+                    .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '') 
+                    .replace(/[\u2600-\u27BF]/g, ''); 
+            }
     
             // মেসেজ থেকে ডাইনামিক ভ্যালু এক্সট্রাক্ট করা
             let rowDynamicValues = {};
@@ -2901,22 +2934,18 @@ document.getElementById('btn-generate').addEventListener('click', async function
             let rowData = [phone];
             
             if (hasDynamicColumns) {
-                // ডাইনামিক কলাম থাকলে ডাটা বসবে
                 dynamicHeaders.forEach(h => {
                     let cellVal = rowDynamicValues[h] || "";
                     rowData.push(`"${cellVal.replace(/"/g, '""')}"`);
                 });
             } else {
-                // সাধারণ মেসেজ থাকলে মেসেজ কলামে বসবে
                 rowData.push(`"${cleanMsg.replace(/"/g, '""')}"`);
             }
     
             csvContent += rowData.join(",") + "\n";
         });
     
-        // 🚀 সুপার ফিক্স: ফাইল তৈরির সময় 100% সঠিক UTF-8 BOM বাইট যুক্ত করা হলো
-        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-        const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
