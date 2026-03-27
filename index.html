@@ -2814,7 +2814,7 @@ document.getElementById('btn-generate').addEventListener('click', async function
         
         if(isPreviewMode) renderPreview();
     }
-          // ==========================================      
+        // ==========================================      
     // EXCEL (CSV) DOWNLOAD LOGIC (BUG FIXED)
     // ==========================================  
     async function downloadExcel() {
@@ -2871,12 +2871,15 @@ document.getElementById('btn-generate').addEventListener('click', async function
             // শিক্ষার্থীর আসল ডাটা দিয়ে রিপ্লেস
             let msgRaw = replaceTagsWithData(rawTemplate, student, false);
             
-            // ডিজাইনের ফরম্যাটিং মুছে ফেলা এবং অদৃশ্য ক্যারেক্টার ক্লিন করা
+            // 🚀 ম্যাজিক ফিক্স: ডিজাইনের ফরম্যাটিং মুছে ফেলা, ইমোজি ক্লিন করা এবং বুলেট পয়েন্ট ফিক্স করা
             let cleanMsg = msgRaw
                 .replace(/\[\/?(?:size|align|space|LOGIC|NUM)[^\]]*\]/gi, '') 
                 .replace(/[*_~]/g, '')
                 .replace(/[\u200B-\u200D]/g, '') // অদৃশ্য স্পেসগুলো (zero-width spaces) মুছে ফেলবে
-                .replace(/\u00A0/g, ' '); // নন-ব্রেকিং স্পেসকে সাধারণ স্পেসে রূপান্তর করবে
+                .replace(/\u00A0/g, ' ') // নন-ব্রেকিং স্পেসকে সাধারণ স্পেসে রূপান্তর করবে
+                .replace(/•/g, '-') // বুলেট পয়েন্ট (•) কে সাধারণ হাইফেন (-) এ রূপান্তর করবে
+                .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '') // সব ধরনের ইমোজি (🔗 সহ) চিরতরে মুছে ফেলবে
+                .replace(/[\u2600-\u27BF]/g, ''); // অন্যান্য সিম্বল ও ইমোজি মুছে ফেলবে
     
             // মেসেজ থেকে ডাইনামিক ভ্যালু এক্সট্রাক্ট করা
             let rowDynamicValues = {};
