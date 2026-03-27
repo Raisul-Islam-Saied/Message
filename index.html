@@ -2871,10 +2871,12 @@ document.getElementById('btn-generate').addEventListener('click', async function
             // শিক্ষার্থীর আসল ডাটা দিয়ে রিপ্লেস
             let msgRaw = replaceTagsWithData(rawTemplate, student, false);
             
-            // ডিজাইনের ফরম্যাটিং মুছে ফেলা
+            // ডিজাইনের ফরম্যাটিং মুছে ফেলা (এবং শুধু অদৃশ্য স্পেসগুলো সরানো হলো, ইমোজি হুবহু থাকবে)
             let cleanMsg = msgRaw
                 .replace(/\[\/?(?:size|align|space|LOGIC|NUM)[^\]]*\]/gi, '') 
-                .replace(/[*_~]/g, ''); 
+                .replace(/[*_~]/g, '')
+                .replace(/[\u200B-\u200D]/g, '') // অদৃশ্য স্পেস (â€‹) রিমুভ করবে
+                .replace(/\u00A0/g, ' '); // নন-ব্রেকিং স্পেসকে (Â) সাধারণ স্পেসে রূপান্তর করবে
     
             // মেসেজ থেকে ডাইনামিক ভ্যালু এক্সট্রাক্ট করা
             let rowDynamicValues = {};
@@ -2910,7 +2912,8 @@ document.getElementById('btn-generate').addEventListener('click', async function
         });
     
         // ফাইল তৈরি এবং অটোমেটিক ডাউনলোড
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        // Blob অংশে Uint8Array যুক্ত করা হলো যেন সব ভার্সনের এক্সেল ফাইলটিকে 100% UTF-8 হিসেবে রিড করে
+        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent.replace(/^\uFEFF/, '')], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
