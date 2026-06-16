@@ -3441,14 +3441,23 @@ function saveCampaignData(phonesArray, currentTemplate) {
                         return String(row[idCol]).trim() === stTargetID;
                     });
                     
-                                        if(csvRow) {
+                                                            if(csvRow) {
                         let mergedSt = { ...st }; 
                         newHeaders.forEach(col => {
-                            mergedSt[`CSV:${col}`] = csvRow[col] !== undefined ? csvRow[col] : '-';
+                            let val = csvRow[col] !== undefined ? csvRow[col] : '-';
+                            
+                            // --- নতুন লজিক: Fail(1), Fail(2) থেকে () ও সংখ্যা তুলে দেওয়া ---
+                            if (typeof val === 'string') {
+                                val = val.replace(/fail\s*\(\d+\)/gi, 'Fail');
+                            }
+                            // --------------------------------------------------------
+                            
+                            mergedSt[`CSV:${col}`] = val;
                         });
                         newParsed.push(mergedSt);
                         mergedCount++;
                     }
+
 
                 });
                 
